@@ -8,13 +8,47 @@ from fastapi.responses import StreamingResponse, JSONResponse
 
 from PIL import Image
 
-from persistent_engine import stream_infer_image, infer_pdf_bytes_using_wrappers, get_async_engine, is_engine_ready
+import sys
+import subprocess
 
-# Configuration
-MODEL_REPO = "https://github.com/YuvrajSingh-mist/DeepSeek-OCR.git"
-PYTORCH_INDEX = "https://download.pytorch.org/whl/cu118"
-VLLM_WHEEL_NAME = "vllm-0.8.5+cu118-cp38-abi3-manylinux1_x86_64.whl"
-WHEEL_URL = "https://github.com/vllm-project/vllm/releases/download/v0.8.5/vllm-0.8.5+cu118-cp38-abi3-manylinux1_x86_64.whl"
+# Configuration (must be defined before repository operations)
+MODEL_REPO = os.environ.get("MODEL_REPO", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR.git")
+PYTORCH_INDEX = os.environ.get("PYTORCH_INDEX", "https://download.pytorch.org/whl/cu118")
+VLLM_WHEEL_NAME = os.environ.get("VLLM_WHEEL_NAME", "vllm-0.8.5+cu118-cp38-abi3-manylinux1_x86_64.whl")
+WHEEL_URL = os.environ.get("WHEEL_URL", "https://github.com/vllm-project/vllm/releases/download/v0.8.5/vllm-0.8.5+cu118-cp38-abi3-manylinux1_x86_64.whl")
+
+# Keep repository path simple and writable inside container
+REPO_DIR = "/root/repo"
+
+
+def ensure_repo_and_paths():
+    try:
+        if not os.path.exists(REPO_DIR):
+            # shallow clone to reduce transfer time
+            subprocess.run(["git", "clone", "--depth", "1", MODEL_REPO, REPO_DIR], check=True)
+        else:
+            # fetch latest changes
+            subprocess.run(["git", "-C", MODEL_REPO, "pull"], check=True)
+    except Exception as e:
+        # do not crash import — log and continue; later imports may fail if modules missing
+        print(f"Warning: repo clone/pull failed: {e}")
+
+    # Add repository directories to sys.path so modules like `persistent_engine` are importable
+    repo_model_infra = os.path.join(REPO_DIR, "model_infra")
+    if os.path.isdir(repo_model_infra) and repo_model_infra not in sys.path:
+        sys.path.insert(0, repo_model_infra)
+
+    if REPO_DIR not in sys.path:
+        sys.path.insert(0, REPO_DIR)
+
+
+
+# Placeholders for repo-provided functions; populated at startup
+stream_infer_image = None
+infer_pdf_bytes_using_wrappers = None
+get_async_engine = None
+is_engine_ready = lambda: False
+
 
 # Use Python 3.9 in the image to match the vLLM wheel (cp38) used below.
 IMAGE = modal.Image.from_registry("nvidia/cuda:11.8.0-devel-ubuntu22.04", add_python="3.9")
@@ -56,28 +90,98 @@ IMAGE = build_image(IMAGE)
 # Create volumes for caches
 hf_cache = modal.Volume.from_name("hf-cache", create_if_missing=True)
 vllm_cache = modal.Volume.from_name("vllm-cache", create_if_missing=True)
-volumes = {"/root/.cache/huggingface": hf_cache, "/root/.cache/vllm": vllm_cache}
+repo_volume = modal.Volume.from_name("deepseek-ocr-repo", create_if_missing=True)
+volumes = {
+    "/root/.cache/huggingface": hf_cache,
+    "/root/.cache/vllm": vllm_cache,
+    "/root/repo": repo_volume,
+}
 
 app = modal.App("deepseek-ocr-modal", image=IMAGE)
 
 fastapi_app = FastAPI(title='DeepSeek-OCR (Modal compatible)')
-
+# @fastapi_app.get('/health')
 
 @fastapi_app.get('/health')
 async def health():
     # Report whether the shared async engine is initialized (pre-warmed).
-    ready = is_engine_ready()
-    return JSONResponse({'ready': ready})
-
-
-@fastapi_app.on_event('startup')
-async def startup_event():
-    # Try to pre-warm the shared engine so the first request is faster.
+    ready = False
     try:
-        get_async_engine()
+        ready = bool(callable(get_async_engine) and is_engine_ready())
+    except Exception:
+        ready = False
+
+    # Repo diagnostics
+    repo_present = os.path.isdir(REPO_DIR)
+    repo_commit = None
+    if repo_present:
+        try:
+            repo_commit = subprocess.check_output(["git", "-C", REPO_DIR, "rev-parse", "--short", "HEAD"], stderr=subprocess.DEVNULL)
+            repo_commit = repo_commit.decode().strip()
+        except Exception:
+            repo_commit = None
+
+    modules_loaded = {
+        'stream_infer_image': stream_infer_image is not None,
+        'infer_pdf_bytes_using_wrappers': infer_pdf_bytes_using_wrappers is not None,
+        'get_async_engine': get_async_engine is not None,
+    }
+
+    return JSONResponse({'ready': ready, 'repo_present': repo_present, 'repo_commit': repo_commit, 'modules_loaded': modules_loaded})
+
+
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup code
+    try:
+        ensure_repo_and_paths()
+    except Exception as e:
+        print(f"Warning: repo clone/pull failed during startup: {e}")
+
+    # Import repo-backed helpers now that volumes are mounted
+    global stream_infer_image, infer_pdf_bytes_using_wrappers, get_async_engine, is_engine_ready
+    try:
+        # Add repo path (already added in ensure_repo_and_paths) to sys.path
+        if REPO_DIR not in sys.path:
+            sys.path.insert(0, REPO_DIR)
+        from persistent_engine import stream_infer_image as _sii, infer_pdf_bytes_using_wrappers as _ipw, get_async_engine as _gae, is_engine_ready as _ier
+        stream_infer_image = _sii
+        infer_pdf_bytes_using_wrappers = _ipw
+        get_async_engine = _gae
+        is_engine_ready = _ier
+    except Exception as e:
+        print(f"Error importing persistent repo modules on startup: {e}")
+
+    try:
+        if callable(get_async_engine):
+            get_async_engine()
     except Exception:
         # Do not crash startup here; health endpoint will reflect not-ready.
         pass
+
+    # Log registered FastAPI routes for debugging
+    try:
+        routes_info = []
+        for r in app.routes:
+            # route may be Starlette Route or APIRoute
+            try:
+                path = r.path
+                methods = getattr(r, 'methods', None)
+            except Exception:
+                path = str(r)
+                methods = None
+            routes_info.append({'path': path, 'methods': list(methods) if methods else None})
+        print("FastAPI routes:", routes_info)
+    except Exception as e:
+        print("Failed to enumerate FastAPI routes:", e)
+
+    yield
+
+    # Shutdown code (if needed)
+
+fastapi_app = FastAPI(lifespan=lifespan)
 
 
 @fastapi_app.post('/upload/image')
@@ -154,15 +258,17 @@ async def upload_pdf(file: UploadFile = File(...), prompt: Optional[str] = None)
 
 
 @app.function(gpu="a100", volumes=volumes, timeout=30 * 60)
-@modal.fastapi_endpoint()
+@modal.asgi_app()
 def serve():
-    # Clone the repo into the container and start uvicorn for the FastAPI app
-    os.system(f"git clone {MODEL_REPO} repo || true")
-    os.chdir("repo")
+    # Ensure the mounted repo volume has the latest code and use it
+    try:
+        ensure_repo_and_paths()
+    except Exception:
+        # continue and let imports or startup report errors
+        pass
+    os.chdir(REPO_DIR)
     # Ensure PROMPT env and MODEL_PATH are set if needed
     os.environ.setdefault("PROMPT", "<image>\n<|grounding|>Convert the document to markdown.")
     
-    # Return the ASGI app object to Modal so the platform runs it with
-    # its managed server (uvicorn is installed in the image during build).
     return fastapi_app
 
