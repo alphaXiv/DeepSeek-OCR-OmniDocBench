@@ -1,0 +1,23 @@
+-r ../requirements.txt
+fastapi
+uvicorn[standard]
+
+# NOTE: This file intentionally keeps vllm and torch out of the plain pip list.
+# The repository requires specific CUDA wheel versions for PyTorch and vLLM
+# (see `model_infra/modal_deploy.md`) — install those explicitly in the
+# Modal build step using the exact wheel or commands listed there.
+
+httpx
+fastapi
+uvicorn[standard]
+Pillow
+vllm
+# transformers
+torch
+einops
+addict
+img2pdf
+fitz
+tqdm
+numpy
+requests
