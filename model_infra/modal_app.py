@@ -29,8 +29,6 @@ def ensure_repo_and_paths():
             # clone to /tmp then move
             subprocess.run(["git", "clone", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR", "DeepSeek-OCR"], cwd="/tmp", check=True)
             subprocess.run(["mv", "/tmp/DeepSeek-OCR", repo_dir], check=True)
-            # Install requirements
-            subprocess.run(["pip", "install", "-r", "requirements.txt"], cwd=repo_dir, check=True)
         else:
             # fetch latest changes
             subprocess.run(["git", "-C", repo_dir, "pull"], check=True)
@@ -89,6 +87,21 @@ def build_image(image: modal.Image):
     # Install flash-attn
     image = image.uv_pip_install(["flash-attn==2.7.3"], extra_options="--no-build-isolation")
 
+    # Install requirements from repo
+    image = image.uv_pip_install([
+        "transformers==4.46.3",
+        "tokenizers==0.20.3",
+        "PyMuPDF",
+        "img2pdf",
+        "einops",
+        "easydict",
+        "addict",
+        "Pillow",
+        "numpy",
+        "fitz",
+        "tqdm"
+    ])
+
     return image
 
 IMAGE = build_image(IMAGE)
@@ -108,33 +121,6 @@ app = modal.App("deepseek-ocr-modal", image=IMAGE)
 fastapi_app = FastAPI(title='DeepSeek-OCR (Modal compatible)')
 # @fastapi_app.get('/health')
 
-@fastapi_app.get('/health')
-async def health():
-    # Report whether the shared async engine is initialized (pre-warmed).
-    ready = False
-    try:
-        ready = bool(callable(get_async_engine) and is_engine_ready())
-    except Exception:
-        ready = False
-
-    # Repo diagnostics
-    repo_present = os.path.isdir(REPO_DIR)
-    repo_commit = None
-    # if repo_present:
-    #     try:
-    #         repo_commit = subprocess.check_output(["git", "-C", REPO_DIR, "rev-parse", "--short", "HEAD"], stderr=subprocess.DEVNULL)
-    #         repo_commit = repo_commit.decode().strip()
-    #     except Exception:
-    #         repo_commit = None
-
-    modules_loaded = {
-        'stream_infer_image': stream_infer_image is not None,
-        'infer_pdf_bytes_using_wrappers': infer_pdf_bytes_using_wrappers is not None,
-        'get_async_engine': get_async_engine is not None,
-    }
-
-    return JSONResponse({'ready': ready, 'repo_present': repo_present, 'repo_commit': repo_commit, 'modules_loaded': modules_loaded})
-
 
 @fastapi_app.post('/repo/reset')
 async def reset_repo():
@@ -145,14 +131,12 @@ async def reset_repo():
     # Clone to /tmp then move
     subprocess.run(["git", "clone", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR", "DeepSeek-OCR"], cwd="/tmp", check=True)
     subprocess.run(["mv", "/tmp/DeepSeek-OCR", repo_dir], check=True)
-    # Install requirements
-    subprocess.run(["pip", "install", "-r", "requirements.txt"], cwd=repo_dir, check=True)
     return {"status": "repo reset and cloned"}
 
 
 @fastapi_app.post('/run/pdf')
 async def run_pdf_script(file: UploadFile = File(...)):
-    """Run the run_dpsk_ocr_pdf.py script on the uploaded PDF file and stream the output."""
+    """Run the run_dpsk_ocr_pdf.py script on the uploaded PDF file and return the OCR text as JSON."""
     contents = await file.read()
     
     # Save the uploaded file to /tmp
@@ -160,26 +144,35 @@ async def run_pdf_script(file: UploadFile = File(...)):
     with open(input_file, 'wb') as f:
         f.write(contents)
     
+    # Fixed output directory
+    output_dir = '/tmp/ocr_output'
+    os.makedirs(output_dir, exist_ok=True)
+    
     # Path to the script
     script_dir = os.path.join(REPO_DIR, "DeepSeek-OCR", "DeepSeek-OCR-master", "DeepSeek-OCR-vllm")
     script_path = os.path.join(script_dir, "run_dpsk_ocr_pdf.py")
     
-    # Run the script with args and stream stdout
+    # Run the script with args
     process = await asyncio.create_subprocess_exec(
-        "python", script_path, "--input", input_file, "--output", script_dir,
+        "python", script_path, "--input", input_file, "--output", output_dir,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
         cwd=script_dir
     )
     
-    async def stream_output():
-        while True:
-            line = await process.stdout.readline()
-            if not line:
-                break
-            yield line
+    stdout, stderr = await process.communicate()
     
-    return StreamingResponse(stream_output(), media_type='text/plain')
+    if process.returncode != 0:
+        return JSONResponse({"error": stdout.decode()}, status_code=500)
+    
+    # Read the output file
+    output_file = os.path.join(output_dir, 'input.mmd')
+    if os.path.exists(output_file):
+        with open(output_file, 'r', encoding='utf-8') as f:
+            ocr_text = f.read()
+        return JSONResponse({"ocr_text": ocr_text})
+    else:
+        return JSONResponse({"error": "OCR output file not found"}, status_code=500)
 
 
 @app.function(gpu="A100-80GB", volumes=volumes, timeout=30 * 60)

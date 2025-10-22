@@ -7,3 +7,4 @@ easydict
 addict 
 Pillow
 numpy
+fitz
