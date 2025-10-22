@@ -122,14 +122,14 @@ volumes = {
 
 app = modal.App("deepseek-ocr-modal", image=IMAGE)
 
-
 @app.cls(
     gpu="A100-80GB",
     volumes=volumes,
     timeout=30 * 60,
     scaledown_window=600,  # Keep container alive for 10 minutes after last request
-    max_concurrency=8,     # Allow up to 8 containers (each with 1 GPU)
+    min_containers=5
 )
+@modal.concurrent(max_inputs=120, target_inputs=100)
 class DeepSeekOCRModel:
     """
     Persistent OCR model that initializes once and handles multiple requests.
@@ -365,8 +365,9 @@ async def health():
     return {"status": "healthy", "model": "DeepSeek-OCR"}
 
 
-@app.function(volumes=volumes, timeout=30 * 60, max_concurrency=8)
+@app.function(volumes=volumes, timeout=30 * 60)
 @modal.asgi_app()
+@modal.concurrent(max_inputs=120, target_inputs=100)
 def serve():
     """Serve the FastAPI application."""
     # Ensure the mounted repo volume has the latest code and use it
