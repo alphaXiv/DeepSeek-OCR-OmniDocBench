@@ -1,5 +1,5 @@
 
-from modal_app import app
+from model_infra.modal_app_async import app
 
 if __name__ == "__main__":
     import sys

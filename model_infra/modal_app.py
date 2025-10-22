@@ -10,10 +10,11 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse, JSONResponse
 
 from PIL import Image
-
 import sys
 import subprocess
 import asyncio
+
+# from config import MAX_CONCURRENCY
 
 # Configuration (must be defined before repository operations)
 MODEL_REPO = os.environ.get("MODEL_REPO", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR")
@@ -127,9 +128,9 @@ app = modal.App("deepseek-ocr-modal", image=IMAGE)
     volumes=volumes,
     timeout=30 * 60,
     scaledown_window=600,  # Keep container alive for 10 minutes after last request
-    min_containers=5
+    min_containers=2
 )
-@modal.concurrent(max_inputs=120, target_inputs=100)
+@modal.concurrent(max_inputs=20, target_inputs=15)
 class DeepSeekOCRModel:
     """
     Persistent OCR model that initializes once and handles multiple requests.
@@ -184,8 +185,9 @@ class DeepSeekOCRModel:
             swap_space=0,
             max_num_seqs=256,
             tensor_parallel_size=1,
-            gpu_memory_utilization=0.9,
-            disable_mm_preprocessor_cache=True
+            gpu_memory_utilization=0.95,
+            disable_mm_preprocessor_cache=True,
+            dtype='bfloat16'
         )
         
         # Setup logits processors
@@ -212,7 +214,7 @@ class DeepSeekOCRModel:
         """Convert PDF bytes to list of PIL Images."""
         images = []
         pdf_document = self.fitz.open(stream=pdf_bytes, filetype="pdf")
-        
+            
         zoom = dpi / 72.0
         matrix = self.fitz.Matrix(zoom, zoom)
         
@@ -264,6 +266,7 @@ class DeepSeekOCRModel:
         """
         print(f"📄 Processing PDF...")
         
+
         if prompt is None:
             prompt = DEFAULT_PROMPT
         
@@ -271,6 +274,8 @@ class DeepSeekOCRModel:
         images = self._pdf_to_images(pdf_bytes)
         print(f"📸 Converted PDF to {len(images)} images")
         
+         # Check page count limit (150 pages)
+    
         # Prepare batch inputs with ThreadPoolExecutor for faster preprocessing
         print("🔧 Preprocessing images...")
         with ThreadPoolExecutor(max_workers=min(64, len(images))) as executor:
@@ -345,7 +350,33 @@ async def run_pdf_endpoint(file: UploadFile = File(...)):
     Process a PDF file using the warm OCR model.
     This endpoint now uses the persistent model instead of spawning subprocesses.
     """
+    import fitz
+    
     pdf_bytes = await file.read()
+
+    # Check file size limit (128MB)
+    max_size = 128 * 1024 * 1024  # 128MB in bytes
+    if len(pdf_bytes) > max_size:
+        return JSONResponse(
+            status_code=413,
+            content={
+                "error": "File too large",
+                "message": f"Maximum file size is 128MB. Uploaded file is {len(pdf_bytes) / (1024*1024):.1f}MB"
+            }
+        )
+    
+    # Check page count limit (150 pages)
+    pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
+    num_pages = pdf_document.page_count
+    pdf_document.close()
+    if num_pages > 150:
+        return JSONResponse(
+            status_code=413,
+            content={
+                "error": "Too many pages",
+                "message": f"Maximum number of pages is 150. PDF has {num_pages} pages"
+            }
+        )
     
     # Call the Modal method (this will use the warm model)
     model = DeepSeekOCRModel()
@@ -367,7 +398,7 @@ async def health():
 
 @app.function(volumes=volumes, timeout=30 * 60)
 @modal.asgi_app()
-@modal.concurrent(max_inputs=120, target_inputs=100)
+@modal.concurrent(max_inputs=20, target_inputs=15)
 def serve():
     """Serve the FastAPI application."""
     # Ensure the mounted repo volume has the latest code and use it
@@ -378,4 +409,3 @@ def serve():
         pass
     
     return fastapi_app
-
