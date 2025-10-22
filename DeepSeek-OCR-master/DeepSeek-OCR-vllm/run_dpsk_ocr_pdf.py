@@ -6,6 +6,7 @@ import re
 from tqdm import tqdm
 import torch
 from concurrent.futures import ThreadPoolExecutor
+import argparse
  
 
 if torch.version.cuda == '11.8':
@@ -231,6 +232,14 @@ def process_single_image(image):
 
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input', default=INPUT_PATH, help='Path to input PDF file')
+    parser.add_argument('--output', default=OUTPUT_PATH, help='Path to output directory')
+    args = parser.parse_args()
+    
+    INPUT_PATH = args.input
+    OUTPUT_PATH = args.output
 
     os.makedirs(OUTPUT_PATH, exist_ok=True)
     os.makedirs(f'{OUTPUT_PATH}/images', exist_ok=True)
