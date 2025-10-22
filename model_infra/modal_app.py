@@ -123,12 +123,12 @@ volumes = {
 app = modal.App("deepseek-ocr-modal", image=IMAGE)
 
 
-# Class-based Modal function that keeps the model warm
 @app.cls(
     gpu="A100-80GB",
     volumes=volumes,
     timeout=30 * 60,
     scaledown_window=600,  # Keep container alive for 10 minutes after last request
+    max_concurrency=8,     # Allow up to 8 containers (each with 1 GPU)
 )
 class DeepSeekOCRModel:
     """
@@ -365,7 +365,7 @@ async def health():
     return {"status": "healthy", "model": "DeepSeek-OCR"}
 
 
-@app.function(volumes=volumes, timeout=30 * 60)
+@app.function(volumes=volumes, timeout=30 * 60, max_concurrency=8)
 @modal.asgi_app()
 def serve():
     """Serve the FastAPI application."""
