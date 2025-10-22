@@ -35,7 +35,7 @@
 <p align="center">
   <a href="https://huggingface.co/deepseek-ai/DeepSeek-OCR"><b>📥 Model Download</b></a> |
   <a href="https://github.com/deepseek-ai/DeepSeek-OCR/blob/main/DeepSeek_OCR_paper.pdf"><b>📄 Paper Link</b></a> |
-  <a href="./DeepSeek_OCR_paper.pdf"><b>📄 Arxiv Paper Link</b></a> |
+  <a href="https://arxiv.org/abs/2510.18234"><b>📄 Arxiv Paper Link</b></a> |
 </p>
 
 <h2>
@@ -171,11 +171,10 @@ We also appreciate the benchmarks: [Fox](https://github.com/ucaslcl/Fox), [Omini
 
 ## Citation
 
-coming soon！
-
-
-
-
-
-
-
+```bibtex
+@article{wei2024deepseek-ocr,
+  title={DeepSeek-OCR: Contexts Optical Compression},
+  author={Wei, Haoran and Sun, Yaofeng and Li, Yukun},
+  journal={arXiv preprint arXiv:2510.18234},
+  year={2025}
+}
