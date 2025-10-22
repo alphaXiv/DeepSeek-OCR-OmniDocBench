@@ -325,6 +325,7 @@ if __name__ == "__main__":
 
         contents += content + f'\n{page_num}\n'
 
+        print(content)  # Stream the OCR text for this page
 
         jdx += 1
 

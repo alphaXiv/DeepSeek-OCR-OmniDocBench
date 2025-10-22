@@ -26,8 +26,11 @@ def ensure_repo_and_paths():
     repo_dir = os.path.join(REPO_DIR, "DeepSeek-OCR")
     try:
         if not os.path.exists(repo_dir):
-            # shallow clone to reduce transfer time
-            subprocess.run(["git", "clone", "--depth", "1", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR"], cwd=REPO_DIR, check=True)
+            # clone to /tmp then move
+            subprocess.run(["git", "clone", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR", "DeepSeek-OCR"], cwd="/tmp", check=True)
+            subprocess.run(["mv", "/tmp/DeepSeek-OCR", repo_dir], check=True)
+            # Install requirements
+            subprocess.run(["pip", "install", "-r", "requirements.txt"], cwd=repo_dir, check=True)
         else:
             # fetch latest changes
             subprocess.run(["git", "-C", repo_dir, "pull"], check=True)
@@ -139,8 +142,11 @@ async def reset_repo():
     repo_dir = os.path.join(REPO_DIR, "DeepSeek-OCR")
     if os.path.exists(repo_dir):
         subprocess.run(["rm", "-rf", repo_dir], check=True)
-    # Clone directly
-    subprocess.run(["git", "clone", "--depth", "1", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR"], cwd=REPO_DIR, check=True)
+    # Clone to /tmp then move
+    subprocess.run(["git", "clone", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR", "DeepSeek-OCR"], cwd="/tmp", check=True)
+    subprocess.run(["mv", "/tmp/DeepSeek-OCR", repo_dir], check=True)
+    # Install requirements
+    subprocess.run(["pip", "install", "-r", "requirements.txt"], cwd=repo_dir, check=True)
     return {"status": "repo reset and cloned"}
 
 
