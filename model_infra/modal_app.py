@@ -98,7 +98,6 @@ def build_image(image: modal.Image):
         "addict",
         "Pillow",
         "numpy",
-        "fitz",
         "tqdm"
     ])
 
