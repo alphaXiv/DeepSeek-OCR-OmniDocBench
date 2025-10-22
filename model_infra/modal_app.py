@@ -128,7 +128,8 @@ app = modal.App("deepseek-ocr-modal", image=IMAGE)
     volumes=volumes,
     timeout=30 * 60,
     scaledown_window=600,  # Keep container alive for 10 minutes after last request
-    min_containers=2
+    min_containers=2,
+    max_containers=5
 )
 @modal.concurrent(max_inputs=20, target_inputs=15)
 class DeepSeekOCRModel:
@@ -354,14 +355,14 @@ async def run_pdf_endpoint(file: UploadFile = File(...)):
     
     pdf_bytes = await file.read()
 
-    # Check file size limit (128MB)
-    max_size = 128 * 1024 * 1024  # 128MB in bytes
+
+    max_size = 64 * 1024 * 1024  
     if len(pdf_bytes) > max_size:
         return JSONResponse(
             status_code=413,
             content={
                 "error": "File too large",
-                "message": f"Maximum file size is 128MB. Uploaded file is {len(pdf_bytes) / (1024*1024):.1f}MB"
+                "message": f"Maximum file size is 64MB. Uploaded file is {len(pdf_bytes) / (1024*1024):.1f}MB"
             }
         )
     
@@ -396,7 +397,7 @@ async def health():
     return {"status": "healthy", "model": "DeepSeek-OCR"}
 
 
-@app.function(volumes=volumes, timeout=30 * 60)
+@app.function(volumes=volumes, timeout=30 * 60, min_containers=2, max_containers=5, scaledown_window=600)
 @modal.asgi_app()
 @modal.concurrent(max_inputs=20, target_inputs=15)
 def serve():
