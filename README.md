@@ -52,6 +52,7 @@
 </p>
 
 ## Release
+- [2025/10/23]🚀🚀🚀 DeepSeek-OCR is now officially supported in upstream [vLLM](https://docs.vllm.ai/projects/recipes/en/latest/DeepSeek/DeepSeek-OCR.html#installing-vllm). Thanks to the [vLLM](https://github.com/vllm-project/vllm) team for their help.
 - [2025/10/20]🚀🚀🚀 We release DeepSeek-OCR, a model to investigate the role of vision encoders from an LLM-centric viewpoint.
 
 ## Contents
@@ -102,6 +103,63 @@ python run_dpsk_ocr_pdf.py
 3. batch eval for benchmarks
 ```Shell
 python run_dpsk_ocr_eval_batch.py
+```
+
+**[2025/10/23] The version of upstream [vLLM](https://docs.vllm.ai/projects/recipes/en/latest/DeepSeek/DeepSeek-OCR.html#installing-vllm):**
+
+```shell
+uv venv
+source .venv/bin/activate
+# Until v0.11.1 release, you need to install vLLM from nightly build
+uv pip install -U vllm --pre --extra-index-url https://wheels.vllm.ai/nightly
+```
+
+```python
+from vllm import LLM, SamplingParams
+from vllm.model_executor.models.deepseek_ocr import NGramPerReqLogitsProcessor
+from PIL import Image
+
+# Create model instance
+llm = LLM(
+    model="deepseek-ai/DeepSeek-OCR",
+    enable_prefix_caching=False,
+    mm_processor_cache_gb=0,
+    logits_processors=[NGramPerReqLogitsProcessor]
+)
+
+# Prepare batched input with your image file
+image_1 = Image.open("path/to/your/image_1.png").convert("RGB")
+image_2 = Image.open("path/to/your/image_2.png").convert("RGB")
+prompt = "<image>\nFree OCR."
+
+model_input = [
+    {
+        "prompt": prompt,
+        "multi_modal_data": {"image": image_1}
+    },
+    {
+        "prompt": prompt,
+        "multi_modal_data": {"image": image_2}
+    }
+]
+
+sampling_param = SamplingParams(
+            temperature=0.0,
+            max_tokens=8192,
+            # ngram logit processor args
+            extra_args=dict(
+                ngram_size=30,
+                window_size=90,
+                whitelist_token_ids={128821, 128822},  # whitelist: <td>, </td>
+            ),
+            skip_special_tokens=False,
+        )
+# Generate output
+model_outputs = llm.generate(model_input, sampling_param)
+
+# Print output
+for output in model_outputs:
+    print(output.outputs[0].text)
 ```
 ## Transformers-Inference
 - Transformers
