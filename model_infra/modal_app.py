@@ -131,7 +131,7 @@ app = modal.App("deepseek-ocr-modal", image=IMAGE)
     min_containers=2,
     max_containers=5
 )
-@modal.concurrent(max_inputs=20, target_inputs=15)
+@modal.concurrent(max_inputs=100, target_inputs=80)
 class DeepSeekOCRModel:
     """
     Persistent OCR model that initializes once and handles multiple requests.
@@ -354,6 +354,19 @@ async def run_pdf_endpoint(file: UploadFile = File(...)):
     import fitz
     
     pdf_bytes = await file.read()
+    
+    # Verify the file is a valid PDF by attempting to open it
+    try:
+        pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
+        pdf_document.close()
+    except Exception:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "Invalid file format",
+                "message": "The uploaded file is not a valid PDF"
+            }
+        )
 
 
     max_size = 64 * 1024 * 1024  
@@ -372,7 +385,7 @@ async def run_pdf_endpoint(file: UploadFile = File(...)):
     pdf_document.close()
     if num_pages > 150:
         return JSONResponse(
-            status_code=413,
+            status_code=417,
             content={
                 "error": "Too many pages",
                 "message": f"Maximum number of pages is 150. PDF has {num_pages} pages"
@@ -399,7 +412,7 @@ async def health():
 
 @app.function(volumes=volumes, timeout=30 * 60, min_containers=2, max_containers=5, scaledown_window=600)
 @modal.asgi_app()
-@modal.concurrent(max_inputs=20, target_inputs=15)
+@modal.concurrent(max_inputs=100, target_inputs=80)
 def serve():
     """Serve the FastAPI application."""
     # Ensure the mounted repo volume has the latest code and use it
