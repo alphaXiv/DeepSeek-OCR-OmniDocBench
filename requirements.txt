@@ -8,3 +8,8 @@ addict
 Pillow
 numpy
 fitz
+GPUtil
+psutil
+aiohttp
+kaleido
+plotly

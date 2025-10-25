@@ -13,10 +13,12 @@ import sys
 import subprocess
 import asyncio
 
+from metrics_collector import metrics_collector
+
 # from config import MAX_CONCURRENCY
 
 # Import metrics collector
-from .metrics_collector import metrics_collector, get_gpu_metrics_summary
+
 
 # Configuration (must be defined before repository operations)
 MODEL_REPO = os.environ.get("MODEL_REPO", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR")

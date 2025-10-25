@@ -15,8 +15,7 @@ import asyncio
 
 # from config import MAX_CONCURRENCY
 
-# Import metrics collector
-from .metrics_collector import metrics_collector, get_gpu_metrics_summary
+
 
 # Configuration (must be defined before repository operations)
 MODEL_REPO = os.environ.get("MODEL_REPO", "https://github.com/YuvrajSingh-mist/DeepSeek-OCR")
@@ -168,7 +167,9 @@ class DeepSeekOCRModel:
         from process.ngram_norepeat import NoRepeatNGramLogitsProcessor
         from process.image_process import DeepseekOCRProcessor
         import fitz  # PyMuPDF
-        
+        # Import metrics collector
+        from metrics_collector import metrics_collector, get_gpu_metrics_summary
+
         # Store imports as instance variables
         self.DeepseekOCRProcessor = DeepseekOCRProcessor
         self.fitz = fitz
