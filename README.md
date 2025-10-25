@@ -231,7 +231,7 @@ We also appreciate the benchmarks: [Fox](https://github.com/ucaslcl/Fox), [Omini
 ## Citation
 
 ```bibtex
-@article{wei2024deepseek-ocr,
+@article{wei2025deepseek,
   title={DeepSeek-OCR: Contexts Optical Compression},
   author={Wei, Haoran and Sun, Yaofeng and Li, Yukun},
   journal={arXiv preprint arXiv:2510.18234},
