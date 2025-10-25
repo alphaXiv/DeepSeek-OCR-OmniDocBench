@@ -277,40 +277,37 @@ class DeepSeekOCRModel:
             # Convert PDF to images
             images = self._pdf_to_images(pdf_bytes)
             print(f"📸 Converted PDF to {len(images)} images")
-
-            # Process images in batches to reduce GPU memory pressure and control concurrency
-            # Default batch size chosen to balance throughput and memory; it's safe to tune.
-            batch_size = 8
+            
+             # Check page count limit (150 pages)
+        
+            # Prepare batch inputs with ThreadPoolExecutor for faster preprocessing
+            print("🔧 Preprocessing images...")
+            with ThreadPoolExecutor(max_workers=min(64, len(images))) as executor:
+                batch_inputs = list(executor.map(
+                    lambda img: self._process_single_image(img, prompt),
+                    images
+                ))
+            
+            # Run inference
+            print("🧠 Running OCR inference...")
+            outputs_list = self.llm.generate(batch_inputs, sampling_params=self.sampling_params)
+            
+            # Process outputs
             pages = []
-
-            print("🔧 Preprocessing + inference in batches...")
-            for start in range(0, len(images), batch_size):
-                chunk = images[start : start + batch_size]
-
-                # Tokenize / preprocess this chunk in parallel (keeps work on GPU-side code paths)
-                with ThreadPoolExecutor(max_workers=min(64, len(chunk))) as executor:
-                    batch_inputs = list(executor.map(lambda img: self._process_single_image(img, prompt), chunk))
-
-                # Run inference for this chunk
-                print(f"🧠 Running OCR inference for pages {start + 1}..{start + len(chunk)}")
-                outputs_chunk = self.llm.generate(batch_inputs, sampling_params=self.sampling_params)
-
-                # Process outputs for this chunk and append
-                for j, output in enumerate(outputs_chunk):
-                    idx = start + j
-                    content = output.outputs[0].text
-
-                    # Check for proper EOS token
-                    if "<｜end▁of▁sentence｜>" in content:
-                        content = content.replace("<｜end▁of▁sentence｜>", "")
-                    else:
-                        if skip_repeat:
-                            print(f"⚠️  Skipping page {idx + 1} (no EOS token - likely repeated output)")
-                            continue
-
-                    # Clean up grounding tokens for markdown output
-                    content = self._clean_grounding_tokens(content)
-                    pages.append(content)
+            for idx, output in enumerate(outputs_list):
+                content = output.outputs[0].text
+                
+                # Check for proper EOS token
+                if '<｜end▁of▁sentence｜>' in content:
+                    content = content.replace('<｜end▁of▁sentence｜>', '')
+                else:
+                    if skip_repeat:
+                        print(f"⚠️  Skipping page {idx + 1} (no EOS token - likely repeated output)")
+                        continue
+                
+                # Clean up grounding tokens for markdown output
+                content = self._clean_grounding_tokens(content)
+                pages.append(content)
             
             print(f"✅ Processed {len(pages)} pages successfully")
             
@@ -366,10 +363,10 @@ async def reset_repo():
     return {"status": "repo reset and cloned"}
 
 
-@fastapi_app.post('/run/app/pdf')
+@fastapi_app.post('/run/base/pdf')
 async def run_pdf_endpoint(file: UploadFile = File(...)):
     """
-    Process a PDF file using the app modal implementation (batched processing).
+    Process a PDF file using the base modal implementation (single batch processing).
     This endpoint uses the persistent model instance.
     """
     import fitz
@@ -406,7 +403,7 @@ async def run_pdf_endpoint(file: UploadFile = File(...)):
     pdf_document.close()
     if num_pages > 150:
         return JSONResponse(
-            status_code=413,
+            status_code=417,
             content={
                 "error": "Too many pages",
                 "message": f"Maximum number of pages is 150. PDF has {num_pages} pages"
@@ -418,7 +415,7 @@ async def run_pdf_endpoint(file: UploadFile = File(...)):
     result = model.process_pdf.remote(pdf_bytes)
     
     return JSONResponse({
-        "implementation": "app",
+        "implementation": "base",
         "ocr_text": result["full_text"],
         "pages": result["pages"],
         "num_pages": result["num_pages"],
