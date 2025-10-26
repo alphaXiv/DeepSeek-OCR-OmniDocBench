@@ -124,14 +124,7 @@ class MetricsCollector:
             gpu_memory_peak = 0
             gpu_utilization_avg = 0
 
-        # CPU usage (rough estimate)
-        if _HAS_PSUTIL and psutil is not None:
-            try:
-                cpu_usage_avg = psutil.cpu_percent(interval=None)
-            except Exception:
-                cpu_usage_avg = 0.0
-        else:
-            cpu_usage_avg = 0.0
+        
 
         return PerformanceMetrics(
             start_time=self.start_time or 0,
