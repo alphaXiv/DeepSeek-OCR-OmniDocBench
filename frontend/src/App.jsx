@@ -79,9 +79,20 @@ function App() {
     const formData = new FormData()
     formData.append('file', selectedFile)
 
+    // Cache busting
+    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const url = `https://alphaxiv--deepseek-ocr-modal-serve.modal.run/run/app/pdf?_r=${requestId}`
+
+    console.info('Uploading PDF:', { requestId, fileName: selectedFile.name })
+
     try {
-      const response = await fetch('https://api.alphaxiv.org/models/v1/deepseek/deepseek-ocr/inference', {
+      const response = await fetch(url, {
         method: 'POST',
+        headers: {
+          'Cache-Control': 'no-cache, no-store',
+          'Pragma': 'no-cache',
+          'X-Request-Id': requestId,
+        },
         body: formData,
       })
 
