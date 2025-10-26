@@ -101,7 +101,7 @@ function App() {
       }
 
       const data = await response.json()
-      let ocrText = data.data?.ocr_text || 'No text extracted'
+      let ocrText = data.ocr_text || 'No text extracted'
       
       // Convert LaTeX delimiters to formats KaTeX understands
       // Convert \( ... \) to $ ... $
