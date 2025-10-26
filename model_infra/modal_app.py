@@ -309,7 +309,7 @@ class DeepSeekOCRModel:
             for j, output in enumerate(outputs_chunk):
                 idx = start + j
                 content = output.outputs[0].text
-
+    
                 # Check for proper EOS token
                 if "<｜end▁of▁sentence｜>" in content:
                     content = content.replace("<｜end▁of▁sentence｜>", "")
