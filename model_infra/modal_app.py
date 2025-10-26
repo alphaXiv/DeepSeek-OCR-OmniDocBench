@@ -13,7 +13,6 @@ import sys
 import subprocess
 import asyncio
 
-from metrics_collector import metrics_collector
 
 # from config import MAX_CONCURRENCY
 
@@ -31,6 +30,9 @@ REPO_DIR = "/root/repo"
 MODEL_PATH = "deepseek-ai/DeepSeek-OCR"
 DEFAULT_PROMPT = "<image>\n<|grounding|>Convert the document to markdown."
 
+
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def ensure_repo_and_paths():
     repo_dir = os.path.join(REPO_DIR, "DeepSeek-OCR")
@@ -99,7 +101,7 @@ def build_image(image: modal.Image):
 
     # Install requirements from repo
     image = image.uv_pip_install([
-        "transformers==4.46.3",
+       "transformers==4.46.3",
         "tokenizers==0.20.3",
         "PyMuPDF",
         "img2pdf",
@@ -108,7 +110,11 @@ def build_image(image: modal.Image):
         "addict",
         "Pillow",
         "numpy",
-        "tqdm"
+        "tqdm",
+        "aiohttp",
+        "GPUtil",
+        "psutil",
+        "kaleido"
     ])
 
     return image
@@ -135,7 +141,7 @@ app = modal.App("deepseek-ocr-modal", image=IMAGE)
     min_containers=2,
     max_containers=5
 )
-@modal.concurrent(max_inputs=32, target_inputs=16)
+@modal.concurrent(max_inputs=16, target_inputs=8)
 class DeepSeekOCRModel:
     """
     Persistent OCR model that initializes once and handles multiple requests.
@@ -171,6 +177,7 @@ class DeepSeekOCRModel:
         from process.image_process import DeepseekOCRProcessor
         import fitz  # PyMuPDF
         
+
         # Store imports as instance variables
         self.DeepseekOCRProcessor = DeepseekOCRProcessor
         self.fitz = fitz
@@ -190,7 +197,7 @@ class DeepSeekOCRModel:
             swap_space=0,
             max_num_seqs=256,
             tensor_parallel_size=1,
-            gpu_memory_utilization=0.95,
+            gpu_memory_utilization=0.90,
             disable_mm_preprocessor_cache=True,
             dtype='bfloat16'
         )
@@ -270,6 +277,7 @@ class DeepSeekOCRModel:
             Dictionary with 'pages' (list of OCR text per page) and 'full_text' (combined)
         """
         print(f"📄 Processing PDF...")
+        from metrics_collector import metrics_collector
         
         # Start metrics collection
         with metrics_collector.collect_metrics():
@@ -282,7 +290,7 @@ class DeepSeekOCRModel:
 
             # Process images in batches to reduce GPU memory pressure and control concurrency
             # Default batch size chosen to balance throughput and memory; it's safe to tune.
-            batch_size = 8
+            batch_size = 32
             pages = []
 
             print("🔧 Preprocessing + inference in batches...")
@@ -368,7 +376,7 @@ async def reset_repo():
     return {"status": "repo reset and cloned"}
 
 
-@fastapi_app.post('/run/app/pdf')
+@fastapi_app.post('/run/pdf')
 async def run_pdf_endpoint(file: UploadFile = File(...)):
     """
     Process a PDF file using the app modal implementation (batched processing).

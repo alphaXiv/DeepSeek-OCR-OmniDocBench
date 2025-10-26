@@ -29,6 +29,10 @@ MODEL_PATH = "deepseek-ai/DeepSeek-OCR"
 DEFAULT_PROMPT = "<image>\n<|grounding|>Convert the document to markdown."
 
 
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+
 def ensure_repo_and_paths():
     repo_dir = os.path.join(REPO_DIR, "DeepSeek-OCR")
     try:
@@ -105,7 +109,11 @@ def build_image(image: modal.Image):
         "addict",
         "Pillow",
         "numpy",
-        "tqdm"
+        "tqdm",
+        "aiohttp",
+        "GPUtil",
+        "psutil",
+        "kaleido"
     ])
 
     return image
@@ -130,9 +138,10 @@ app = modal.App("deepseek-ocr-modal", image=IMAGE)
     timeout=30 * 60,
     scaledown_window=600,  # Keep container alive for 10 minutes after last request
     min_containers=2,
-    max_containers=5
+    max_containers=5,
+    # allow_concurrent_inputs=4
 )
-@modal.concurrent(max_inputs=32, target_inputs=16)
+@modal.concurrent(max_inputs=4, target_inputs=2)
 class DeepSeekOCRModel:
     """
     Persistent OCR model that initializes once and handles multiple requests.
@@ -168,8 +177,7 @@ class DeepSeekOCRModel:
         from process.image_process import DeepseekOCRProcessor
         import fitz  # PyMuPDF
         # Import metrics collector
-        from metrics_collector import metrics_collector, get_gpu_metrics_summary
-
+        
         # Store imports as instance variables
         self.DeepseekOCRProcessor = DeepseekOCRProcessor
         self.fitz = fitz
@@ -189,7 +197,7 @@ class DeepSeekOCRModel:
             swap_space=0,
             max_num_seqs=256,
             tensor_parallel_size=1,
-            gpu_memory_utilization=0.95,
+            gpu_memory_utilization=0.90,
             disable_mm_preprocessor_cache=True,
             dtype='bfloat16'
         )
@@ -269,25 +277,42 @@ class DeepSeekOCRModel:
             Dictionary with 'pages' (list of OCR text per page) and 'full_text' (combined)
         """
         print(f"📄 Processing PDF...")
-        
+        from metrics_collector import metrics_collector, get_gpu_metrics_summary
+
         # Start metrics collection
         with metrics_collector.collect_metrics():
             if prompt is None:
                 prompt = DEFAULT_PROMPT
-            
-            # Convert PDF to images
-            images = self._pdf_to_images(pdf_bytes)
-            print(f"📸 Converted PDF to {len(images)} images")
-            
-             # Check page count limit (150 pages)
-        
-            # Prepare batch inputs with ThreadPoolExecutor for faster preprocessing
-            print("🔧 Preprocessing images...")
-            with ThreadPoolExecutor(max_workers=min(64, len(images))) as executor:
-                batch_inputs = list(executor.map(
-                    lambda img: self._process_single_image(img, prompt),
-                    images
-                ))
+            # Convert PDF to images and preprocess on CPU only.
+            # Some downstream image processing/tokenization code may use
+            # CUDA if it is visible to the process. To ensure preprocessing
+            # does not use the GPU, temporarily hide CUDA devices during the
+            # PDF-to-image conversion and preprocessing steps by clearing
+            # CUDA_VISIBLE_DEVICES. We restore the original value afterwards.
+            orig_cuda = os.environ.get("CUDA_VISIBLE_DEVICES")
+            try:
+                # Hide GPUs for the preprocessing stage
+                os.environ["CUDA_VISIBLE_DEVICES"] = ""
+                print("📸 Converting PDF to images (CPU-only mode)...")
+                images = self._pdf_to_images(pdf_bytes)
+                print(f"📸 Converted PDF to {len(images)} images")
+
+                
+
+                # Prepare batch inputs with ThreadPoolExecutor for faster preprocessing
+                print("🔧 Preprocessing images (CPU-only)...")
+                with ThreadPoolExecutor(max_workers=min(64, len(images))) as executor:
+                    batch_inputs = list(executor.map(
+                        lambda img: self._process_single_image(img, prompt),
+                        images
+                    ))
+            finally:
+                # Restore CUDA visibility for the rest of the process (inference)
+                if orig_cuda is None:
+                    # Remove the env var if it wasn't set originally
+                    os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+                else:
+                    os.environ["CUDA_VISIBLE_DEVICES"] = orig_cuda
             
             # Run inference
             print("🧠 Running OCR inference...")
@@ -364,7 +389,7 @@ async def reset_repo():
     return {"status": "repo reset and cloned"}
 
 
-@fastapi_app.post('/run/base/pdf')
+@fastapi_app.post('/run/app/pdf')
 async def run_pdf_endpoint(file: UploadFile = File(...)):
     """
     Process a PDF file using the base modal implementation (single batch processing).
@@ -398,18 +423,18 @@ async def run_pdf_endpoint(file: UploadFile = File(...)):
             }
         )
     
-    # Check page count limit (150 pages)
-    pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
-    num_pages = pdf_document.page_count
-    pdf_document.close()
-    if num_pages > 150:
-        return JSONResponse(
-            status_code=417,
-            content={
-                "error": "Too many pages",
-                "message": f"Maximum number of pages is 150. PDF has {num_pages} pages"
-            }
-        )
+    # # Check page count limit (150 pages)
+    # pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
+    # num_pages = pdf_document.page_count
+    # pdf_document.close()
+    # if num_pages > 150:
+    #     return JSONResponse(
+    #         status_code=417,
+    #         content={
+    #             "error": "Too many pages",
+    #             "message": f"Maximum number of pages is 150. PDF has {num_pages} pages"
+    #         }
+    #     )
     
     # Call the Modal method (this will use the warm model)
     model = DeepSeekOCRModel()

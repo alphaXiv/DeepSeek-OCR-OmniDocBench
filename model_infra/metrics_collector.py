@@ -90,7 +90,21 @@ class MetricsCollector:
     def stop_collection(self) -> PerformanceMetrics:
         """Stop collecting and return aggregated metrics"""
         if not self.is_collecting:
-            raise RuntimeError("Metrics collection not started")
+            # Be resilient: if stop_collection is called without a matching start_collection,
+            # return an empty PerformanceMetrics object instead of raising. This can happen
+            # if the context manager was entered but start failed, or if collection was
+            # disabled in the environment.
+            print("Warning: stop_collection called but metrics collection was not started")
+            end_time = time.time()
+            return PerformanceMetrics(
+                start_time=self.start_time or end_time,
+                end_time=end_time,
+                duration=0.0,
+                gpu_memory_peak=0.0,
+                gpu_utilization_avg=0.0,
+                cpu_usage_avg=0.0,
+                gpu_metrics_history=[]
+            )
 
         self.is_collecting = False
         if self.collection_thread:
@@ -111,7 +125,13 @@ class MetricsCollector:
             gpu_utilization_avg = 0
 
         # CPU usage (rough estimate)
-        cpu_usage_avg = psutil.cpu_percent(interval=None)
+        if _HAS_PSUTIL and psutil is not None:
+            try:
+                cpu_usage_avg = psutil.cpu_percent(interval=None)
+            except Exception:
+                cpu_usage_avg = 0.0
+        else:
+            cpu_usage_avg = 0.0
 
         return PerformanceMetrics(
             start_time=self.start_time or 0,
@@ -126,13 +146,28 @@ class MetricsCollector:
     @contextmanager
     def collect_metrics(self):
         """Context manager for automatic metrics collection"""
-        self.start_collection()
+        collection_started = False
         try:
+            try:
+                self.start_collection()
+                collection_started = True
+            except Exception as e:
+                # Don't let metrics startup errors break the main processing flow
+                print(f"Warning: failed to start metrics collection: {e}")
+                collection_started = False
+
             yield self
+
         finally:
-            metrics = self.stop_collection()
-            # Store metrics for later retrieval
-            self._last_metrics = metrics
+            try:
+                # Attempt to stop collection; stop_collection is resilient and will
+                # return an empty PerformanceMetrics if collection wasn't started.
+                metrics = self.stop_collection()
+                # Store metrics for later retrieval
+                self._last_metrics = metrics
+            except Exception as e:
+                # Last-resort guard: log but do not propagate exceptions to caller
+                print(f"Warning: stop_collection raised an exception: {e}")
 
     def get_last_metrics(self) -> Optional[PerformanceMetrics]:
         """Get the last collected metrics"""
@@ -171,6 +206,9 @@ metrics_collector = MetricsCollector()
 def get_gpu_metrics_summary() -> Dict[str, float]:
     """Get a quick summary of current GPU metrics"""
     try:
+        if not _HAS_GPUTIL or GPUtil is None:
+            return {'error': 'GPUtil not available'}
+
         gpus = GPUtil.getGPUs()
         if not gpus:
             return {'error': 'No GPUs found'}

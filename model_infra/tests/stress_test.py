@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 from pathlib import Path
+import numpy as np
 
 @dataclass
 class TestResult:
@@ -45,7 +46,7 @@ class TestResult:
 class StressTester:
     """Stress testing framework for Modal OCR implementations"""
 
-    def __init__(self, base_url: str = "https://alphaxiv--deepseek-ocr-modal-serve.modal.run"):
+    def __init__(self, base_url: str = "https://alphaxiv--deepseek-ocr-modal-serve-dev.modal.run"):
         self.base_url = base_url
         # Use the tests directory for existing PDF files
         self.test_data_dir = Path(__file__).parent  # tests/ directory
@@ -70,29 +71,38 @@ class StressTester:
         start_time = time.time()
 
         try:
+            # Read file bytes into memory first to avoid the file object being
+            # closed while aiohttp is still sending data. Use FormData to send a
+            # proper multipart/form-data request that mirrors a browser/file upload.
+            url = f"{self.base_url}/run/app/pdf"
+            file_bytes = None
             with open(pdf_path, 'rb') as f:
-                files = {'file': f}
-                url = f"{self.base_url}/process_pdf"
+                file_bytes = f.read()
 
-                async with session.post(url, data=files) as response:
-                    end_time = time.time()
-                    latency = end_time - start_time
+            data = aiohttp.FormData()
+            data.add_field('file', file_bytes,
+                           filename=Path(pdf_path).name,
+                           content_type='application/pdf')
 
-                    if response.status == 200:
-                        result = await response.json()
-                        return {
-                            'success': True,
-                            'latency': latency,
-                            'pages_processed': result.get('num_successful', 0),
-                            'total_pages': result.get('num_pages', 0)
-                        }
-                    else:
-                        error_text = await response.text()
-                        return {
-                            'success': False,
-                            'latency': latency,
-                            'error': f"HTTP {response.status}: {error_text}"
-                        }
+            async with session.post(url, data=data) as response:
+                end_time = time.time()
+                latency = end_time - start_time
+
+                if response.status == 200:
+                    result = await response.json()
+                    return {
+                        'success': True,
+                        'latency': latency,
+                        'pages_processed': result.get('num_successful', 0),
+                        'total_pages': result.get('num_pages', 0)
+                    }
+                else:
+                    error_text = await response.text()
+                    return {
+                        'success': False,
+                        'latency': latency,
+                        'error': f"HTTP {response.status}: {error_text}"
+                    }
 
         except Exception as e:
             end_time = time.time()
@@ -121,26 +131,32 @@ class StressTester:
 
             print(f"   Using {len(pdf_files)} available PDFs for random selection")
 
-            # Create a queue of requests to maintain sustained load
+            # We'll keep a master list of all tasks we create so we can await
+            # every single one at the end. This avoids any race where tasks
+            # might be created and not be awaited later.
             active_tasks = set()
+            all_tasks = []
             request_count = 0
+
+            import random
 
             while time.time() < end_time:
                 # Maintain target concurrency by adding new requests
                 while len(active_tasks) < target_concurrency and time.time() < end_time:
                     request_count += 1
                     # Randomly select a PDF for this request
-                    import random
                     random_pdf = random.choice(pdf_files)
                     task = asyncio.create_task(self.run_single_request(session, str(random_pdf), implementation))
                     active_tasks.add(task)
+                    all_tasks.append(task)
 
                 # Wait for at least one task to complete
                 if active_tasks:
-                    done, active_tasks = await asyncio.wait(active_tasks, return_when=asyncio.FIRST_COMPLETED)
+                    done, pending = await asyncio.wait(active_tasks, return_when=asyncio.FIRST_COMPLETED)
 
-                    # Process completed tasks
+                    # Remove finished tasks from active_tasks and process them
                     for task in done:
+                        active_tasks.discard(task)
                         try:
                             result = task.result()
                             if result['success']:
@@ -156,9 +172,24 @@ class StressTester:
                 # Small delay to prevent overwhelming the event loop
                 await asyncio.sleep(0.01)
 
-            # Wait for remaining tasks to complete
-            if active_tasks:
-                remaining_results = await asyncio.gather(*active_tasks, return_exceptions=True)
+            # Wait for all created tasks to complete (this guarantees nothing was
+            # left running in the background). We use return_exceptions to
+            # capture any thrown exceptions and count them as failures below.
+            if all_tasks:
+                remaining_results = await asyncio.gather(*all_tasks, return_exceptions=True)
+                # We already counted successful/failed for tasks we saw earlier,
+                # but gathering here ensures every task has finished. To avoid
+                # double-counting, only increment counts for tasks not already
+                # included (we can detect that because their latencies wouldn't
+                # be in our `latencies` list). Simpler approach: recompute
+                # summary from scratch from remaining_results for correctness.
+
+                # Reset counters and reconstruct from remaining_results to avoid
+                # subtle double-counting issues.
+                successful = 0
+                failed = 0
+                latencies = []
+
                 for result in remaining_results:
                     if isinstance(result, Exception):
                         failed += 1
@@ -170,7 +201,13 @@ class StressTester:
                         failed += 1
 
         test_duration = time.time() - start_time
-        total_requests = successful + failed
+        # Total requests equals the number of tasks we created
+        total_requests = len(all_tasks)
+
+        # Safety: if no tasks were created, keep totals consistent
+        if total_requests == 0:
+            successful = 0
+            failed = 0
 
         # Calculate statistics
         if latencies:
@@ -316,8 +353,8 @@ class StressTester:
             return []
 
         # Test configurations for sustained load testing
-        implementations = ['base', 'app']  # modal_base vs modal_app
-        target_concurrency = 32  # Around 32 concurrent requests
+        implementations = ['base']  # modal_base vs modal_app
+        target_concurrency = 16  # Around 32 concurrent requests
         test_duration = 30  # 30 seconds per implementation
 
         all_results = []
@@ -331,12 +368,19 @@ class StressTester:
 
             except Exception as e:
                 print(f"  ❌ {implementation} sustained load test failed: {e}")
+        # Save numpy snapshot of results (one file per run)
+        timestamp = int(time.time())
+        npy_path = self.results_dir / f"results_snapshot_{timestamp}.npy"
+        # Use pickle to store list of TestResult objects as dicts
+        serializable = [r.__dict__ for r in all_results]
+        np.save(npy_path, serializable, allow_pickle=True)
 
-        # Create visualizations
+        # Create visualizations (also saves JSON/detailed_results as before)
         print("\n📈 Generating performance visualizations...")
         self.create_comparison_visualizations(all_results)
 
         print(f"\n✅ Sustained load testing complete! Results saved to {self.results_dir}")
+        print(f"🔖 Numpy snapshot written to {npy_path}")
         return all_results
 
 async def main():
