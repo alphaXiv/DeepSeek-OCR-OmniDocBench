@@ -29,14 +29,27 @@ function App() {
     }
   }, [])
 
+  const isValidFile = (file) => {
+    const validTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/bmp'
+    ]
+    return file && validTypes.includes(file.type)
+  }
+
   const handleFileSelect = (event) => {
     const file = event.target.files?.[0]
-    if (file && file.type === 'application/pdf') {
+    if (isValidFile(file)) {
       setSelectedFile(file)
       setError('')
       setOcrResult('')
     } else {
-      setError('Please select a valid PDF file')
+      setError('Please select a valid PDF or image file (JPEG, PNG, GIF, WebP, BMP)')
       setSelectedFile(null)
     }
   }
@@ -57,18 +70,18 @@ function App() {
     setDragActive(false)
     
     const file = e.dataTransfer.files?.[0]
-    if (file && file.type === 'application/pdf') {
+    if (isValidFile(file)) {
       setSelectedFile(file)
       setError('')
       setOcrResult('')
     } else {
-      setError('Please drop a valid PDF file')
+      setError('Please drop a valid PDF or image file')
     }
   }
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError('Please select a PDF file first')
+      setError('Please select a file first')
       return
     }
 
@@ -79,11 +92,15 @@ function App() {
     const formData = new FormData()
     formData.append('file', selectedFile)
 
+    // Auto-detect file type and route to appropriate endpoint
+    const isPdf = selectedFile.type === 'application/pdf'
+    const endpoint = isPdf ? 'pdf' : 'image'
+
     // Cache busting
     const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-    const url = `https://alphaxiv--deepseek-ocr-modal-serve.modal.run/run/pdf?_r=${requestId}`
+    const url = `https://alphaxiv--deepseek-ocr-modal-serve.modal.run/run/${endpoint}?_r=${requestId}`
 
-    console.info('Uploading PDF:', { requestId, fileName: selectedFile.name })
+    console.info(`Uploading ${isPdf ? 'PDF' : 'Image'}:`, { requestId, fileName: selectedFile.name, endpoint })
 
     try {
       const response = await fetch(url, {
@@ -146,7 +163,7 @@ function App() {
     <>
       <div className="container">
         <h1>DeepSeek OCR</h1>
-        <p className="subtitle">Upload a PDF to extract text using AI-powered OCR</p>
+        <p className="subtitle">Upload a PDF or image to extract text using AI-powered OCR</p>
 
         <div 
           className={`upload-area ${dragActive ? 'drag-active' : ''}`}
@@ -159,7 +176,7 @@ function App() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="application/pdf"
+            accept="application/pdf,image/jpeg,image/png,image/gif,image/webp,image/bmp"
             onChange={handleFileSelect}
             style={{ display: 'none' }}
           />
@@ -170,9 +187,9 @@ function App() {
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
             <p className="upload-text">
-              {selectedFile ? selectedFile.name : 'Drop PDF here or click to browse'}
+              {selectedFile ? selectedFile.name : 'Drop file here or click to browse'}
             </p>
-            <p className="upload-hint">PDF files only</p>
+            <p className="upload-hint">PDF or image files (JPEG, PNG, GIF, WebP, BMP)</p>
           </div>
         </div>
 
