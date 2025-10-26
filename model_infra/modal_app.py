@@ -13,6 +13,10 @@ from PIL import Image
 import sys
 import subprocess
 import asyncio
+from PIL import ImageDraw, ImageFont, ImageOps
+import numpy as np
+import base64
+import io as _io
 
 
 # from config import MAX_CONCURRENCY
@@ -285,6 +289,7 @@ class DeepSeekOCRModel:
         if prompt is None:
             prompt = DEFAULT_PROMPT
         
+        
         # Convert PDF to images
         images = self._pdf_to_images(pdf_bytes)
         print(f"📸 Converted PDF to {len(images)} images")
@@ -359,6 +364,143 @@ class DeepSeekOCRModel:
         content = re.sub(r'\n{4,}', '\n\n', content)
         
         return content
+
+    # --- Image-specific helpers ported from run_dpsk_ocr_image.py (adapted to in-memory outputs) ---
+    def _re_match(self, text: str):
+        pattern = r'(<\|ref\|>(.*?)<\|/ref\|><\|det\|>(.*?)<\|/det\|>)'
+        matches = re.findall(pattern, text, re.DOTALL)
+
+        mathes_image = []
+        mathes_other = []
+        for a_match in matches:
+            if '<|ref|>image<|/ref|>' in a_match[0]:
+                mathes_image.append(a_match[0])
+            else:
+                mathes_other.append(a_match[0])
+        return matches, mathes_image, mathes_other
+
+    def _extract_coordinates_and_label(self, ref_text, image_width, image_height):
+        try:
+            label_type = ref_text[1]
+            cor_list = eval(ref_text[2])
+        except Exception as e:
+            print(e)
+            return None
+
+        return (label_type, cor_list)
+
+    def _draw_bounding_boxes(self, image: Image.Image, refs):
+        """Draw boxes and return (annotated_image, list_of_cropped_images).
+        Cropped images are returned as PIL.Image objects (not saved to disk).
+        """
+        image_width, image_height = image.size
+        img_draw = image.copy()
+        draw = ImageDraw.Draw(img_draw)
+
+        overlay = Image.new('RGBA', img_draw.size, (0, 0, 0, 0))
+        draw2 = ImageDraw.Draw(overlay)
+        font = ImageFont.load_default()
+
+        img_idx = 0
+        crops = []
+        for i, ref in enumerate(refs):
+            try:
+                result = self._extract_coordinates_and_label(ref, image_width, image_height)
+                if result:
+                    label_type, points_list = result
+                    color = (np.random.randint(0, 200), np.random.randint(0, 200), np.random.randint(0, 255))
+                    color_a = color + (20,)
+                    for points in points_list:
+                        x1, y1, x2, y2 = points
+                        x1 = int(x1 / 999 * image_width)
+                        y1 = int(y1 / 999 * image_height)
+                        x2 = int(x2 / 999 * image_width)
+                        y2 = int(y2 / 999 * image_height)
+
+                        if label_type == 'image':
+                            try:
+                                cropped = image.crop((x1, y1, x2, y2))
+                                crops.append(cropped)
+                            except Exception as e:
+                                print(e)
+                                pass
+                            img_idx += 1
+
+                        try:
+                            if label_type == 'title':
+                                draw.rectangle([x1, y1, x2, y2], outline=color, width=4)
+                                draw2.rectangle([x1, y1, x2, y2], fill=color_a, outline=(0, 0, 0, 0), width=1)
+                            else:
+                                draw.rectangle([x1, y1, x2, y2], outline=color, width=2)
+                                draw2.rectangle([x1, y1, x2, y2], fill=color_a, outline=(0, 0, 0, 0), width=1)
+
+                            text_x = x1
+                            text_y = max(0, y1 - 15)
+                            text_bbox = draw.textbbox((0, 0), label_type, font=font)
+                            text_width = text_bbox[2] - text_bbox[0]
+                            text_height = text_bbox[3] - text_bbox[1]
+                            draw.rectangle([text_x, text_y, text_x + text_width, text_x + text_height],
+                                           fill=(255, 255, 255, 30))
+                            draw.text((text_x, text_y), label_type, font=font, fill=color)
+                        except Exception:
+                            pass
+            except Exception:
+                continue
+        img_draw.paste(overlay, (0, 0), overlay)
+        return img_draw, crops
+
+    def _process_image_with_refs(self, image: Image.Image, ref_texts):
+        annotated, crops = self._draw_bounding_boxes(image, ref_texts)
+        return annotated, crops
+
+    @modal.method()
+    def process_image(self, image_bytes: bytes, prompt: Optional[str] = None, crop_mode: bool = True) -> dict:
+        """
+        Process a single image bytes and return OCR results along with annotated image and crops (base64).
+        """
+        if prompt is None:
+            prompt = DEFAULT_PROMPT
+
+        # Load image
+        try:
+            image = Image.open(_io.BytesIO(image_bytes))
+            image = ImageOps.exif_transpose(image).convert('RGB')
+        except Exception as e:
+            return {"error": "invalid_image", "message": str(e)}
+
+        # Create cache item like the PDF flow
+        processor = self.DeepseekOCRProcessor()
+        cache_item = {
+            "prompt": prompt,
+            "multi_modal_data": {
+                "image": processor.tokenize_with_images(images=[image], bos=True, eos=True, cropping=crop_mode)
+            },
+        } #Its fine since only one image per req will be handled anyways so no batching :)
+
+        outputs = list(self.llm.generate([cache_item], sampling_params=self.sampling_params))
+        if not outputs:
+            return {"error": "no_output"}
+
+        content = outputs[0].outputs[0].text
+
+        # Post-process content
+        if "<｜end▁of▁sentence｜>" in content:
+            content = content.replace("<｜end▁of▁sentence｜>", "")
+
+        matches_ref, matches_images, mathes_other = self._re_match(content)
+
+        # Replace image refs and other grounding refs in content; do NOT save or return images
+        for idx, a_match_image in enumerate(matches_images):
+            # replace image refs with a simple placeholder or remove them
+            content = content.replace(a_match_image, f'')
+
+        for idx, a_match_other in enumerate(mathes_other):
+            content = content.replace(a_match_other, '').replace('\\coloneqq', ':=').replace('\\eqqcolon', '=:')
+
+        return {
+            "raw_output": outputs[0].outputs[0].text,
+            "full_text": content,
+        }
 
 
 # FastAPI app for HTTP endpoints
@@ -444,6 +586,33 @@ async def run_pdf_endpoint(file: UploadFile = File(...)):
         "num_pages": result["num_pages"],
         "num_successful": result["num_successful"],
         "performance_metrics": result.get("performance_metrics", {})
+    })
+
+
+@fastapi_app.post('/run/image')
+async def run_image_endpoint(file: UploadFile = File(...)):
+    """
+    Process a single image using the persistent model instance.
+    Returns OCR text and annotated image / crops as base64 strings.
+    """
+    image_bytes = await file.read()
+
+    # Basic size guard
+    max_size = 16 * 1024 * 1024
+    if len(image_bytes) > max_size:
+        return JSONResponse(status_code=413, content={"error": "file too large", "message": "Max 16MB"})
+
+    model = DeepSeekOCRModel()
+    result = model.process_image.remote(image_bytes)
+
+    if "error" in result:
+        return JSONResponse(status_code=400, content=result)
+
+    # Return only text results (no images)
+    return JSONResponse({
+        "implementation": "app",
+        "ocr_text": result.get("full_text", ""),
+        "raw_output": result.get("raw_output", ""),
     })
 
 
