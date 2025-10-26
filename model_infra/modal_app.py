@@ -277,74 +277,74 @@ class DeepSeekOCRModel:
             Dictionary with 'pages' (list of OCR text per page) and 'full_text' (combined)
         """
         print(f"📄 Processing PDF...")
-        from metrics_collector import metrics_collector
+        # from metrics_collector import metrics_collector
         
         # Start metrics collection
-        with metrics_collector.collect_metrics():
-            if prompt is None:
-                prompt = DEFAULT_PROMPT
-            
-            # Convert PDF to images
-            images = self._pdf_to_images(pdf_bytes)
-            print(f"📸 Converted PDF to {len(images)} images")
+        # with metrics_collector.collect_metrics():
+        if prompt is None:
+            prompt = DEFAULT_PROMPT
+        
+        # Convert PDF to images
+        images = self._pdf_to_images(pdf_bytes)
+        print(f"📸 Converted PDF to {len(images)} images")
 
-            # Process images in batches to reduce GPU memory pressure and control concurrency
-            # Default batch size chosen to balance throughput and memory; it's safe to tune.
-            batch_size = 32
-            pages = []
+        # Process images in batches to reduce GPU memory pressure and control concurrency
+        # Default batch size chosen to balance throughput and memory; it's safe to tune.
+        batch_size = 32
+        pages = []
 
-            print("🔧 Preprocessing + inference in batches...")
-            for start in range(0, len(images), batch_size):
-                chunk = images[start : start + batch_size]
+        print("🔧 Preprocessing + inference in batches...")
+        for start in range(0, len(images), batch_size):
+            chunk = images[start : start + batch_size]
 
-                # Tokenize / preprocess this chunk in parallel (keeps work on GPU-side code paths)
-                with ThreadPoolExecutor(max_workers=min(64, len(chunk))) as executor:
-                    batch_inputs = list(executor.map(lambda img: self._process_single_image(img, prompt), chunk))
+            # Tokenize / preprocess this chunk in parallel (keeps work on GPU-side code paths)
+            with ThreadPoolExecutor(max_workers=min(64, len(chunk))) as executor:
+                batch_inputs = list(executor.map(lambda img: self._process_single_image(img, prompt), chunk))
 
-                # Run inference for this chunk
-                print(f"🧠 Running OCR inference for pages {start + 1}..{start + len(chunk)}")
-                outputs_chunk = self.llm.generate(batch_inputs, sampling_params=self.sampling_params)
+            # Run inference for this chunk
+            print(f"🧠 Running OCR inference for pages {start + 1}..{start + len(chunk)}")
+            outputs_chunk = self.llm.generate(batch_inputs, sampling_params=self.sampling_params)
 
-                # Process outputs for this chunk and append
-                for j, output in enumerate(outputs_chunk):
-                    idx = start + j
-                    content = output.outputs[0].text
+            # Process outputs for this chunk and append
+            for j, output in enumerate(outputs_chunk):
+                idx = start + j
+                content = output.outputs[0].text
 
-                    # Check for proper EOS token
-                    if "<｜end▁of▁sentence｜>" in content:
-                        content = content.replace("<｜end▁of▁sentence｜>", "")
-                    else:
-                        if skip_repeat:
-                            print(f"⚠️  Skipping page {idx + 1} (no EOS token - likely repeated output)")
-                            continue
+                # Check for proper EOS token
+                if "<｜end▁of▁sentence｜>" in content:
+                    content = content.replace("<｜end▁of▁sentence｜>", "")
+                else:
+                    if skip_repeat:
+                        print(f"⚠️  Skipping page {idx + 1} (no EOS token - likely repeated output)")
+                        continue
 
-                    # Clean up grounding tokens for markdown output
-                    content = self._clean_grounding_tokens(content)
-                    pages.append(content)
-            
-            print(f"✅ Processed {len(pages)} pages successfully")
-            
-            # Get final metrics
-            final_metrics = metrics_collector.get_last_metrics()
-            
-            result = {
-                "pages": pages,
-                "full_text": "\n\n<--- Page Split --->\n\n".join(pages),
-                "num_pages": len(images),
-                "num_successful": len(pages)
-            }
-            
-            # Add performance metrics to result
-            if final_metrics:
-                result["performance_metrics"] = {
-                    "duration_seconds": round(final_metrics.duration, 3),
-                    "gpu_memory_peak_mb": round(final_metrics.gpu_memory_peak, 2),
-                    "gpu_utilization_avg_percent": round(final_metrics.gpu_utilization_avg, 2),
-                    "cpu_usage_avg_percent": round(final_metrics.cpu_usage_avg, 2),
-                    "gpu_metrics_samples": len(final_metrics.gpu_metrics_history)
-                }
-            
-            return result
+                # Clean up grounding tokens for markdown output
+                content = self._clean_grounding_tokens(content)
+                pages.append(content)
+        
+        print(f"✅ Processed {len(pages)} pages successfully")
+        
+        # Get final metrics
+        # final_metrics = metrics_collector.get_last_metrics()
+        
+        result = {
+            "pages": pages,
+            "full_text": "\n\n<--- Page Split --->\n\n".join(pages),
+            "num_pages": len(images),
+            "num_successful": len(pages)
+        }
+        
+        # # Add performance metrics to result
+        # if final_metrics:
+        #     result["performance_metrics"] = {
+        #         "duration_seconds": round(final_metrics.duration, 3),
+        #         "gpu_memory_peak_mb": round(final_metrics.gpu_memory_peak, 2),
+        #         "gpu_utilization_avg_percent": round(final_metrics.gpu_utilization_avg, 2),
+        #         "cpu_usage_avg_percent": round(final_metrics.cpu_usage_avg, 2),
+        #         "gpu_metrics_samples": len(final_metrics.gpu_metrics_history)
+        #     }
+        
+        return result
     
     def _clean_grounding_tokens(self, content: str) -> str:
         """Remove grounding tokens from content."""
