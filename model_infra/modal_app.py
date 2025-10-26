@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import modal
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from PIL import Image
 import sys
@@ -362,6 +363,15 @@ class DeepSeekOCRModel:
 
 # FastAPI app for HTTP endpoints
 fastapi_app = FastAPI(title='DeepSeek-OCR (Modal compatible)')
+
+# Add CORS middleware
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (or restrict to specific domains)
+    allow_credentials=False,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 
 @fastapi_app.post('/repo/reset')
