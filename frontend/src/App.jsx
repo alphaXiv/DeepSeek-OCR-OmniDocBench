@@ -81,7 +81,7 @@ function App() {
 
     // Cache busting
     const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-    const url = `https://alphaxiv--deepseek-ocr-modal-serve.modal.run/run/app/pdf?_r=${requestId}`
+    const url = `https://alphaxiv--deepseek-ocr-modal-serve.modal.run/run/pdf?_r=${requestId}`
 
     console.info('Uploading PDF:', { requestId, fileName: selectedFile.name })
 
