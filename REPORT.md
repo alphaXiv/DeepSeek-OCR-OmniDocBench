@@ -91,7 +91,7 @@ We conducted a z-test for proportions to compare overall accuracies.
 |---|---:|---:|
 | DeepSeek OCR | 84.24 | 1,141 |
 | OLmOCR-2 | 81.56 | 1,105 |
-<!-- 
+
 ## Key Takeaways
 
 - **Strengths**: DeepSeek excels in text, tables, and reading order, with narrow CIs indicating reliability.
@@ -100,7 +100,7 @@ We conducted a z-test for proportions to compare overall accuracies.
 - **Recommendations**:
   - Improve formula parsing (e.g., LaTeX-aware models).
   - Run bootstrap CIs on per-page data for robustness.
-  - Explore equivalence testing (TOST) for practical parity. -->
+  - Explore equivalence testing (TOST) for practical parity.
 
 ## Conclusion
 
