@@ -1,0 +1,16 @@
+-r ../requirements.txt
+fastapi
+uvicorn[standard]
+fastapi
+# uvicorn[standard]
+Pillow
+# vllm
+# transformers
+# torch
+einops
+addict
+img2pdf
+fitz
+tqdm
+numpy
+requests

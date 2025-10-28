@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 **/__pycache__/
 # check_data/
 **/.ipynb_checkpoints/
@@ -19,3 +20,7 @@ old_tools
 old_trace
 result/
 configs/
+=======
+OmniDocBench/
+olmocr/
+>>>>>>> fb5a74401d6ae68b76c00dfb0fbc9050043fd272

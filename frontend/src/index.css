@@ -1,0 +1,85 @@
+:root {
+  /* AlphaXiv Brand Colors */
+  --color-custom-red: #9a2036;
+  
+  /* Background colors */
+  --color-bg: oklch(100% 0 0);
+  --color-panel: oklch(100% 0 0);
+  --color-panel-light: #fafafa;
+  
+  /* Border Colors */
+  --color-border: #d4d4d8;
+  
+  /* Text Colors */
+  --color-text: #18181b;
+  --color-subtext: #71717a;
+  --color-muted: #a1a1aa;
+  
+  /* Font */
+  font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robik, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="dark"] {
+  --color-custom-red: #c83232;
+  --color-bg: oklch(22% 0 0);
+  --color-panel: oklch(22% 0 0);
+  --color-panel-light: oklch(23% 0 0);
+  --color-text: #fafafa;
+  --color-subtext: #d4d4d8;
+  --color-muted: #71717a;
+  --color-border: #52525b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  font-weight: 500;
+  color: var(--color-custom-red);
+  text-decoration: inherit;
+  transition: opacity 0.2s;
+}
+a:hover {
+  opacity: 0.8;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 2px solid var(--color-custom-red);
+  outline-offset: 2px;
+}

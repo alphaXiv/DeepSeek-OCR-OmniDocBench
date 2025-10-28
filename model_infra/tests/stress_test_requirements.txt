@@ -1,0 +1,10 @@
+# Requirements for stress testing and performance analysis
+aiohttp
+matplotlib
+seaborn
+pandas
+plotly
+numpy
+GPUtil
+psutil
+kaleido
