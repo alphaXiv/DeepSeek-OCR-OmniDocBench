@@ -40,14 +40,15 @@ def batch_images_to_pdfs(input_dir, output_dir=None):
     """
     # If output directory is not specified, create a "pdfs" directory in the input directory
     if output_dir is None:
-        output_dir = os.path.join(input_dir, "pdfs")
+        output_dir = os.path.join('converted_olmocr_pdfs_from_img', "pdfs")
 
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
     # Get all image files
     image_files = []
-    for root, _, files in os.walk(input_dir):
+   
+    for root, _, files in os.walk( './../../../../../../../home/ubuntu/.cache/huggingface/hub/datasets--opendatalab--OmniDocBench/snapshots/91fe284bbfacfa687959ae3eb00846ca852aa907/images/'):
         for file in files:
             if is_image_file(file):
                 image_files.append(os.path.join(root, file))
@@ -61,10 +62,11 @@ def batch_images_to_pdfs(input_dir, output_dir=None):
     # Process each image
     for image_path in tqdm(image_files, desc="Conversion Progress"):
         # Calculate relative path to maintain directory structure in output
-        rel_path = os.path.relpath(image_path, input_dir)
+        rel_path = os.path.relpath(image_path, 'converted_olmocr_pdfs_from_img')
         rel_dir = os.path.dirname(rel_path)
         # Create corresponding output subdirectory
         output_subdir = os.path.join(output_dir, rel_dir)
+        print("here: ", output_subdir)
         os.makedirs(output_subdir, exist_ok=True)
 
         # Get filename without extension
@@ -80,7 +82,7 @@ def batch_images_to_pdfs(input_dir, output_dir=None):
 
 if __name__ == "__main__":
     # Example usage
-    input_directory = "your_image_directory_path"  # Replace with your image directory path
-    output_directory = "your_output_directory_path" # Replace with output directory path, or None to use default
+    input_directory = "../snapshots/91fe284bbfacfa687959ae3eb00846ca852aa907/images"  # Replace with your image directory path
+    output_directory = "converted_olmocr_pdfs_from_img" # Replace with output directory path, or None to use default
 
     batch_images_to_pdfs(input_directory, output_directory)
