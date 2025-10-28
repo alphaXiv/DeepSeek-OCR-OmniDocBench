@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 <h1 align="center">
 OmniDocBench
 </h1>
@@ -2206,12 +2206,11 @@ The current open-source model supports the following modes:
 We would like to thank [Vary](https://github.com/Ucas-HaoranWei/Vary/), [GOT-OCR2.0](https://github.com/Ucas-HaoranWei/GOT-OCR2.0/), [MinerU](https://github.com/opendatalab/MinerU), [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR), [OneChart](https://github.com/LingyvKong/OneChart), [Slow Perception](https://github.com/Ucas-HaoranWei/Slow-Perception) for their valuable models and ideas.
 
 We also appreciate the benchmarks: [Fox](https://github.com/ucaslcl/Fox), [OminiDocBench](https://github.com/opendatalab/OmniDocBench).
->>>>>>> fb5a74401d6ae68b76c00dfb0fbc9050043fd272
 
 ## Citation
 
 ```bibtex
-<<<<<<< HEAD
+
 @misc{ouyang2024omnidocbenchbenchmarkingdiversepdf,
       title={OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations}, 
       author={Linke Ouyang and Yuan Qu and Hongbin Zhou and Jiawei Zhu and Rui Zhang and Qunshu Lin and Bin Wang and Zhiyuan Zhao and Man Jiang and Xiaomeng Zhao and Jin Shi and Fan Wu and Pei Chu and Minghao Liu and Zhenxiang Li and Chao Xu and Bo Zhang and Botian Shi and Zhongying Tu and Conghui He},
@@ -2229,4 +2228,4 @@ We also appreciate the benchmarks: [Fox](https://github.com/ucaslcl/Fox), [Omini
   journal={arXiv preprint arXiv:2510.18234},
   year={2025}
 }
->>>>>>> fb5a74401d6ae68b76c00dfb0fbc9050043fd272
+
