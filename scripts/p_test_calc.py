@@ -1,7 +1,7 @@
 from statsmodels.stats.proportion import proportions_ztest
 
 # successes and total observations
-count = [round(0.5616 * 1000), round(0.6000 * 1000)]
+count = [round(0.8156 * 1000), round(0.8423 * 1000)]
 nobs = [1355, 1355]
 
 # two-tailed test: is Model B different?
