@@ -1,8 +1,10 @@
-# DeepSeek OCR — Evaluation Summary vs. OLmOCR (OmniDocBench subset)
+# Evaluation Summary 
+
+## DeepSeek-OCR vs. OLmOCR2 on OmniDocBench!
 
 Date: 2025-10-29
 
-This report summarizes evaluation results for DeepSeek OCR (vLLM pipeline) on an OmniDocBench end-to-end run of 1,355 pages. The core metrics below are taken from the evaluation output (`results_dpsk-cleaned_quick_match_metric_result.json`). I compute 95% confidence intervals (CI) for each key metric using the normal (Wald) approximation with z ≈ 1.95 (as requested). Where a metric is reported as a normalized edit distance (Edit_dist), I convert it to an accuracy-style quantity (1 − Edit_dist) to produce an intuitive CI on the success rate.
+This report summarizes evaluation results for DeepSeek OCR (vLLM pipeline) and OLmOCR2on an OmniDocBench end-to-end run of 1,355 rich annotated pdf images. The core metrics below are taken from the evaluation output (`results_dpsk-cleaned_quick_match_metric_result.json`). I compute 95% confidence intervals (CI) for each key metric using the normal (Wald) approximation with z ≈ 1.95 (as requested). Where a metric is reported as a normalized edit distance (Edit_dist), I convert it to an accuracy-style quantity (1 − Edit_dist) to produce an intuitive CI on the success rate.
 
 Summary of reported aggregate metrics (from evaluation)
 
