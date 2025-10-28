@@ -289,7 +289,6 @@ class DeepSeekOCRModel:
         if prompt is None:
             prompt = DEFAULT_PROMPT
         
-        
         # Convert PDF to images
         images = self._pdf_to_images(pdf_bytes)
         print(f"📸 Converted PDF to {len(images)} images")
