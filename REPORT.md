@@ -1,6 +1,6 @@
 # DeepSeek OCR Evaluation Report
 
-## TL;DR
+## Executive Summary
 
 This report evaluates the performance of **DeepSeek OCR** (a vLLM-based multimodal pipeline) against **OLmOCR-2** on the OmniDocBench end-to-end benchmark, using 1,355 annotated PDF pages. DeepSeek OCR achieves an overall accuracy of **84.24%**, slightly outperforming OLmOCR-2's **81.56%**, though the difference is not statistically significant (p ≈ 0.305). Key strengths include excellent text and table recovery, with formula parsing as the primary weakness. Confidence intervals are computed using the Wald approximation (z ≈ 1.95).
 
@@ -73,6 +73,7 @@ We report point estimates with 95% confidence intervals (CIs) using the Wald app
 - **CI Calculation**: Wald approximation with z = 1.95 for 95% bands. SE = sqrt(p(1-p)/n), ME = z × SE.
 - **Example**: For text-block accuracy (p = 0.926, n = 1355), SE ≈ 0.00711, ME ≈ 0.01386, CI = [0.912, 0.940].
 - **Data Sources**: OmniDocBench pipeline outputs; per-page JSONs for potential deeper analysis.
+- **Metric choice (Edit Distance vs CDM)**: For text, formula and reading-order we used normalized Edit Distance (reported as `Edit_dist` and presented as accuracy = 1 − Edit_dist) rather than the CDM metric. Edit Distance is simple, interpretable, and directly available from the OmniDocBench outputs; CDM (Content Distance Metric) is an alternative that emphasizes token-level content differences and could be used in follow-up analyses.
 
 ## Statistical Test: Overall Performance Comparison
 
