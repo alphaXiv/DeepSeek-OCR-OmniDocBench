@@ -1,6 +1,6 @@
 # DeepSeek OCR Evaluation Report
 
-## Executive Summary
+## TL;DR
 
 This report evaluates the performance of **DeepSeek OCR** (a vLLM-based multimodal pipeline) against **OLmOCR-2** on the OmniDocBench end-to-end benchmark, using 1,355 annotated PDF pages. DeepSeek OCR achieves an overall accuracy of **84.24%**, slightly outperforming OLmOCR-2's **81.56%**, though the difference is not statistically significant (p ≈ 0.305). Key strengths include excellent text and table recovery, with formula parsing as the primary weakness. Confidence intervals are computed using the Wald approximation (z ≈ 1.95).
 
