@@ -6,30 +6,40 @@ This report summarizes evaluation results for DeepSeek OCR (vLLM pipeline) on an
 
 Summary of reported aggregate metrics (from evaluation)
 
-| Metric | Value |
-|---|---:|
-| text_block_Edit_dist | 0.074 |
-| display_formula_Edit_dist | 0.273 |
-| table_TEDS | 87.418 |
-| table_TEDS_structure_only | 91.235 |
-| reading_order_Edit_dist | 0.089 |
-| overall | 84.239333 |
 
 In plain terms:
-- Text paragraph normalized edit distance = 0.074 → text-block accuracy ≈ 92.6%
-- Display-formula edit distance = 0.273 → display-formula accuracy ≈ 72.7%
-- Table similarity (TEDS) = 87.418% (already a percent-style similarity)
-- Table structure-only TEDS = 91.235%
-- Reading-order edit distance = 0.089 → reading-order accuracy ≈ 91.1%
-- Overall score reported = 84.239333% (as in the evaluation output)
-
-- Overall score reported = 84.239333% (as in the evaluation output)
+- Text paragraph normalized edit distance
+- Display-formula edit distance
+- Table similarity (TEDS)
+- Table structure-only TEDS
+- Reading-order edit distance
+- Overall score reported
 
 ## Figures
 
-![Overall evaluation — DeepSeek OCR vs OmniDocBench](assets/ocr/End2End_OmniDocBench_deepseek_ocr_overall.png)
+### Overall comparison
 
-*Figure — overall evaluation plot (see `assets/ocr/End2End_OmniDocBench_deepseek_ocr_overall.png`).*
+![DeepSeek — Overall](assets/ocr/End2End_OmniDocBench_deepseek_ocr_overall.png)
+![OLmOCR-2 — Overall](assets/ocr/End2End_OmniDocBench_olmo_ocr_2_overall.png)
+
+*Figure — Overall evaluation plots for DeepSeek (left) and OLmOCR-2 (right).
+
+### Language breakdown — English
+
+![DeepSeek — English](assets/ocr/End2End_OmniDocBench_deepseek_ocr_english.png)
+![OLmOCR-2 — English](assets/ocr/End2End_OmniDocBench_olmo_ocr_2_english.png)
+
+*Per-language performance (English) for both systems.*
+
+### Language breakdown — Chinese
+
+![DeepSeek — Chinese](assets/ocr/End2End_OmniDocBench_deepseek_ocr_chinese.png)
+![OLmOCR-2 — Chinese](assets/ocr/End2End_OmniDocBench_olmo_ocr_2_chinese.png)
+
+*Per-language performance (Chinese) for both systems.*
+
+
+*Example document crops / OCR outputs from the dataset.*
 
 Methodology for the confidence intervals
 - Sample size: n = 1,355 pages
