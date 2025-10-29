@@ -1,3 +1,2 @@
 # Ignore local cloned/checked-out subprojects and large folders
-olmocr/
-OmniDocBench/
+...existing code...
