@@ -195,16 +195,12 @@ def process_paper(paper):
 
     # Determine a suggested starting version if available (e.g., 'v1')
     suggested_version = None
-    if isinstance(paper.get('versionLabel'), str):
-        try:
-            suggested_version = int(paper.get('versionLabel').lstrip('vV'))
-        except Exception:
-            suggested_version = None
-    elif 'version' in paper:
-        try:
-            suggested_version = int(paper.get('version'))
-        except Exception:
-            suggested_version = None
+    # isinstance(paper.get('versionLabel'), str):
+    try:
+        suggested_version = int(paper.get('versionLabel').lstrip('vV'))
+    except Exception:
+        suggested_version = None
+
 
     # Attempt to download using universal id only (v0..v5)
     success, actual_version, pdf_path = download_pdf(universal_id, suggested_version or 1)
