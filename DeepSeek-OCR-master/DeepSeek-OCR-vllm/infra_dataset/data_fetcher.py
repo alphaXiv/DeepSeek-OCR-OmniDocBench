@@ -37,7 +37,7 @@ FEED_URL = "https://api.alphaxiv.org/papers/v2/feed"
 METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}{}.pdf"
 
-PAGE_SIZE = 100
+PAGE_SIZE = 1
 MAX_PAPERS = 100  # Start with 100 for testing
 
 def fetch_feed_page(page_num):
@@ -69,7 +69,8 @@ def fetch_feed_page(page_num):
                     data = response.json()
                 except Exception as e:
                     logger.warning(f"Failed to parse JSON from explicit URL: {e}; text snippet: {response.text[:200]}")
-                if data and 'data' in data:
+                if data:
+                    print(data)
                     return data
             else:
                 logger.warning(f"Non-200 status for explicit URL: {response.status_code}; text: {response.text[:200]}")
