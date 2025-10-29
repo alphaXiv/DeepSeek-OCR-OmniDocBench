@@ -98,6 +98,8 @@ Use OmniDocBench's evaluation scripts to compare the generated outputs.
 
 After evaluation, results are stored in `OmniDocBench/result/`. Use the notebooks in `OmniDocBench/tools/` to generate comparison tables and visualizations.
 
+You can find our results in `results` folder too!
+
 Key metrics include:
 - Text accuracy (normalized edit distance)
 - Formula accuracy (Edit dist score)
