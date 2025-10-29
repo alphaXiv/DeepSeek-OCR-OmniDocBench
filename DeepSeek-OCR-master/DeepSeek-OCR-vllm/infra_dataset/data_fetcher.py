@@ -268,8 +268,8 @@ def main():
                     unique_papers.add(pid_safe)
                     new_papers.append(paper)
                     pbar.update(1)
-                    if len(unique_papers) >= MAX_PAPERS:
-                        break
+                    # if len(unique_papers) >= MAX_PAPERS:
+                    #     break
             
             # Process in parallel (limit workers based on CPU count)
             cpu_count = os.cpu_count() or 1
