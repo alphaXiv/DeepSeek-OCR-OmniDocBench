@@ -35,7 +35,7 @@ SESSION = requests.Session()
 
 FEED_URL = "https://api.alphaxiv.org/papers/v2/feed"
 METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
-PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}{}.pdf"
+PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 
 PAGE_SIZE = 100
 MAX_PAPERS = 100  # Start with 100 for testing
@@ -102,7 +102,7 @@ def download_pdf(paper_id, version, retries=3):
             logger.info(f"PDF already exists: {pdf_id}")
             return True, v, pdf_path
 
-        url = PDF_URL.format(pdf_id, version)
+        url = PDF_URL.format(pdf_id)
         for attempt in range(retries):
             try:
                 resp = SESSION.get(url, timeout=60, stream=True)
