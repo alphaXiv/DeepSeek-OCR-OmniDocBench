@@ -6,6 +6,7 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from datetime import datetime
+import threading
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PDF_DIR = os.path.join(BASE_DIR, 'pdfs')
@@ -36,6 +37,9 @@ print(BASE_DIR)
 SCRIPT_DIR = os.path.join(BASE_DIR, '..')
 OCR_SCRIPT = os.path.join(SCRIPT_DIR, 'run_dpsk_ocr_pdf.py')
 
+# Lock for thread-safe config modification
+config_lock = threading.Lock()
+
 def run_ocr_on_pdf(pdf_path, output_dir):
     """Run OCR on a single PDF"""
     config_path = os.path.join(SCRIPT_DIR, 'config.py')
@@ -55,37 +59,39 @@ def run_ocr_on_pdf(pdf_path, output_dir):
         f"OUTPUT_PATH = '{output_dir}'"
     )
 
-    # Write modified config, run OCR, ensure we restore config in finally
-    try:
-        with open(config_path, 'w') as f:
-            f.write(modified_config)
-
-        logger.info(f"Starting OCR for {pdf_path} -> {output_dir}")
-        start_ts = datetime.utcnow().isoformat()
-
-        result = subprocess.run([
-            sys.executable, OCR_SCRIPT
-        ], cwd=SCRIPT_DIR, capture_output=True, text=True, timeout=7200)
-
-        end_ts = datetime.utcnow().isoformat()
-        if result.returncode == 0:
-            logger.info(f"OCR succeeded for {pdf_path} (output dir: {output_dir})")
-            return True, result.stdout
-        else:
-            logger.error(f"OCR failed for {pdf_path}: returncode={result.returncode}")
-            logger.error(result.stderr)
-            return False, result.stderr
-
-    except Exception as e:
-        logger.exception(f"Exception while running OCR on {pdf_path}: {e}")
-        return False, str(e)
-
-    finally:
+    # Use lock to ensure thread-safe config modification
+    with config_lock:
+        # Write modified config, run OCR, ensure we restore config in finally
         try:
             with open(config_path, 'w') as f:
-                f.write(backup)
+                f.write(modified_config)
+
+            logger.info(f"Starting OCR for {pdf_path} -> {output_dir}")
+            start_ts = datetime.utcnow().isoformat()
+
+            result = subprocess.run([
+                sys.executable, OCR_SCRIPT
+            ], cwd=SCRIPT_DIR, capture_output=True, text=True, timeout=7200)
+
+            end_ts = datetime.utcnow().isoformat()
+            if result.returncode == 0:
+                logger.info(f"OCR succeeded for {pdf_path} (output dir: {output_dir})")
+                return True, result.stdout
+            else:
+                logger.error(f"OCR failed for {pdf_path}: returncode={result.returncode}")
+                logger.error(result.stderr)
+                return False, result.stderr
+
         except Exception as e:
-            logger.exception(f"Failed to restore config after OCR for {pdf_path}: {e}")
+            logger.exception(f"Exception while running OCR on {pdf_path}: {e}")
+            return False, str(e)
+
+        finally:
+            try:
+                with open(config_path, 'w') as f:
+                    f.write(backup)
+            except Exception as e:
+                logger.exception(f"Failed to restore config after OCR for {pdf_path}: {e}")
 
 def process_pdf(pdf_file):
     pdf_path = os.path.join(PDF_DIR, pdf_file)
@@ -131,7 +137,7 @@ def main():
     logger.info(f"Found {len(pdf_files)} PDFs to process")
     print(f"Found {len(pdf_files)} PDFs to process")
 
-    max_workers = min(4, max(1, (os.cpu_count() or 1) // 2))
+    max_workers = 1  # Sequential processing to avoid config conflicts
     with ThreadPoolExecutor(max_workers=max_workers) as executor:  # Limit concurrency for GPU
         futures = [executor.submit(process_pdf, pdf) for pdf in pdf_files]
 
