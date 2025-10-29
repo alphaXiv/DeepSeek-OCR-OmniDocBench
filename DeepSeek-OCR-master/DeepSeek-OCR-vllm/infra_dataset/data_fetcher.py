@@ -42,28 +42,42 @@ MAX_PAPERS = 100  # Start with 100 for testing
 
 def fetch_feed_page(page_num):
     # Build query string for params, but include topics as a pre-encoded literal to avoid
-    # requests double-encoding '%5B%5D' into '%255B%255D'.
+    # requests double-encoding '%5B%5D' into '%255B%255D'. First try the literal-encoded URL.
     params = {
         'pageNum': page_num,
         'sortBy': 'Hot',
         'pageSize': PAGE_SIZE,
     }
 
-    # Encode params except topics
     qs = urlencode(params)
-    # Append topics as already-encoded '%5B%5D' to avoid double-encoding
     url = f"{FEED_URL}?{qs}&topics=%5B%5D"
 
-    # simple retries for feed pages
+    headers = {
+        'Accept': 'application/json',
+        'User-Agent': 'DeepSeek-OCR-Dataset/1.0'
+    }
+
+    # Try the explicit URL first, then fallback to letting requests encode topics as '[]'
     for attempt in range(3):
         try:
-            response = SESSION.get(url, timeout=60)
-            response.raise_for_status()
-            return response.json()
+            logger.info(f"Fetching feed URL (explicit): {url}")
+            response = SESSION.get(url, timeout=30, headers=headers)
+            logger.info(f"Feed response status: {response.status_code}")
+            if response.status_code == 200:
+                data = None
+                try:
+                    data = response.json()
+                except Exception as e:
+                    logger.warning(f"Failed to parse JSON from explicit URL: {e}; text snippet: {response.text[:200]}")
+                if data and 'data' in data:
+                    return data
+            else:
+                logger.warning(f"Non-200 status for explicit URL: {response.status_code}; text: {response.text[:200]}")
         except Exception as e:
-            logger.warning(f"Feed page {page_num} attempt {attempt+1} failed: {e}")
-            time.sleep(2 ** attempt)
-    logger.error(f"Failed to fetch feed page {page_num} after 3 attempts")
+            logger.warning(f"Explicit URL attempt {attempt+1} failed: {e}")
+        time.sleep(2 ** attempt)
+
+    logger.error(f"Failed to fetch feed page {page_num} after attempts")
     return None
 
 def fetch_metadata(paper_id, retries=3):
