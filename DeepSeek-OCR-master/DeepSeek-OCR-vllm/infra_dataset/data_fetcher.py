@@ -251,7 +251,7 @@ def main():
             feed_data = fetch_feed_page(page_num)
             if not feed_data or 'papers' not in feed_data:
                 print(f"No more data at page {page_num}")
-                break
+                continue
             
             papers = feed_data['papers']
             # Removed break on empty papers to keep trying next pages
