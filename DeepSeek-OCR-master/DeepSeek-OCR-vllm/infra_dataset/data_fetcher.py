@@ -37,7 +37,7 @@ FEED_URL = "https://api.alphaxiv.org/papers/v2/feed"
 METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}{}.pdf"
 
-PAGE_SIZE = 1
+PAGE_SIZE = 100
 MAX_PAPERS = 100  # Start with 100 for testing
 
 def fetch_feed_page(page_num):
@@ -69,8 +69,7 @@ def fetch_feed_page(page_num):
                     data = response.json()
                 except Exception as e:
                     logger.warning(f"Failed to parse JSON from explicit URL: {e}; text snippet: {response.text[:200]}")
-                if data:
-                    print(data)
+                if data and 'papers' in data:
                     return data
             else:
                 logger.warning(f"Non-200 status for explicit URL: {response.status_code}; text: {response.text[:200]}")
@@ -254,11 +253,11 @@ def main():
     with tqdm(total=MAX_PAPERS, desc="Fetching papers") as pbar:
         while len(unique_papers) < MAX_PAPERS:
             feed_data = fetch_feed_page(page_num)
-            if not feed_data or 'data' not in feed_data:
+            if not feed_data or 'papers' not in feed_data:
                 print(f"No more data at page {page_num}")
                 break
             
-            papers = feed_data['data']
+            papers = feed_data['papers']
             if not papers:
                 break
             
