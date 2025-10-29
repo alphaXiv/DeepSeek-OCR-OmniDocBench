@@ -44,12 +44,13 @@ def fetch_feed_page(page_num):
         'pageNum': page_num,
         'sortBy': 'Hot',
         'pageSize': PAGE_SIZE,
-        'topics': '%5B%5D'
+        # use raw brackets; requests will URL-encode to '%5B%5D'
+        'topics': '[]'
     }
     # simple retries for feed pages
     for attempt in range(3):
         try:
-            response = SESSION.get(FEED_URL, params=params, timeout=30)
+            response = SESSION.get(FEED_URL, params=params, timeout=60)
             response.raise_for_status()
             return response.json()
         except Exception as e:
