@@ -45,6 +45,12 @@ We report point estimates with 95% confidence intervals (CIs) using the Wald app
 | ![DeepSeek overall](assets/ocr/End2End_OmniDocBench_deepseek_ocr_overall.png) | ![OLmOCR-2 overall](assets/ocr/End2End_OmniDocBench_olmo_ocr_2_overall.png) |
 | DeepSeek OCR Overall | OLmOCR-2 Overall |
 
+### Direct Comparison: DeepSeek OCR vs OLMOCR-2
+
+![DeepSeek OCR vs OLMOCR-2](assets/DeepSeek-OCV%20vs%20Olmocr2.png)
+
+*Figure: Comparative performance analysis of DeepSeek OCR and OLMOCR-2 on OmniDocBench end-to-end evaluation, highlighting strengths in text recovery and areas for improvement in formula parsing.*
+
 ### Language Breakdown — English
 
 | | |
