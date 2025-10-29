@@ -1,8 +1,16 @@
 # DeepSeek OCR Evaluation Report
 
-## Executive Summary
+## TL;DR
 
 This report evaluates the performance of **DeepSeek OCR** (a vLLM-based multimodal pipeline) against **OLmOCR-2** on the OmniDocBench end-to-end benchmark, using 1,355 annotated PDF pages. DeepSeek OCR achieves an overall accuracy of **84.24%**, slightly outperforming OLmOCR-2's **81.56%**, though the difference is not statistically significant (p ≈ 0.305). Key strengths include excellent text and table recovery, with formula parsing as the primary weakness. Confidence intervals are computed using the Wald approximation (z ≈ 1.95).
+
+
+### Direct Comparison: DeepSeek OCR vs OLMOCR-2
+
+![DeepSeek OCR vs OLMOCR-2](assets/DeepSeek-OCV%20vs%20Olmocr2.png)
+
+*Figure: Comparative performance analysis of DeepSeek OCR and OLMOCR-2 on OmniDocBench end-to-end evaluation, highlighting strengths in text recovery and areas for improvement in formula parsing.*
+
 
 ## Introduction
 
@@ -38,6 +46,7 @@ We report point estimates with 95% confidence intervals (CIs) using the Wald app
 
 ## Visual Comparisons
 
+
 ### Overall Performance
 
 | | |
@@ -45,11 +54,6 @@ We report point estimates with 95% confidence intervals (CIs) using the Wald app
 | ![DeepSeek overall](assets/ocr/End2End_OmniDocBench_deepseek_ocr_overall.png) | ![OLmOCR-2 overall](assets/ocr/End2End_OmniDocBench_olmo_ocr_2_overall.png) |
 | DeepSeek OCR Overall | OLmOCR-2 Overall |
 
-### Direct Comparison: DeepSeek OCR vs OLMOCR-2
-
-![DeepSeek OCR vs OLMOCR-2](assets/DeepSeek-OCV%20vs%20Olmocr2.png)
-
-*Figure: Comparative performance analysis of DeepSeek OCR and OLMOCR-2 on OmniDocBench end-to-end evaluation, highlighting strengths in text recovery and areas for improvement in formula parsing.*
 
 ### Language Breakdown — English
 
