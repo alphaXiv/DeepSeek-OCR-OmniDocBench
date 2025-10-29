@@ -4,7 +4,6 @@ import os
 from tqdm import tqdm
 import time
 from urllib.parse import urlencode
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from datetime import datetime
 
@@ -271,13 +270,9 @@ def main():
                     # if len(unique_papers) >= MAX_PAPERS:
                     #     break
             
-            # Process in parallel (limit workers based on CPU count)
-            cpu_count = os.cpu_count() or 1
-            max_workers = max(1, cpu_count // 2)
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = [executor.submit(process_paper, paper) for paper in new_papers]
-                for future in as_completed(futures):
-                    future.result()
+            # Process sequentially
+            for paper in new_papers:
+                process_paper(paper)
             
             page_num += 1
             time.sleep(1)  # Rate limiting
