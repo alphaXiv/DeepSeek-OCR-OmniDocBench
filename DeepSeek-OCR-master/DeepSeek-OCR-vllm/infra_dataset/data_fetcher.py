@@ -3,6 +3,7 @@ import json
 import os
 from tqdm import tqdm
 import time
+from urllib.parse import urlencode
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from datetime import datetime
@@ -40,17 +41,23 @@ PAGE_SIZE = 100
 MAX_PAPERS = 100  # Start with 100 for testing
 
 def fetch_feed_page(page_num):
+    # Build query string for params, but include topics as a pre-encoded literal to avoid
+    # requests double-encoding '%5B%5D' into '%255B%255D'.
     params = {
         'pageNum': page_num,
         'sortBy': 'Hot',
         'pageSize': PAGE_SIZE,
-        # use raw brackets; requests will URL-encode to '%5B%5D'
-        'topics': '[]'
     }
+
+    # Encode params except topics
+    qs = urlencode(params)
+    # Append topics as already-encoded '%5B%5D' to avoid double-encoding
+    url = f"{FEED_URL}?{qs}&topics=%5B%5D"
+
     # simple retries for feed pages
     for attempt in range(3):
         try:
-            response = SESSION.get(FEED_URL, params=params, timeout=60)
+            response = SESSION.get(url, timeout=60)
             response.raise_for_status()
             return response.json()
         except Exception as e:
