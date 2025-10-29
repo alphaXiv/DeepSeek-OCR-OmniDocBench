@@ -32,6 +32,7 @@ if not logger.handlers:
 SUMMARY_LOG = os.path.join(LOG_DIR, 'ocr_summary.jsonl')
 
 # Path to the run_dpsk_ocr_pdf.py script
+print(BASE_DIR)
 SCRIPT_DIR = os.path.join(BASE_DIR, '..')
 OCR_SCRIPT = os.path.join(SCRIPT_DIR, 'run_dpsk_ocr_pdf.py')
 

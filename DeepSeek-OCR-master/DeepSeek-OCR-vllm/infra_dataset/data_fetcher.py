@@ -254,8 +254,7 @@ def main():
                 break
             
             papers = feed_data['papers']
-            if not papers:
-                break
+            # Removed break on empty papers to keep trying next pages
             
             new_papers = []
             for paper in papers:
