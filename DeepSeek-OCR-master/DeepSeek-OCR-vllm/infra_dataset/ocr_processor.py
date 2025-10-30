@@ -420,7 +420,7 @@ def main():
     logger.info(f"Found {len(pdf_files)} PDFs to process")
     print(f"Found {len(pdf_files)} PDFs to process")
 
-    batch_size = 4  # Process PDFs in batches for better GPU utilization
+    batch_size = 1024 # Process PDFs in batches for better GPU utilization
     total_failed = 0
 
     with tqdm(total=len(pdf_files), desc="Processing OCR") as pbar:
