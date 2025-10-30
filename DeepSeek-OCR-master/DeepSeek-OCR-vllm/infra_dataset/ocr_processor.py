@@ -266,6 +266,7 @@ def process_batched_pdfs(pdf_batch, output_base_dir, max_images_per_batch=1000):
 def preprocess_all_pdfs(pdf_batch, output_base_dir):
     """
     Pre-process all PDFs first to collect tokenized inputs and metadata.
+    Uses threading for both PDF loading and image tokenization.
     Returns: (all_batch_inputs, pdf_metadata_list)
     """
     all_batch_inputs = []
@@ -274,7 +275,8 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
 
     print("Phase 1: Pre-processing all PDFs...")
 
-    for pdf_filename, pdf_path in tqdm(pdf_batch, desc="Loading PDFs"):
+    def load_single_pdf(pdf_filename, pdf_path):
+        """Load a single PDF and return its metadata"""
         paper_id = os.path.splitext(pdf_filename)[0]
         output_dir = os.path.join(output_base_dir, paper_id)
         os.makedirs(output_dir, exist_ok=True)
@@ -282,26 +284,56 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
 
         try:
             images = pdf_to_images_high_quality(pdf_path)
-
-            # Store metadata for this PDF
-            pdf_start_idx = image_idx
-            pdf_end_idx = image_idx + len(images)
-
-            pdf_metadata_list.append({
+            return {
                 'filename': pdf_filename,
                 'path': pdf_path,
                 'paper_id': paper_id,
                 'output_dir': output_dir,
                 'images': images,
+                'success': True
+            }
+        except Exception as e:
+            print(f"Failed to load {pdf_filename}: {e}")
+            return {
+                'filename': pdf_filename,
+                'path': pdf_path,
+                'paper_id': paper_id,
+                'output_dir': output_dir,
+                'images': [],
+                'success': False,
+                'error': str(e)
+            }
+
+    # Load all PDFs in parallel using threading
+    print(f"Loading {len(pdf_batch)} PDFs using {min(NUM_WORKERS, len(pdf_batch))} threads...")
+    with ThreadPoolExecutor(max_workers=min(NUM_WORKERS, len(pdf_batch))) as executor:
+        pdf_results = list(tqdm(
+            executor.map(lambda x: load_single_pdf(x[0], x[1]), pdf_batch),
+            total=len(pdf_batch),
+            desc="Loading PDFs"
+        ))
+
+    # Process results and build metadata
+    for result in pdf_results:
+        if result['success']:
+            # Store metadata for this PDF
+            pdf_start_idx = image_idx
+            pdf_end_idx = image_idx + len(result['images'])
+
+            pdf_metadata_list.append({
+                'filename': result['filename'],
+                'path': result['path'],
+                'paper_id': result['paper_id'],
+                'output_dir': result['output_dir'],
+                'images': result['images'],
                 'image_start_idx': pdf_start_idx,
                 'image_end_idx': pdf_end_idx
             })
 
             image_idx = pdf_end_idx
-
-        except Exception as e:
-            print(f"Failed to load {pdf_filename}: {e}")
-            continue
+        else:
+            # Log failed PDFs but continue
+            print(f"Skipping failed PDF: {result['filename']} - {result.get('error', 'Unknown error')}")
 
     # Now tokenize all images at once
     all_images = []
@@ -310,8 +342,7 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
 
     print(f"Total images to process: {len(all_images)}")
 
-    # Pre-process all images in parallel
-    NUM_WORKERS = os.cpu_count()
+    # Pre-process all images in parallel (already threaded)
     with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
         all_batch_inputs = list(tqdm(
             executor.map(process_single_image, all_images),
@@ -344,13 +375,15 @@ def process_tokenized_batch(tokenized_inputs, pdf_metadata_list, batch_size=512)
 def save_pdf_results(pdf_metadata_list, all_outputs):
     """
     Save results for each PDF using the collected outputs.
+    Uses threading for parallel processing where possible.
     """
     print("Phase 3: Saving results...")
 
     total_success = 0
     total_failed = 0
 
-    for pdf_info in tqdm(pdf_metadata_list, desc="Saving PDFs"):
+    def save_single_pdf(pdf_info):
+        """Save results for a single PDF"""
         try:
             pdf_images = pdf_info['images']
             pdf_output_dir = pdf_info['output_dir']
@@ -403,12 +436,29 @@ def save_pdf_results(pdf_metadata_list, all_outputs):
                 afile.write(contents)
             pil_to_pdf_img2pdf(draw_images, pdf_out_path)
 
-            logger.info(f"OCR succeeded for {pdf_filename}")
-            total_success += 1
+            return True, pdf_filename
 
         except Exception as e:
-            logger.error(f"OCR failed for {pdf_filename}: {e}")
+            return False, (pdf_info['filename'], str(e))
+
+    # Process PDFs in parallel for saving
+    print(f"Saving {len(pdf_metadata_list)} PDFs using {min(NUM_WORKERS, len(pdf_metadata_list))} threads...")
+    with ThreadPoolExecutor(max_workers=min(NUM_WORKERS, len(pdf_metadata_list))) as executor:
+        results = list(tqdm(
+            executor.map(save_single_pdf, pdf_metadata_list),
+            total=len(pdf_metadata_list),
+            desc="Saving PDFs"
+        ))
+
+    # Count results
+    for success, result in results:
+        if success:
+            total_success += 1
+            logger.info(f"OCR succeeded for {result}")
+        else:
             total_failed += 1
+            filename, error = result
+            logger.error(f"OCR failed for {filename}: {error}")
 
     return total_success, total_failed
 
