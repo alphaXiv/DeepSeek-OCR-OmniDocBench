@@ -251,6 +251,7 @@ def main():
             feed_data = fetch_feed_page(page_num)
             if not feed_data or 'papers' not in feed_data:
                 print(f"No more data at page {page_num}")
+                page_num += 1
                 continue
             
             papers = feed_data['papers']
@@ -261,6 +262,7 @@ def main():
                 pid = paper.get('universal_paper_id') or paper.get('universalId')
                 if not pid:
                     # skip papers without universal id
+                    page_num += 1
                     continue
                 # sanitize
                 pid_safe = str(pid).replace('/', '_')
