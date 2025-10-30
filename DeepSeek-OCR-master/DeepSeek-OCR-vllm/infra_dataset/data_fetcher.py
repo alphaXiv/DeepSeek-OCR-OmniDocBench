@@ -75,7 +75,7 @@ def fetch_feed_page(page_num):
                 logger.warning(f"Non-200 status for explicit URL: {response.status_code}; text: {response.text[:200]}")
         except Exception as e:
             logger.warning(f"Explicit URL attempt {attempt+1} failed: {e}")
-        time.sleep(2 ** attempt)
+        time.sleep(1)
 
     logger.error(f"Failed to fetch feed page {page_num} after attempts")
     return None
@@ -89,7 +89,7 @@ def fetch_metadata(paper_id, retries=3):
             return response.json()
         except Exception as e:
             logger.warning(f"Metadata fetch {paper_id} attempt {attempt+1} failed: {e}")
-            time.sleep(2 ** attempt)
+            time.sleep(1)
     logger.error(f"Metadata fetch failed for {paper_id} after {retries} attempts")
     return None
 
@@ -108,7 +108,7 @@ def download_pdf(paper_id, version, retries=3):
                 resp = SESSION.get(url, timeout=60, stream=True)
                 if resp.status_code != 200:
                     logger.warning(f"PDF {pdf_id} attempt {attempt+1} returned status {resp.status_code}")
-                    time.sleep(2 ** attempt)
+                    time.sleep(1)
                     continue
 
                 # stream to disk
@@ -125,14 +125,14 @@ def download_pdf(paper_id, version, retries=3):
                         os.remove(pdf_path)
                     except Exception:
                         pass
-                    time.sleep(2 ** attempt)
+                    time.sleep(1)
                     continue
 
                 logger.info(f"Downloaded {pdf_id} ({total_bytes} bytes)")
                 return True, v, pdf_path
             except Exception as e:
                 logger.warning(f"Download {pdf_id} attempt {attempt+1} failed: {e}")
-                time.sleep(2 ** attempt)
+                time.sleep(1)
                 continue
 
         logger.info(f"No valid response for {pdf_id} after {retries} attempts, trying next version")
@@ -280,7 +280,7 @@ def main():
                     future.result()
             
             page_num += 1
-            time.sleep(1)  # Rate limiting
+            time.sleep(0.5)  # Rate limiting
     
     print(f"Collected {len(unique_papers)} unique papers")
 
