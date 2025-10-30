@@ -39,29 +39,32 @@ METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 
 PAGE_SIZE = 100
-MAX_PAPERS = 200000  # Start with 100 for testing
+MAX_PAPERS = 100000  # Updated to 100000 as requested
 
-def fetch_feed_page(page_num):
-    # Build query string for params, but include topics as a pre-encoded literal to avoid
-    # requests double-encoding '%5B%5D' into '%255B%255D'. First try the literal-encoded URL.
-    params = {
+def fetch_feed_page(page_num, params):
+    # Build query string for params
+    query_params = {
         'pageNum': page_num,
-        'sortBy': 'Hot',
         'pageSize': PAGE_SIZE,
     }
-
-    qs = urlencode(params)
-    url = f"{FEED_URL}?{qs}&topics=%5B%5D"
+    query_params.update(params)
+    
+    # Handle array params as JSON strings
+    for key in ['topics', 'organizations']:
+        if key in query_params and isinstance(query_params[key], list):
+            query_params[key] = json.dumps(query_params[key])
+    
+    qs = urlencode(query_params)
+    url = f"{FEED_URL}?{qs}"
 
     headers = {
         'Accept': 'application/json',
         'User-Agent': 'DeepSeek-OCR-Dataset/1.0'
     }
 
-    # Try the explicit URL first, then fallback to letting requests encode topics as '[]'
     for attempt in range(2):
         try:
-            logger.info(f"Fetching feed URL (explicit): {url}")
+            logger.info(f"Fetching feed URL: {url}")
             response = SESSION.get(url, timeout=15, headers=headers)
             logger.info(f"Feed response status: {response.status_code}")
             if response.status_code == 200:
@@ -69,16 +72,16 @@ def fetch_feed_page(page_num):
                 try:
                     data = response.json()
                 except Exception as e:
-                    logger.warning(f"Failed to parse JSON from explicit URL: {e}; text snippet: {response.text[:200]}")
+                    logger.warning(f"Failed to parse JSON: {e}; text snippet: {response.text[:200]}")
                 if data and 'papers' in data:
                     return data
             else:
-                logger.warning(f"Non-200 status for explicit URL: {response.status_code}; text: {response.text[:200]}")
+                logger.warning(f"Non-200 status: {response.status_code}; text: {response.text[:200]}")
         except Exception as e:
-            logger.warning(f"Explicit URL attempt {attempt+1} failed: {e}")
+            logger.warning(f"Feed fetch attempt {attempt+1} failed: {e}")
         time.sleep(1)
 
-    logger.error(f"Failed to fetch feed page {page_num} after attempts")
+    logger.error(f"Failed to fetch feed page {page_num} with params {params} after attempts")
     return None
 
 def fetch_metadata(paper_id, retries=2):
@@ -203,10 +206,11 @@ def process_paper(paper):
     except Exception as e:
         logger.warning(f"Failed to check page count for {universal_id}: {e}")
         # If can't check, assume ok or skip? To be safe, skip
-        try:
-            os.remove(pdf_path)
-        except Exception:
-            pass
+        if pdf_path:
+            try:
+                os.remove(pdf_path)
+            except Exception:
+                pass
         record = {
             'id': universal_id,
             'status': 'skipped_page_check_failed',
@@ -225,10 +229,11 @@ def process_paper(paper):
     if not metadata:
         logger.info(f"Skipping {universal_id}: metadata fetch failed")
         # Remove PDF since we won't process it
-        try:
-            os.remove(pdf_path)
-        except Exception:
-            pass
+        if pdf_path:
+            try:
+                os.remove(pdf_path)
+            except Exception:
+                pass
         record = {
             'id': universal_id,
             'status': 'metadata_fetch_failed',
@@ -256,10 +261,11 @@ def process_paper(paper):
     if not license_url or license_url.strip() != allowed_license:
         logger.info(f"Skipping {universal_id} due to license '{license_url}'")
         # Remove PDF
-        try:
-            os.remove(pdf_path)
-        except Exception:
-            pass
+        if pdf_path:
+            try:
+                os.remove(pdf_path)
+            except Exception:
+                pass
         record = {
             'id': universal_id,
             'status': 'skipped_license',
@@ -296,47 +302,79 @@ def process_paper(paper):
     return True
 
 def main():
-    unique_papers = set()
-    page_num = 0
+    # Multi-dimensional crawl strategy
+    sort_bys = ["Hot", "Views", "Comments", "Likes", "GitHub"]
+    intervals = ["3 Days", "7 Days", "30 Days", "90 Days", "All time"]
+    topics_shards = [
+        # [],
+        ["cs.AI"],
+        ["cs.CV"],
+        ["cs.CL"],
+        ["cs.LG"],
+        ["cs.IR"],
+        ["cs.DB"],
+        ["cs.SE"],
+        ["cs.NE"],
+    ]
     
-    with tqdm(total=MAX_PAPERS, desc="Fetching papers") as pbar:
-        while len(unique_papers) < MAX_PAPERS:
-            feed_data = fetch_feed_page(page_num)
+    query_configs = []
+    for sb in sort_bys:
+        for iv in intervals:
+            for topics in topics_shards:
+                query_configs.append({
+                    'sortBy': sb,
+                    'interval': iv,
+                    'topics': topics,
+                    'organizations': []
+                })
+    
+    unique_papers = set()
+    total_pbar = tqdm(total=MAX_PAPERS, desc="Total unique papers")
+    
+    for config in query_configs:
+        if len(unique_papers) >= MAX_PAPERS:
+            break
+        logger.info(f"Starting config: {config}")
+        page_num = 0
+        max_pages_per_config = 50  # Limit pages per config to avoid too many requests
+        
+        while len(unique_papers) < MAX_PAPERS and page_num < max_pages_per_config:
+            feed_data = fetch_feed_page(page_num, config)
             if not feed_data or 'papers' not in feed_data:
-                print(f"No more data at page {page_num}")
-                page_num += 1
-                continue
+                logger.info(f"No more data for config {config} at page {page_num}")
+                break
             
             papers = feed_data['papers']
-            # Removed break on empty papers to keep trying next pages
+            if not papers:
+                logger.info(f"Empty papers list for config {config} at page {page_num}")
+                break
             
             new_papers = []
             for paper in papers:
                 pid = paper.get('universal_paper_id') or paper.get('universalId')
                 if not pid:
-                    # skip papers without universal id
-                    # page_num += 1
                     continue
-                # sanitize
                 pid_safe = str(pid).replace('/', '_')
                 if pid_safe not in unique_papers:
                     unique_papers.add(pid_safe)
                     new_papers.append(paper)
-                    pbar.update(1)
-                    # if len(unique_papers) >= MAX_PAPERS:
-                    #     break
+                    total_pbar.update(1)
+                    if len(unique_papers) >= MAX_PAPERS:
+                        break
             
-            # Process in parallel (increase workers for faster fetching)
-            cpu_count = os.cpu_count() or 1
-            max_workers = cpu_count  # Use all CPU cores for parallel processing
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = [executor.submit(process_paper, paper) for paper in new_papers]
-                for future in as_completed(futures):
-                    future.result()
+            # Process new_papers in parallel
+            if new_papers:
+                cpu_count = os.cpu_count()
+                max_workers = cpu_count
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    futures = [executor.submit(process_paper, paper) for paper in new_papers]
+                    for future in as_completed(futures):
+                        future.result()
             
             page_num += 1
-            time.sleep(0.5)  # Reduced rate limiting
+            time.sleep(0.5)  # Rate limiting
     
+    total_pbar.close()
     print(f"Collected {len(unique_papers)} unique papers")
 
 if __name__ == "__main__":
