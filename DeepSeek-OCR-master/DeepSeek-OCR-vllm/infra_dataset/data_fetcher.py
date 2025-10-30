@@ -38,7 +38,7 @@ METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 
 PAGE_SIZE = 100
-MAX_PAPERS = 100  # Start with 100 for testing
+MAX_PAPERS = 200000  # Start with 100 for testing
 
 def fetch_feed_page(page_num):
     # Build query string for params, but include topics as a pre-encoded literal to avoid
