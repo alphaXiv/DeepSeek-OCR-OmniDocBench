@@ -1,8 +1,8 @@
 import os
 import json
-import subprocess
 import sys
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from datetime import datetime
 
@@ -30,61 +30,31 @@ if not logger.handlers:
 # Summary file for OCR results
 SUMMARY_LOG = os.path.join(LOG_DIR, 'ocr_summary.jsonl')
 
-# Path to the run_dpsk_ocr_pdf.py script
-print(BASE_DIR)
 SCRIPT_DIR = os.path.join(BASE_DIR, '..')
-OCR_SCRIPT = os.path.join(SCRIPT_DIR, 'run_dpsk_ocr_pdf.py')
+sys.path.insert(0, SCRIPT_DIR)
+
+# Lazy import
+run_dpsk_ocr_pdf = None
+
 
 def run_ocr_on_pdf(pdf_path, output_dir):
     """Run OCR on a single PDF"""
-    config_path = os.path.join(SCRIPT_DIR, 'config.py')
-    # Read current config
-    with open(config_path, 'r') as f:
-        config_content = f.read()
+    global run_dpsk_ocr_pdf
+    if run_dpsk_ocr_pdf is None:
+        import run_dpsk_ocr_pdf
+    
+    logger.info(f"Starting OCR for {pdf_path} -> {output_dir}")
+    start_ts = datetime.utcnow().isoformat()
 
-    # Backup original
-    backup = config_content
-
-    # Modify INPUT_PATH and OUTPUT_PATH
-    modified_config = config_content.replace(
-        "INPUT_PATH = ''",
-        f"INPUT_PATH = '{pdf_path}'"
-    ).replace(
-        "OUTPUT_PATH = ''",
-        f"OUTPUT_PATH = '{output_dir}'"
-    )
-
-    # Write modified config, run OCR, ensure we restore config in finally
     try:
-        with open(config_path, 'w') as f:
-            f.write(modified_config)
-
-        logger.info(f"Starting OCR for {pdf_path} -> {output_dir}")
-        start_ts = datetime.utcnow().isoformat()
-
-        result = subprocess.run([
-            sys.executable, OCR_SCRIPT
-        ], cwd=SCRIPT_DIR, capture_output=True, text=True, timeout=7200)
-
+        run_dpsk_ocr_pdf.process_pdf_to_ocr(pdf_path, output_dir)
         end_ts = datetime.utcnow().isoformat()
-        if result.returncode == 0:
-            logger.info(f"OCR succeeded for {pdf_path} (output dir: {output_dir})")
-            return True, result.stdout
-        else:
-            logger.error(f"OCR failed for {pdf_path}: returncode={result.returncode}")
-            logger.error(result.stderr)
-            return False, result.stderr
-
+        logger.info(f"OCR succeeded for {pdf_path} (output dir: {output_dir})")
+        return True, "Success"
     except Exception as e:
-        logger.exception(f"Exception while running OCR on {pdf_path}: {e}")
+        end_ts = datetime.utcnow().isoformat()
+        logger.error(f"OCR failed for {pdf_path}: {e}")
         return False, str(e)
-
-    finally:
-        try:
-            with open(config_path, 'w') as f:
-                f.write(backup)
-        except Exception as e:
-            logger.exception(f"Failed to restore config after OCR for {pdf_path}: {e}")
 
 def process_pdf(pdf_file):
     pdf_path = os.path.join(PDF_DIR, pdf_file)
@@ -130,14 +100,18 @@ def main():
     logger.info(f"Found {len(pdf_files)} PDFs to process")
     print(f"Found {len(pdf_files)} PDFs to process")
 
-    with tqdm(total=len(pdf_files), desc="Processing OCR") as pbar:
-        failed = 0
-        for pdf_file in pdf_files:
-            success = process_pdf(pdf_file)
-            pbar.update(1)
-            if not success:
-                failed += 1
-                pbar.set_postfix({"failed": failed})
+    max_workers = 1  # Keep sequential for GPU
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(process_pdf, pdf) for pdf in pdf_files]
+
+        with tqdm(total=len(pdf_files), desc="Processing OCR") as pbar:
+            failed = 0
+            for future in as_completed(futures):
+                success = future.result()
+                pbar.update(1)
+                if not success:
+                    failed += 1
+                    pbar.set_postfix({"failed": failed})
     logger.info(f"OCR processing complete. total={len(pdf_files)}, failed={failed}")
 
 if __name__ == "__main__":
