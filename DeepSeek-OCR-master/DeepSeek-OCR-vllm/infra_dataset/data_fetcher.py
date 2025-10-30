@@ -271,9 +271,13 @@ def main():
                     # if len(unique_papers) >= MAX_PAPERS:
                     #     break
             
-            # Process sequentially
-            for paper in new_papers:
-                process_paper(paper)
+            # Process in parallel (limit workers based on CPU count)
+            cpu_count = os.cpu_count() or 1
+            max_workers = max(1, cpu_count // 2)
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = [executor.submit(process_paper, paper) for paper in new_papers]
+                for future in as_completed(futures):
+                    future.result()
             
             page_num += 1
             time.sleep(1)  # Rate limiting

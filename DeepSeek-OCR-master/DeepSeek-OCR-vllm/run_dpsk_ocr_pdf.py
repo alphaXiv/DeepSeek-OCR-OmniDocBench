@@ -40,7 +40,8 @@ llm = LLM(
     max_num_seqs=MAX_CONCURRENCY,
     tensor_parallel_size=1,
     gpu_memory_utilization=0.9,
-    disable_mm_preprocessor_cache=True
+    disable_mm_preprocessor_cache=True,
+    dtype='bfloat16'
 )
 
 logits_processors = [NoRepeatNGramLogitsProcessor(ngram_size=20, window_size=50, whitelist_token_ids= {128821, 128822})] #window for fast；whitelist_token_ids: <td>,</td>
