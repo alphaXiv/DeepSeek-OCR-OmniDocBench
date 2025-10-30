@@ -100,7 +100,7 @@ def main():
     logger.info(f"Found {len(pdf_files)} PDFs to process")
     print(f"Found {len(pdf_files)} PDFs to process")
 
-    max_workers = 1  # Keep sequential for GPU
+    max_workers = os.cpu_count()  # Parallel processing for faster OCR
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(process_pdf, pdf) for pdf in pdf_files]
 
