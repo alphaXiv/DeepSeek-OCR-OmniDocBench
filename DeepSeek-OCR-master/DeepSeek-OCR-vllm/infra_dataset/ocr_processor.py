@@ -42,7 +42,7 @@ from process.image_process import DeepseekOCRProcessor
 import fitz
 import img2pdf
 import io
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 ModelRegistry.register_model("DeepseekOCRForCausalLM", DeepseekOCRForCausalLM)
 
@@ -304,10 +304,10 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
                 'error': str(e)
             }
 
-    # Load all PDFs in parallel using threading
+    # Load all PDFs in parallel using processes
     NUM_WORKERS = os.cpu_count()
-    print(f"Loading {len(pdf_batch)} PDFs using {NUM_WORKERS} threads...")
-    with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+    print(f"Loading {len(pdf_batch)} PDFs using {NUM_WORKERS} processes...")
+    with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
         pdf_results = list(tqdm(
             executor.map(lambda x: load_single_pdf(x[0], x[1]), pdf_batch),
             total=len(pdf_batch),
@@ -344,7 +344,7 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
     print(f"Total images to process: {len(all_images)}")
 
     # Pre-process all images in parallel (already threaded)
-    with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+    with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
         all_batch_inputs = list(tqdm(
             executor.map(process_single_image, all_images),
             total=len(all_images),
@@ -443,8 +443,8 @@ def save_pdf_results(pdf_metadata_list, all_outputs):
             return False, (pdf_info['filename'], str(e))
 
     # Process PDFs in parallel for saving
-    print(f"Saving {len(pdf_metadata_list)} PDFs using {min(NUM_WORKERS, len(pdf_metadata_list))} threads...")
-    with ThreadPoolExecutor(max_workers=min(NUM_WORKERS, len(pdf_metadata_list))) as executor:
+    print(f"Saving {len(pdf_metadata_list)} PDFs using {min(NUM_WORKERS, len(pdf_metadata_list))} processes...")
+    with ProcessPoolExecutor(max_workers=min(NUM_WORKERS, len(pdf_metadata_list))) as executor:
         results = list(tqdm(
             executor.map(save_single_pdf, pdf_metadata_list),
             total=len(pdf_metadata_list),
