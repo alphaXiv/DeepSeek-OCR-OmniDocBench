@@ -20,15 +20,16 @@ def main():
         if paper_dir.is_dir():
             paper_id = paper_dir.name
             images_dir = paper_dir / "images"
-            if images_dir.exists() and any(images_dir.glob("*.jpg")):
-                print(f"Uploading images for {paper_id}")
+            mmd_file = paper_dir / f"{paper_id}.mmd"
+            if images_dir.exists() and mmd_file.exists() and any(images_dir.glob("*.jpg")):
+                print(f"Uploading dataset for {paper_id}")
                 result = subprocess.run([
                     sys.executable, "upload_to_hf.py", paper_id, "--token", hf_token
                 ], cwd=base_dir)
                 if result.returncode != 0:
                     print(f"Failed to upload {paper_id}")
             else:
-                print(f"No images for {paper_id}")
+                print(f"No images or markdown for {paper_id}")
 
 if __name__ == "__main__":
     main()

@@ -9,7 +9,7 @@ echo "Starting DeepSeek OCR Dataset Infrastructure"
 
 # Install dependencies
 echo "Installing dependencies..."
-pip install huggingface_hub
+pip install huggingface_hub datasets
 
 # Step 2: Fetch data
 echo "Fetching papers and downloading PDFs..."

@@ -1,88 +1,56 @@
 import os
 import sys
-from huggingface_hub import HfApi, create_repo
 from pathlib import Path
+from huggingface_hub import HfApi, create_repo
+from datasets import Dataset, Image
 import argparse
 
-def upload_paper_images_to_hf(paper_id, hf_token, org_name="alphaXiv"):
+def upload_paper_to_hf_dataset(paper_id, hf_token, org_name="alphaXiv"):
     """
-    Upload OCR images for a paper to Hugging Face Hub as a dataset.
+    Upload OCR images and markdown as a Hugging Face dataset with columns: paper_id, images, markdown.
     """
     base_dir = Path(__file__).parent
-    images_dir = base_dir / "ocr_results" / paper_id / "images"
+    ocr_dir = base_dir / "ocr_results" / paper_id
+    images_dir = ocr_dir / "images"
+    mmd_file = ocr_dir / f"{paper_id}.mmd"
 
-    if not images_dir.exists():
-        print(f"No images directory found for {paper_id}")
+    if not images_dir.exists() or not mmd_file.exists():
+        print(f"Missing images or markdown for {paper_id}")
         return False
 
-    # Create repo name
-    repo_name = f"{paper_id}-ocr-images"
-    repo_id = f"{org_name}/{repo_name}"
+    # Load markdown
+    with open(mmd_file, 'r', encoding='utf-8') as f:
+        markdown = f.read()
 
-    # Create repo
-    try:
-        create_repo(repo_id, token=hf_token, repo_type="dataset", private=False)
-        print(f"Created repo: {repo_id}")
-    except Exception as e:
-        print(f"Repo might already exist or error: {e}")
-
-    # Upload images
-    api = HfApi(token=hf_token)
-    try:
-        api.upload_folder(
-            folder_path=str(images_dir),
-            repo_id=repo_id,
-            repo_type="dataset",
-            path_in_repo="images"
-        )
-        print(f"Uploaded images for {paper_id} to {repo_id}")
-    except Exception as e:
-        print(f"Failed to upload images for {paper_id}: {e}")
+    # Load images
+    image_paths = sorted(images_dir.glob("*.jpg"))
+    if not image_paths:
+        print(f"No images for {paper_id}")
         return False
 
-    # Create a simple dataset card
-    readme_content = f"""---
-dataset_info:
-  features:
-  - name: image
-    dtype: image
-  splits:
-  - name: train
-    num_bytes: 0
-    num_examples: {len(list(images_dir.glob('*.jpg')))}
-  download_size: 0
-  dataset_size: 0
----
+    # Create dataset row
+    data = {
+        "paper_id": [paper_id] * len(image_paths),
+        "image": [str(p) for p in image_paths],  # Will be loaded as Image feature
+        "markdown": [markdown] * len(image_paths)  # Same markdown for all images
+    }
 
-# {paper_id} OCR Images
+    # Create Dataset
+    dataset = Dataset.from_dict(data).cast_column("image", Image())
 
-This dataset contains OCR-extracted images from the paper {paper_id}.
-
-Images are extracted during the OCR process using DeepSeek-OCR.
-"""
-
-    readme_path = base_dir / "temp_readme.md"
-    with open(readme_path, 'w') as f:
-        f.write(readme_content)
-
+    # Push to Hub
+    repo_id = f"{org_name}/{paper_id}-ocr-dataset"
     try:
-        api.upload_file(
-            path_or_fileobj=str(readme_path),
-            path_in_repo="README.md",
-            repo_id=repo_id,
-            repo_type="dataset"
-        )
-        print(f"Uploaded README for {paper_id}")
+        dataset.push_to_hub(repo_id, token=hf_token)
+        print(f"Uploaded dataset for {paper_id} to {repo_id}")
     except Exception as e:
-        print(f"Failed to upload README for {paper_id}: {e}")
-    finally:
-        if readme_path.exists():
-            readme_path.unlink()
+        print(f"Failed to upload dataset for {paper_id}: {e}")
+        return False
 
     return True
 
 def main():
-    parser = argparse.ArgumentParser(description="Upload OCR images to Hugging Face Hub")
+    parser = argparse.ArgumentParser(description="Upload OCR dataset to Hugging Face Hub")
     parser.add_argument("paper_id", help="Paper ID to upload")
     parser.add_argument("--token", help="Hugging Face token", default=os.environ.get("HF_TOKEN"))
     parser.add_argument("--org", help="Organization name", default="alphaXiv")
@@ -93,7 +61,7 @@ def main():
         print("HF_TOKEN not provided. Set HF_TOKEN environment variable or use --token")
         sys.exit(1)
 
-    success = upload_paper_images_to_hf(args.paper_id, args.token, args.org)
+    success = upload_paper_to_hf_dataset(args.paper_id, args.token, args.org)
     sys.exit(0 if success else 1)
 
 if __name__ == "__main__":
