@@ -318,6 +318,12 @@ def process_pdf_to_ocr(input_path, output_path):
     pil_to_pdf_img2pdf(draw_images, pdf_out_path)
 
 
+# Pre-allocate KV cache with a dry run on dummy input
+dummy_image = Image.new('RGB', (1024,1024), color='white')
+dummy_input = process_single_image(dummy_image)
+_ = llm.generate([dummy_input], sampling_params=sampling_params)
+torch.cuda.synchronize()
+
 # Lazy import
 run_dpsk_ocr_pdf = None
 
