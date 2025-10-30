@@ -184,8 +184,8 @@ def process_paper(paper):
         doc = fitz.open(pdf_path)
         page_count = doc.page_count
         doc.close()
-        if page_count > 128:
-            logger.info(f"Skipping {universal_id}: PDF has {page_count} pages (>128)")
+        if page_count > 50:
+            logger.info(f"Skipping {universal_id}: PDF has {page_count} pages (>50)")
             if pdf_path:
                 try:
                     os.remove(pdf_path)
@@ -336,7 +336,7 @@ def main():
             break
         logger.info(f"Starting config: {config}")
         page_num = 0
-        max_pages_per_config = 50  # Limit pages per config to avoid too many requests
+        max_pages_per_config = 100  # Limit pages per config to avoid too many requests
         
         while len(unique_papers) < MAX_PAPERS and page_num < max_pages_per_config:
             feed_data = fetch_feed_page(page_num, config)

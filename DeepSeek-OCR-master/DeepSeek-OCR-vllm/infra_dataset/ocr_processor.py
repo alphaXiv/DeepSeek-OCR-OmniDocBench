@@ -42,7 +42,7 @@ from process.image_process import DeepseekOCRProcessor
 import fitz
 import img2pdf
 import io
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 
 ModelRegistry.register_model("DeepseekOCRForCausalLM", DeepseekOCRForCausalLM)
 
@@ -231,6 +231,36 @@ def process_image_with_refs(image, ref_texts, jdx, output_path):
     return result_image
 
 
+def load_single_pdf(pdf_filename, pdf_path, output_base_dir):
+    """Load a single PDF and return its metadata"""
+    paper_id = os.path.splitext(pdf_filename)[0]
+    output_dir = os.path.join(output_base_dir, paper_id)
+    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(f'{output_dir}/images', exist_ok=True)
+
+    try:
+        images = pdf_to_images_high_quality(pdf_path)
+        return {
+            'filename': pdf_filename,
+            'path': pdf_path,
+            'paper_id': paper_id,
+            'output_dir': output_dir,
+            'images': images,
+            'success': True
+        }
+    except Exception as e:
+        print(f"Failed to load {pdf_filename}: {e}")
+        return {
+            'filename': pdf_filename,
+            'path': pdf_path,
+            'paper_id': paper_id,
+            'output_dir': output_dir,
+            'images': [],
+            'success': False,
+            'error': str(e)
+        }
+
+
 def process_single_image(image):
     """single image"""
     prompt_in = PROMPT
@@ -275,41 +305,12 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
 
     print("Phase 1: Pre-processing all PDFs...")
 
-    def load_single_pdf(pdf_filename, pdf_path):
-        """Load a single PDF and return its metadata"""
-        paper_id = os.path.splitext(pdf_filename)[0]
-        output_dir = os.path.join(output_base_dir, paper_id)
-        os.makedirs(output_dir, exist_ok=True)
-        os.makedirs(f'{output_dir}/images', exist_ok=True)
-
-        try:
-            images = pdf_to_images_high_quality(pdf_path)
-            return {
-                'filename': pdf_filename,
-                'path': pdf_path,
-                'paper_id': paper_id,
-                'output_dir': output_dir,
-                'images': images,
-                'success': True
-            }
-        except Exception as e:
-            print(f"Failed to load {pdf_filename}: {e}")
-            return {
-                'filename': pdf_filename,
-                'path': pdf_path,
-                'paper_id': paper_id,
-                'output_dir': output_dir,
-                'images': [],
-                'success': False,
-                'error': str(e)
-            }
-
-    # Load all PDFs in parallel using processes
+    # Load all PDFs in parallel using threading
     NUM_WORKERS = os.cpu_count()
-    print(f"Loading {len(pdf_batch)} PDFs using {NUM_WORKERS} processes...")
-    with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
+    print(f"Loading {len(pdf_batch)} PDFs using {NUM_WORKERS} threads...")
+    with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
         pdf_results = list(tqdm(
-            executor.map(lambda x: load_single_pdf(x[0], x[1]), pdf_batch),
+            executor.map(lambda x: load_single_pdf(x[0], x[1], output_base_dir), pdf_batch),
             total=len(pdf_batch),
             desc="Loading PDFs"
         ))
@@ -344,7 +345,7 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
     print(f"Total images to process: {len(all_images)}")
 
     # Pre-process all images in parallel (already threaded)
-    with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
+    with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
         all_batch_inputs = list(tqdm(
             executor.map(process_single_image, all_images),
             total=len(all_images),
@@ -443,8 +444,8 @@ def save_pdf_results(pdf_metadata_list, all_outputs):
             return False, (pdf_info['filename'], str(e))
 
     # Process PDFs in parallel for saving
-    print(f"Saving {len(pdf_metadata_list)} PDFs using {min(NUM_WORKERS, len(pdf_metadata_list))} processes...")
-    with ProcessPoolExecutor(max_workers=min(NUM_WORKERS, len(pdf_metadata_list))) as executor:
+    print(f"Saving {len(pdf_metadata_list)} PDFs using {min(NUM_WORKERS, len(pdf_metadata_list))} threads...")
+    with ThreadPoolExecutor(max_workers=min(NUM_WORKERS, len(pdf_metadata_list))) as executor:
         results = list(tqdm(
             executor.map(save_single_pdf, pdf_metadata_list),
             total=len(pdf_metadata_list),
