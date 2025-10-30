@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Exit on any error
+set -e
+
+# Trap to handle errors
+trap 'echo "Error occurred at line $LINENO. Exiting..." >&2; exit 1' ERR
+
 # Robust Infra Runner Script
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
