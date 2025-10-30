@@ -241,81 +241,163 @@ def process_single_image(image):
     return cache_item
 
 
-def process_pdf_to_ocr(input_path, output_path):
-    os.makedirs(output_path, exist_ok=True)
-    os.makedirs(f'{output_path}/images', exist_ok=True)
-    
-    print('PDF loading .....')
+def process_pdf_batch_to_ocr(pdf_batch, output_base_dir, max_images_per_batch=1000):
+    """
+    Process multiple PDFs in batched llm.generate() calls for better GPU utilization.
+    Never splits a single PDF across multiple batches - processes large PDFs individually.
 
-    images = pdf_to_images_high_quality(input_path)
+    Args:
+        pdf_batch: List of (pdf_filename, pdf_path) tuples
+        output_base_dir: Base directory for outputs
+        max_images_per_batch: Maximum images to process in one batch to prevent OOM
+    """
+    # Separate large PDFs from small ones
+    large_pdfs = []
+    small_pdfs = []
+    current_batch = []
+    current_batch_images = 0
 
-    prompt = PROMPT
+    for pdf_filename, pdf_path in pdf_batch:
+        paper_id = os.path.splitext(pdf_filename)[0]
+        output_dir = os.path.join(output_base_dir, paper_id)
+        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(f'{output_dir}/images', exist_ok=True)
 
-    # batch_inputs = []
-    NUM_WORKERS = os.cpu_count()
-    with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:  
-        batch_inputs = list(tqdm(
-            executor.map(process_single_image, images),
-            total=len(images),
-            desc="Pre-processed images"
-        ))
+        print(f'Loading PDF: {pdf_filename}')
+        images = pdf_to_images_high_quality(pdf_path)
 
-    outputs_list = llm.generate(
-        batch_inputs,
-        sampling_params=sampling_params
-    )
-
-    mmd_det_path = output_path + '/' + input_path.split('/')[-1].replace('.pdf', '_det.mmd')
-    mmd_path = output_path + '/' + input_path.split('/')[-1].replace('pdf', 'mmd')
-    pdf_out_path = output_path + '/' + input_path.split('/')[-1].replace('.pdf', '_layouts.pdf')
-    contents_det = ''
-    contents = ''
-    draw_images = []
-    jdx = 0
-    for output, img in zip(outputs_list, images):
-        content = output.outputs[0].text
-
-        if '<｜end▁of▁sentence｜>' in content: # repeat no eos
-            content = content.replace('<｜end▁of▁sentence｜>', '')
+        if len(images) > max_images_per_batch:
+            # This PDF is too large for batching - process individually
+            large_pdfs.append((pdf_filename, pdf_path, images, output_dir))
         else:
-            if SKIP_REPEAT:
-                continue
+            # Check if adding this PDF would exceed batch limit
+            if current_batch_images + len(images) > max_images_per_batch and current_batch:
+                # Yield current batch
+                yield current_batch
+                current_batch = []
+                current_batch_images = 0
 
-        
-        page_num = f'\n<--- Page Split --->'
+            # Add to current batch
+            current_batch.append((pdf_filename, pdf_path, images, output_dir))
+            current_batch_images += len(images)
 
-        contents_det += content + f'\n{page_num}\n'
+    # Yield remaining batch
+    if current_batch:
+        yield current_batch
 
-        image_draw = img.copy()
-
-        matches_ref, matches_images, mathes_other = re_match(content)
-        # print(matches_ref)
-        result_image = process_image_with_refs(image_draw, matches_ref, jdx, output_path)
-
-
-        draw_images.append(result_image)
-
-
-        for idx, a_match_image in enumerate(matches_images):
-            content = content.replace(a_match_image, f'![](images/' + str(jdx) + '_' + str(idx) + '.jpg)\n')
-
-        for idx, a_match_other in enumerate(mathes_other):
-            content = content.replace(a_match_other, '').replace('\\coloneqq', ':=').replace('\\eqqcolon', '=:').replace('\n\n\n\n', '\n\n').replace('\n\n\n', '\n\n')
+    # Yield large PDFs as individual batches
+    for large_pdf in large_pdfs:
+        yield [large_pdf]
 
 
-        contents += content + f'\n{page_num}\n'
+def process_batched_pdfs(pdf_batch, output_base_dir, max_images_per_batch=1000):
+    """
+    Process a batch of PDFs using batched LLM inference.
+    """
+    total_success = 0
+    total_failed = 0
+    
+    for batch in process_pdf_batch_to_ocr(pdf_batch, output_base_dir, max_images_per_batch):
+        if not batch:
+            continue
 
+        # Collect all images from this batch
+        all_images = []
+        pdf_info_list = []
 
-        jdx += 1
+        for pdf_filename, pdf_path, images, output_dir in batch:
+            start_idx = len(all_images)
+            end_idx = start_idx + len(images)
 
-    with open(mmd_det_path, 'w', encoding='utf-8') as afile:
-        afile.write(contents_det)
+            pdf_info_list.append({
+                'filename': pdf_filename,
+                'path': pdf_path,
+                'output_dir': output_dir,
+                'images': images,
+                'image_start_idx': start_idx,
+                'image_end_idx': end_idx
+            })
 
-    with open(mmd_path, 'w', encoding='utf-8') as afile:
-        afile.write(contents)
+            all_images.extend(images)
 
+        print(f'Processing batch of {len(all_images)} images from {len(batch)} PDFs')
 
-    pil_to_pdf_img2pdf(draw_images, pdf_out_path)
+        # Pre-process all images in parallel
+        NUM_WORKERS = os.cpu_count()
+        with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+            batch_inputs = list(tqdm(
+                executor.map(process_single_image, all_images),
+                total=len(all_images),
+                desc="Pre-processing images"
+            ))
+
+        # Single batched LLM call for all images
+        outputs_list = llm.generate(batch_inputs, sampling_params=sampling_params)
+
+        # Process outputs per PDF
+        image_idx = 0
+        for pdf_info in pdf_info_list:
+            try:
+                pdf_images = pdf_info['images']
+                pdf_output_dir = pdf_info['output_dir']
+                pdf_filename = pdf_info['filename']
+                pdf_path = pdf_info['path']
+                
+                mmd_det_path = os.path.join(pdf_output_dir, pdf_filename.replace('.pdf', '_det.mmd'))
+                mmd_path = os.path.join(pdf_output_dir, pdf_filename.replace('.pdf', '_det.mmd').replace('_det.mmd', '.mmd'))
+                pdf_out_path = os.path.join(pdf_output_dir, pdf_filename.replace('.pdf', '_layouts.pdf'))
+                
+                contents_det = ''
+                contents = ''
+                draw_images = []
+                jdx = 0
+                
+                # Process each image for this PDF
+                for img in pdf_images:
+                    output = outputs_list[image_idx]
+                    content = output.outputs[0].text
+
+                    if '<｜end▁of▁sentence｜>' in content:
+                        content = content.replace('<｜end▁of▁sentence｜>', '')
+                    else:
+                        if SKIP_REPEAT:
+                            image_idx += 1
+                            continue
+
+                    page_num = f'\n<--- Page Split --->'
+                    contents_det += content + f'\n{page_num}\n'
+
+                    image_draw = img.copy()
+                    matches_ref, matches_images, mathes_other = re_match(content)
+                    result_image = process_image_with_refs(image_draw, matches_ref, jdx, pdf_output_dir)
+                    draw_images.append(result_image)
+
+                    for idx, a_match_image in enumerate(matches_images):
+                        content = content.replace(a_match_image, f'![](images/{jdx}_{idx}.jpg)\n')
+
+                    for idx, a_match_other in enumerate(mathes_other):
+                        content = content.replace(a_match_other, '').replace('\\coloneqq', ':=').replace('\\eqqcolon', '=:').replace('\n\n\n\n', '\n\n').replace('\n\n\n', '\n\n')
+
+                    contents += content + f'\n{page_num}\n'
+                    jdx += 1
+                    image_idx += 1
+                
+                # Write outputs for this PDF
+                with open(mmd_det_path, 'w', encoding='utf-8') as afile:
+                    afile.write(contents_det)
+                with open(mmd_path, 'w', encoding='utf-8') as afile:
+                    afile.write(contents)
+                pil_to_pdf_img2pdf(draw_images, pdf_out_path)
+                
+                logger.info(f"OCR succeeded for {pdf_filename}")
+                total_success += 1
+                
+            except Exception as e:
+                logger.error(f"OCR failed for {pdf_filename}: {e}")
+                total_failed += 1
+                image_idx += len(pdf_info['images'])  # Skip these images in outputs_list
+    
+    return total_success, total_failed
 
 
 print("Pre-allocation....")
@@ -367,7 +449,7 @@ def run_ocr_on_pdf(pdf_path, output_dir):
     start_ts = datetime.utcnow().isoformat()
 
     try:
-        process_pdf_to_ocr(pdf_path, output_dir)
+        process_batched_pdfs([(os.path.basename(pdf_path), pdf_path)], output_dir)
         end_ts = datetime.utcnow().isoformat()
         logger.info(f"OCR succeeded for {pdf_path} (output dir: {output_dir})")
         return True, "Success"
@@ -376,64 +458,69 @@ def run_ocr_on_pdf(pdf_path, output_dir):
         logger.error(f"OCR failed for {pdf_path}: {e}")
         return False, str(e)
 
-def process_pdf(pdf_file):
-    pdf_path = os.path.join(PDF_DIR, pdf_file)
-    paper_id = os.path.splitext(pdf_file)[0]
-    
-    # Create output dir for this paper
-    output_dir = os.path.join(OCR_RESULTS_DIR, paper_id)
-    os.makedirs(output_dir, exist_ok=True)
-    
-    success, output = run_ocr_on_pdf(pdf_path, output_dir)
-
-    log_path = os.path.join(LOG_DIR, f"{paper_id}.log")
-    try:
-        with open(log_path, 'w') as f:
-            f.write(f"pdf: {pdf_path}\n")
-            f.write(f"output_dir: {output_dir}\n")
-            f.write(f"success: {success}\n")
-            f.write(f"timestamp: {datetime.utcnow().isoformat()}\n\n")
-            f.write(output or '')
-    except Exception as e:
-        logger.warning(f"Failed to write per-paper log for {paper_id}: {e}")
-
-    # Append summary record
-    record = {
-        'id': paper_id,
-        'pdf_path': pdf_path,
-        'output_dir': output_dir,
-        'success': bool(success),
-        'log_path': log_path,
-        'timestamp': datetime.utcnow().isoformat()
-    }
-    try:
-        with open(SUMMARY_LOG, 'a') as sf:
-            sf.write(json.dumps(record) + "\n")
-    except Exception as e:
-        logger.warning(f"Failed to write summary for {paper_id}: {e}")
-
-    return success
 
 def main():
     pdf_files = [f for f in os.listdir(PDF_DIR) if f.endswith('.pdf')]
 
-    logger.info(f"Found {len(pdf_files)} PDFs to process")
-    print(f"Found {len(pdf_files)} PDFs to process")
+    print(f'Found {len(pdf_files)} PDFs to process')
 
-    batch_size = 1024 # Process PDFs in batches for better GPU utilization
+    # Batch PDFs for better GPU utilization - limit to prevent OOM
+    pdf_batch_size = 16  # Process 16 PDFs at a time (adjust based on average PDF size)
+    max_images_per_batch = 2000  # Max images per LLM call (higher = better GPU util, but risk of OOM)
+    print(f'Batch settings: {pdf_batch_size} PDFs per batch, max {max_images_per_batch} images per LLM call')
     total_failed = 0
+    total_processed = 0
 
     with tqdm(total=len(pdf_files), desc="Processing OCR") as pbar:
-        for i in range(0, len(pdf_files), batch_size):
-            batch = pdf_files[i:i + batch_size]
-            for pdf in batch:
-                success = process_pdf(pdf)
-                pbar.update(1)
-                if not success:
-                    total_failed += 1
-                    pbar.set_postfix({"failed": total_failed})
+        for i in range(0, len(pdf_files), pdf_batch_size):
+            batch_files = pdf_files[i:i + pdf_batch_size]
+            batch_data = [(f, os.path.join(PDF_DIR, f)) for f in batch_files]
+            
+            try:
+                success_count, failed_count = process_batched_pdfs(batch_data, OCR_RESULTS_DIR, max_images_per_batch)
+                total_processed += success_count
+                total_failed += failed_count
+                
+                # Log per-batch results
+                for pdf_file in batch_files:
+                    paper_id = os.path.splitext(pdf_file)[0]
+                    output_dir = os.path.join(OCR_RESULTS_DIR, paper_id)
+                    log_path = os.path.join(LOG_DIR, f"{paper_id}.log")
+                    
+                    success = (pdf_file in [f for f, _ in batch_data[:success_count]])
+                    
+                    try:
+                        with open(log_path, 'w') as f:
+                            f.write(f"pdf: {os.path.join(PDF_DIR, pdf_file)}\n")
+                            f.write(f"output_dir: {output_dir}\n")
+                            f.write(f"success: {success}\n")
+                            f.write(f"timestamp: {datetime.utcnow().isoformat()}\n\n")
+                    except Exception as e:
+                        logger.warning(f"Failed to write per-paper log for {paper_id}: {e}")
 
-    logger.info(f"OCR processing complete. total={len(pdf_files)}, failed={total_failed}")
+                    # Append summary record
+                    record = {
+                        'id': paper_id,
+                        'pdf_path': os.path.join(PDF_DIR, pdf_file),
+                        'output_dir': output_dir,
+                        'success': success,
+                        'log_path': log_path,
+                        'timestamp': datetime.utcnow().isoformat()
+                    }
+                    try:
+                        with open(SUMMARY_LOG, 'a') as sf:
+                            sf.write(json.dumps(record) + "\n")
+                    except Exception as e:
+                        logger.warning(f"Failed to write summary for {paper_id}: {e}")
+                        
+            except Exception as e:
+                logger.error(f"Batch processing failed for batch starting at {i}: {e}")
+                total_failed += len(batch_files)
+            
+            pbar.update(len(batch_files))
+            pbar.set_postfix({"processed": total_processed, "failed": total_failed})
+
+    logger.info(f"OCR processing complete. total={len(pdf_files)}, processed={total_processed}, failed={total_failed}")
 
 if __name__ == "__main__":
     main()
