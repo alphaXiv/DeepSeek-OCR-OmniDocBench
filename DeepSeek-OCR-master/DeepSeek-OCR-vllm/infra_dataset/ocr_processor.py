@@ -2,9 +2,61 @@ import os
 import json
 import sys
 from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from datetime import datetime
+
+# Copied from run_dpsk_ocr_image.py for VLLM initialization
+import asyncio
+import re
+import torch
+if torch.version.cuda == '11.8':
+    os.environ["TRITON_PTXAS_PATH"] = "/usr/local/cuda-11.8/bin/ptxas"
+
+os.environ['VLLM_USE_V1'] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+
+from vllm import AsyncLLMEngine, SamplingParams
+from vllm.engine.arg_utils import AsyncEngineArgs
+from vllm.model_executor.models.registry import ModelRegistry
+import time
+from deepseek_ocr import DeepseekOCRForCausalLM
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+import numpy as np
+from process.ngram_norepeat import NoRepeatNGramLogitsProcessor
+from process.image_process import DeepseekOCRProcessor
+from config import MODEL_PATH, INPUT_PATH, OUTPUT_PATH, PROMPT, CROP_MODE
+
+ModelRegistry.register_model("DeepseekOCRForCausalLM", DeepseekOCRForCausalLM)
+
+# Initialize VLLM engine once for better GPU utilization
+engine = None
+logits_processors = None
+sampling_params = None
+
+def initialize_vllm():
+    global engine, logits_processors, sampling_params
+    if engine is None:
+        engine_args = AsyncEngineArgs(
+            model=MODEL_PATH,
+            hf_overrides={"architectures": ["DeepseekOCRForCausalLM"]},
+            block_size=256,
+            max_model_len=8192,
+            enforce_eager=False,
+            trust_remote_code=True,  
+            tensor_parallel_size=1,
+            gpu_memory_utilization=0.75,
+        )
+        engine = AsyncLLMEngine.from_engine_args(engine_args)
+        
+        logits_processors = [NoRepeatNGramLogitsProcessor(ngram_size=30, window_size=90, whitelist_token_ids={128821, 128822})]
+        
+        sampling_params = SamplingParams(
+            temperature=0.0,
+            max_tokens=8192,
+            logits_processors=logits_processors,
+            skip_special_tokens=False,
+        )
+        logger.info("VLLM engine initialized")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PDF_DIR = os.path.join(BASE_DIR, 'pdfs')
@@ -95,24 +147,26 @@ def process_pdf(pdf_file):
     return success
 
 def main():
+    initialize_vllm()  # Initialize VLLM once
     pdf_files = [f for f in os.listdir(PDF_DIR) if f.endswith('.pdf')]
 
     logger.info(f"Found {len(pdf_files)} PDFs to process")
     print(f"Found {len(pdf_files)} PDFs to process")
 
-    max_workers = os.cpu_count()  # Parallel processing for faster OCR
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(process_pdf, pdf) for pdf in pdf_files]
+    batch_size = 4  # Process PDFs in batches for better GPU utilization
+    total_failed = 0
 
-        with tqdm(total=len(pdf_files), desc="Processing OCR") as pbar:
-            failed = 0
-            for future in as_completed(futures):
-                success = future.result()
+    with tqdm(total=len(pdf_files), desc="Processing OCR") as pbar:
+        for i in range(0, len(pdf_files), batch_size):
+            batch = pdf_files[i:i + batch_size]
+            for pdf in batch:
+                success = process_pdf(pdf)
                 pbar.update(1)
                 if not success:
-                    failed += 1
-                    pbar.set_postfix({"failed": failed})
-    logger.info(f"OCR processing complete. total={len(pdf_files)}, failed={failed}")
+                    total_failed += 1
+                    pbar.set_postfix({"failed": total_failed})
+
+    logger.info(f"OCR processing complete. total={len(pdf_files)}, failed={total_failed}")
 
 if __name__ == "__main__":
     main()
