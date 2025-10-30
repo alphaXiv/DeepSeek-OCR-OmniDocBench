@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from datetime import datetime
+import fitz  # For PDF page count check
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PDF_DIR = os.path.join(BASE_DIR, 'pdfs')
@@ -58,10 +59,10 @@ def fetch_feed_page(page_num):
     }
 
     # Try the explicit URL first, then fallback to letting requests encode topics as '[]'
-    for attempt in range(3):
+    for attempt in range(2):
         try:
             logger.info(f"Fetching feed URL (explicit): {url}")
-            response = SESSION.get(url, timeout=30, headers=headers)
+            response = SESSION.get(url, timeout=15, headers=headers)
             logger.info(f"Feed response status: {response.status_code}")
             if response.status_code == 200:
                 data = None
@@ -80,11 +81,11 @@ def fetch_feed_page(page_num):
     logger.error(f"Failed to fetch feed page {page_num} after attempts")
     return None
 
-def fetch_metadata(paper_id, retries=3):
+def fetch_metadata(paper_id, retries=2):
     url = METADATA_URL.format(paper_id)
     for attempt in range(retries):
         try:
-            response = SESSION.get(url, timeout=30)
+            response = SESSION.get(url, timeout=15)
             response.raise_for_status()
             return response.json()
         except Exception as e:
@@ -93,7 +94,7 @@ def fetch_metadata(paper_id, retries=3):
     logger.error(f"Metadata fetch failed for {paper_id} after {retries} attempts")
     return None
 
-def download_pdf(paper_id, version, retries=3):
+def download_pdf(paper_id, version, retries=2):
     # Try versions from v0 to v5, use the first one that works
     for v in range(6):  # 0 to 5
         pdf_id = f"{paper_id}v{v}"
@@ -105,7 +106,7 @@ def download_pdf(paper_id, version, retries=3):
         url = PDF_URL.format(pdf_id)
         for attempt in range(retries):
             try:
-                resp = SESSION.get(url, timeout=60, stream=True)
+                resp = SESSION.get(url, timeout=30, stream=True)
                 if resp.status_code != 200:
                     logger.warning(f"PDF {pdf_id} attempt {attempt+1} returned status {resp.status_code}")
                     time.sleep(1)
@@ -149,11 +150,85 @@ def process_paper(paper):
 
     # sanitize universal_id for filenames
     safe_key = str(universal_id).replace('/', '_')
-    # Fetch metadata using universal id only (with retries)
+
+    # Determine a suggested starting version if available (e.g., 'v1')
+    suggested_version = None
+    try:
+        suggested_version = int(paper.get('versionLabel').lstrip('vV'))
+    except Exception:
+        suggested_version = None
+
+    # Attempt to download using universal id only (v0..v5)
+    success, actual_version, pdf_path = download_pdf(universal_id, suggested_version or 1)
+
+    if not success:
+        logger.info(f"Download failed for {universal_id}")
+        record = {
+            'id': universal_id,
+            'status': 'download_failed',
+            'reason': 'no_valid_pdf_version',
+            'meta_path': None,
+            'pdf_path': None,
+            'pdf_version': None,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        with open(SUMMARY_LOG, 'a') as sf:
+            sf.write(json.dumps(record) + "\n")
+        return False
+
+    # Check PDF page count
+    try:
+        doc = fitz.open(pdf_path)
+        page_count = doc.page_count
+        doc.close()
+        if page_count > 128:
+            logger.info(f"Skipping {universal_id}: PDF has {page_count} pages (>128)")
+            if pdf_path:
+                try:
+                    os.remove(pdf_path)
+                except Exception:
+                    pass
+            record = {
+                'id': universal_id,
+                'status': 'skipped_page_count',
+                'reason': f'page_count_{page_count}',
+                'meta_path': None,
+                'pdf_path': None,
+                'pdf_version': None,
+                'timestamp': datetime.utcnow().isoformat()
+            }
+            with open(SUMMARY_LOG, 'a') as sf:
+                sf.write(json.dumps(record) + "\n")
+            return False
+    except Exception as e:
+        logger.warning(f"Failed to check page count for {universal_id}: {e}")
+        # If can't check, assume ok or skip? To be safe, skip
+        try:
+            os.remove(pdf_path)
+        except Exception:
+            pass
+        record = {
+            'id': universal_id,
+            'status': 'skipped_page_check_failed',
+            'reason': str(e),
+            'meta_path': None,
+            'pdf_path': None,
+            'pdf_version': None,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        with open(SUMMARY_LOG, 'a') as sf:
+            sf.write(json.dumps(record) + "\n")
+        return False
+
+    # Now fetch metadata
     metadata = fetch_metadata(universal_id)
     if not metadata:
         logger.info(f"Skipping {universal_id}: metadata fetch failed")
-        # write summary
+        # Remove PDF since we won't process it
+        try:
+            os.remove(pdf_path)
+        except Exception:
+            pass
         record = {
             'id': universal_id,
             'status': 'metadata_fetch_failed',
@@ -175,42 +250,20 @@ def process_paper(paper):
     except Exception as e:
         logger.warning(f"Error saving metadata for {safe_key}: {e}")
 
-    # Only process (download PDFs) if license is CC-BY-4.0
+    # Only process if license is CC-BY-4.0
     license_url = metadata.get('license')
     allowed_license = "http://creativecommons.org/licenses/by/4.0/"
     if not license_url or license_url.strip() != allowed_license:
         logger.info(f"Skipping {universal_id} due to license '{license_url}'")
+        # Remove PDF
+        try:
+            os.remove(pdf_path)
+        except Exception:
+            pass
         record = {
             'id': universal_id,
             'status': 'skipped_license',
             'reason': license_url,
-            'meta_path': meta_path,
-            'pdf_path': None,
-            'pdf_version': None,
-            'timestamp': datetime.utcnow().isoformat()
-        }
-        with open(SUMMARY_LOG, 'a') as sf:
-            sf.write(json.dumps(record) + "\n")
-        return False
-
-    # Determine a suggested starting version if available (e.g., 'v1')
-    suggested_version = None
-    # isinstance(paper.get('versionLabel'), str):
-    try:
-        suggested_version = int(paper.get('versionLabel').lstrip('vV'))
-    except Exception:
-        suggested_version = None
-
-
-    # Attempt to download using universal id only (v0..v5)
-    success, actual_version, pdf_path = download_pdf(universal_id, suggested_version or 1)
-
-    if not success:
-        logger.info(f"Download failed for {universal_id}")
-        record = {
-            'id': universal_id,
-            'status': 'download_failed',
-            'reason': 'no_valid_pdf_version',
             'meta_path': meta_path,
             'pdf_path': None,
             'pdf_version': None,
@@ -251,7 +304,7 @@ def main():
             feed_data = fetch_feed_page(page_num)
             if not feed_data or 'papers' not in feed_data:
                 print(f"No more data at page {page_num}")
-                # page_num += 1
+                page_num += 1
                 continue
             
             papers = feed_data['papers']
