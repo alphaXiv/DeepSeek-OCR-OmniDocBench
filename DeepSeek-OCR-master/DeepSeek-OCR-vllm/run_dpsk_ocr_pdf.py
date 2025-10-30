@@ -223,7 +223,7 @@ def process_image_with_refs(image, ref_texts, jdx):
 
 def process_single_image(image):
     """single image"""
-    prompt_in = prompt
+    prompt_in = PROMPT
     cache_item = {
         "prompt": prompt_in,
         "multi_modal_data": {"image": DeepseekOCRProcessor().tokenize_with_images(images = [image], bos=True, eos=True, cropping=CROP_MODE)},
@@ -231,16 +231,13 @@ def process_single_image(image):
     return cache_item
 
 
-if __name__ == "__main__":
-
-    os.makedirs(OUTPUT_PATH, exist_ok=True)
-    os.makedirs(f'{OUTPUT_PATH}/images', exist_ok=True)
+def process_pdf_to_ocr(input_path, output_path):
+    os.makedirs(output_path, exist_ok=True)
+    os.makedirs(f'{output_path}/images', exist_ok=True)
     
     print(f'{Colors.RED}PDF loading .....{Colors.RESET}')
 
-
-    images = pdf_to_images_high_quality(INPUT_PATH)
-
+    images = pdf_to_images_high_quality(input_path)
 
     prompt = PROMPT
 
@@ -253,33 +250,14 @@ if __name__ == "__main__":
             desc="Pre-processed images"
         ))
 
-
-    # for image in tqdm(images):
-
-    #     prompt_in = prompt
-    #     cache_list = [
-    #         {
-    #             "prompt": prompt_in,
-    #             "multi_modal_data": {"image": DeepseekOCRProcessor().tokenize_with_images(images = [image], bos=True, eos=True, cropping=CROP_MODE)},
-    #         }
-    #     ]
-    #     batch_inputs.extend(cache_list)
-
-
     outputs_list = llm.generate(
         batch_inputs,
         sampling_params=sampling_params
     )
 
-
-    output_path = OUTPUT_PATH
-
-    os.makedirs(output_path, exist_ok=True)
-
-
-    mmd_det_path = output_path + '/' + INPUT_PATH.split('/')[-1].replace('.pdf', '_det.mmd')
-    mmd_path = output_path + '/' + INPUT_PATH.split('/')[-1].replace('pdf', 'mmd')
-    pdf_out_path = output_path + '/' + INPUT_PATH.split('/')[-1].replace('.pdf', '_layouts.pdf')
+    mmd_det_path = output_path + '/' + input_path.split('/')[-1].replace('.pdf', '_det.mmd')
+    mmd_path = output_path + '/' + input_path.split('/')[-1].replace('pdf', 'mmd')
+    pdf_out_path = output_path + '/' + input_path.split('/')[-1].replace('.pdf', '_layouts.pdf')
     contents_det = ''
     contents = ''
     draw_images = []
@@ -328,4 +306,8 @@ if __name__ == "__main__":
 
 
     pil_to_pdf_img2pdf(draw_images, pdf_out_path)
+
+
+if __name__ == "__main__":
+    process_pdf_to_ocr(INPUT_PATH, OUTPUT_PATH)
 
