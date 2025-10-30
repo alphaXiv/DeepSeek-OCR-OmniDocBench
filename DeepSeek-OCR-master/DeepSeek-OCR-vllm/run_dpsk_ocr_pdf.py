@@ -149,7 +149,7 @@ def extract_coordinates_and_label(ref_text, image_width, image_height):
     return (label_type, cor_list)
 
 
-def draw_bounding_boxes(image, refs, jdx):
+def draw_bounding_boxes(image, refs, jdx, output_path):
 
     image_width, image_height = image.size
     img_draw = image.copy()
@@ -184,7 +184,7 @@ def draw_bounding_boxes(image, refs, jdx):
                     if label_type == 'image':
                         try:
                             cropped = image.crop((x1, y1, x2, y2))
-                            cropped.save(f"{OUTPUT_PATH}/images/{jdx}_{img_idx}.jpg")
+                            cropped.save(f"{output_path}/images/{jdx}_{img_idx}.jpg")
                         except Exception as e:
                             print(e)
                             pass
@@ -216,8 +216,8 @@ def draw_bounding_boxes(image, refs, jdx):
     return img_draw
 
 
-def process_image_with_refs(image, ref_texts, jdx):
-    result_image = draw_bounding_boxes(image, ref_texts, jdx)
+def process_image_with_refs(image, ref_texts, jdx, output_path):
+    result_image = draw_bounding_boxes(image, ref_texts, jdx, output_path)
     return result_image
 
 
@@ -280,7 +280,7 @@ def process_pdf_to_ocr(input_path, output_path):
 
         matches_ref, matches_images, mathes_other = re_match(content)
         # print(matches_ref)
-        result_image = process_image_with_refs(image_draw, matches_ref, jdx)
+        result_image = process_image_with_refs(image_draw, matches_ref, jdx, output_path)
 
 
         draw_images.append(result_image)
