@@ -262,7 +262,7 @@ def main():
                 pid = paper.get('universal_paper_id') or paper.get('universalId')
                 if not pid:
                     # skip papers without universal id
-                    page_num += 1
+                    # page_num += 1
                     continue
                 # sanitize
                 pid_safe = str(pid).replace('/', '_')
