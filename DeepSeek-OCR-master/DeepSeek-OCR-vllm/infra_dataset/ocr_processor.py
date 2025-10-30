@@ -5,6 +5,9 @@ from tqdm import tqdm
 import logging
 from datetime import datetime
 
+# Add parent directory to path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # Copied from run_dpsk_ocr_image.py for VLLM initialization
 import asyncio
 import re
