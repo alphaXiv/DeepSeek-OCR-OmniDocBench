@@ -271,16 +271,16 @@ def main():
                     # if len(unique_papers) >= MAX_PAPERS:
                     #     break
             
-            # Process in parallel (limit workers based on CPU count)
+            # Process in parallel (increase workers for faster fetching)
             cpu_count = os.cpu_count() or 1
-            max_workers = max(1, cpu_count // 2)
+            max_workers = cpu_count  # Use all CPU cores for parallel processing
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = [executor.submit(process_paper, paper) for paper in new_papers]
                 for future in as_completed(futures):
                     future.result()
             
             page_num += 1
-            time.sleep(0.5)  # Rate limiting
+            time.sleep(0.5)  # Reduced rate limiting
     
     print(f"Collected {len(unique_papers)} unique papers")
 
