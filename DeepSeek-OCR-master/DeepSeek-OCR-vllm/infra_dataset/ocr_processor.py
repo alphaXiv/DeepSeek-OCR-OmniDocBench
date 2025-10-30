@@ -305,8 +305,9 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
             }
 
     # Load all PDFs in parallel using threading
-    print(f"Loading {len(pdf_batch)} PDFs using {min(NUM_WORKERS, len(pdf_batch))} threads...")
-    with ThreadPoolExecutor(max_workers=min(NUM_WORKERS, len(pdf_batch))) as executor:
+    NUM_WORKERS = os.cpu_count()
+    print(f"Loading {len(pdf_batch)} PDFs using {NUM_WORKERS} threads...")
+    with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
         pdf_results = list(tqdm(
             executor.map(lambda x: load_single_pdf(x[0], x[1]), pdf_batch),
             total=len(pdf_batch),
