@@ -347,6 +347,11 @@ def main():
         total_pbar.n = current_count
         total_pbar.refresh()
 
+        # Add delay after every 1000 PDFs downloaded
+        if current_count > 0 and current_count % 1000 == 0:
+            logger.info(f"Downloaded {current_count} PDFs, taking a 5-second break...")
+            time.sleep(2)
+
         # Check if we've reached the PDF limit
         if get_pdf_count() >= MAX_PAPERS:
             logger.info(f"Reached target PDF count ({get_pdf_count()}/{MAX_PAPERS}), stopping")
