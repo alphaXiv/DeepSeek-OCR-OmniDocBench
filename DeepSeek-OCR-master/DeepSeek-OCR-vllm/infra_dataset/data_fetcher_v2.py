@@ -51,10 +51,10 @@ def fetch_all_papers_page(skip, limit=1000):
         'User-Agent': 'DeepSeek-OCR-Dataset/1.0'
     }
 
-    for attempt in range(3):
+    for attempt in range(2):  # Reduced from 3 to 2 attempts
         try:
             logger.info(f"Fetching all papers URL: {url}")
-            response = SESSION.get(url, timeout=15, headers=headers)
+            response = SESSION.get(url, timeout=10, headers=headers)  # Reduced timeout from 15 to 10
             logger.info(f"All papers response status: {response.status_code}")
             if response.status_code == 200:
                 data = None
@@ -80,16 +80,16 @@ def fetch_all_papers_page(skip, limit=1000):
     logger.error(f"Failed to fetch all papers page with skip={skip} after attempts")
     return None
 
-def fetch_metadata(paper_id, retries=2):
+def fetch_metadata(paper_id, retries=1):
     url = METADATA_URL.format(paper_id)
     for attempt in range(retries):
         try:
-            response = SESSION.get(url, timeout=15)
+            response = SESSION.get(url, timeout=10)  # Reduced timeout from 15 to 10
             response.raise_for_status()
             return response.json()
         except Exception as e:
             logger.warning(f"Metadata fetch {paper_id} attempt {attempt+1} failed: {e}")
-            time.sleep(1)
+            continue  # Removed sleep delay
     logger.error(f"Metadata fetch failed for {paper_id} after {retries} attempts")
     return None
 
@@ -99,9 +99,11 @@ def get_pdf_count():
         return len([f for f in os.listdir(PDF_DIR) if f.endswith('.pdf')])
     return 0
 
-def download_pdf(paper_id, version, retries=2):
-    # Try versions from v0 to v5, use the first one that works
-    for v in range(6):  # 0 to 5
+def download_pdf(paper_id, version, retries=1):
+    # Try only v0 and v1 versions first (most common), then v2-v3 if needed
+    version_priority = [0, 1, 2, 3]  # Reduced from 0-5 to 0-3, reordered for efficiency
+    
+    for v in version_priority:
         pdf_id = f"{paper_id}v{v}"
         pdf_path = os.path.join(PDF_DIR, f"{pdf_id}.pdf")
         if os.path.exists(pdf_path):
@@ -111,16 +113,15 @@ def download_pdf(paper_id, version, retries=2):
         url = PDF_URL.format(pdf_id)
         for attempt in range(retries):
             try:
-                resp = SESSION.get(url, timeout=30, stream=True)
+                resp = SESSION.get(url, timeout=15, stream=True)  # Reduced timeout from 30 to 15
                 if resp.status_code != 200:
                     logger.warning(f"PDF {pdf_id} attempt {attempt+1} returned status {resp.status_code}")
-                    time.sleep(1)
-                    continue
+                    continue  # Removed sleep delay
 
                 # stream to disk
                 total_bytes = 0
                 with open(pdf_path, 'wb') as f:
-                    for chunk in resp.iter_content(chunk_size=8192):
+                    for chunk in resp.iter_content(chunk_size=16384):  # Increased chunk size from 8192 to 16384
                         if chunk:
                             f.write(chunk)
                             total_bytes += len(chunk)
@@ -131,15 +132,13 @@ def download_pdf(paper_id, version, retries=2):
                         os.remove(pdf_path)
                     except Exception:
                         pass
-                    time.sleep(1)
-                    continue
+                    continue  # Removed sleep delay
 
                 logger.info(f"Downloaded {pdf_id} ({total_bytes} bytes)")
                 return True, v, pdf_path
             except Exception as e:
                 logger.warning(f"Download {pdf_id} attempt {attempt+1} failed: {e}")
-                time.sleep(1)
-                continue
+                continue  # Removed sleep delay
 
         logger.info(f"No valid response for {pdf_id} after {retries} attempts, trying next version")
 
@@ -301,7 +300,7 @@ def main():
     total_pbar = tqdm(desc="PDFs downloaded", unit="pdf")
 
     skip = 0
-    batch_size = PAGE_SIZE
+    batch_size = PAGE_SIZE  # 1000 IDs per batch
 
     while get_pdf_count() < MAX_PAPERS:
         logger.info(f"Fetching papers with skip={skip}, limit={batch_size}")
@@ -328,15 +327,14 @@ def main():
 
         if not new_ids:
             logger.info(f"No new papers in this batch (skip={skip})")
-            skip += batch_size
+            skip += 1000  # Increment skip by 1000 for next batch
             continue
 
         logger.info(f"Processing {len(new_ids)} new papers from batch")
 
         # Process new papers in parallel
-        cpu_count = os.cpu_count() or 4  # Default to 4 if cpu_count is None
-        max_workers = min(cpu_count, 8)  # Limit to 8 workers to be respectful
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        cpu_count = os.cpu_count()
+        with ThreadPoolExecutor(max_workers=cpu_count) as executor:
             futures = [executor.submit(process_paper, uid) for uid in new_ids]
             for future in as_completed(futures):
                 future.result()
@@ -351,8 +349,8 @@ def main():
             logger.info(f"Reached target PDF count ({get_pdf_count()}/{MAX_PAPERS}), stopping")
             break
 
-        # Move to next batch
-        skip += batch_size
+        # Move to next batch - increment skip by 1000
+        skip += 1000
 
         # Rate limiting between batches
         time.sleep(0.5)
