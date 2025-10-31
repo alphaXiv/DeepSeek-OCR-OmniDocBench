@@ -38,8 +38,8 @@ ALL_PAPERS_URL = "https://api.alphaxiv.org/papers/v3/all"
 METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 
-PAGE_SIZE = 100000  # Updated to match API limit
-MAX_PAPERS = 100000  # Updated to 100000 as requested
+PAGE_SIZE = 1000000  # Updated to match API limit
+MAX_PAPERS = 10000  # Updated to 100000 as requested
 
 def fetch_all_papers_page(skip, limit=100000):
     """Fetch universal IDs from the new API with pagination"""
@@ -74,7 +74,7 @@ def fetch_all_papers_page(skip, limit=100000):
                 logger.warning(f"Non-200 status: {response.status_code}; text: {response.text[:200]}")
         except Exception as e:
             logger.warning(f"All papers fetch attempt {attempt+1} failed: {e}")
-        time.sleep(1)
+        # time.sleep(1)
 
     logger.error(f"Failed to fetch all papers page with skip={skip} after attempts")
     return None
@@ -302,7 +302,7 @@ def main():
     unique_papers = set()
     total_pbar = tqdm(desc="PDFs downloaded", unit="pdf")
 
-    skip = PAGE_SIZE  # Start from skip=10000
+    skip = MAX_PAPERS  # Start from skip=10000
     batch_size = PAGE_SIZE  # 100000 IDs per batch
 
     while get_pdf_count() < MAX_PAPERS:
@@ -332,7 +332,7 @@ def main():
 
         if not new_ids:
             logger.info(f"No new papers in this batch (skip={skip})")
-            skip += 10000  # Increment skip by 10000
+            skip += MAX_PAPERS  # Increment skip by 10000
             continue
 
         logger.info(f"Processing {len(new_ids)} new papers from batch")
@@ -360,7 +360,7 @@ def main():
             break
 
         # Move to next batch - increment skip by 10000
-        skip += PAGE_SIZE
+        skip += MAX_PAPERS
 
         # Rate limiting between batches
         time.sleep(20)
