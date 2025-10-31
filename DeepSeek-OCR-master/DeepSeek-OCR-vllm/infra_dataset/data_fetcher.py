@@ -345,68 +345,61 @@ def main():
     unique_papers = set()
     total_pbar = tqdm(total=MAX_PAPERS, desc="Total PDFs downloaded")
     
-    for config in query_configs:
-        current_pdf_count = get_pdf_count()
-        if current_pdf_count >= MAX_PAPERS:
-            logger.info(f"Reached target PDF count ({current_pdf_count}/{MAX_PAPERS}), stopping")
-            break
-        logger.info(f"Starting config: {config} (current PDFs: {current_pdf_count})")
-        page_num = 0
-        max_pages_per_config = 100  # Limit pages per config to avoid too many requests
-        batch_size = 3  # Fetch 3 pages at a time in parallel
+    page_num = 0
+    max_pages_per_config = 100  # Limit pages per config to avoid too many requests
+    
+    while get_pdf_count() < MAX_PAPERS and page_num < max_pages_per_config:
+        logger.info(f"Processing page {page_num} for all configs")
         
-        while get_pdf_count() < MAX_PAPERS and page_num < max_pages_per_config:
-            # Calculate batch of pages to fetch
-            end_page = min(page_num + batch_size, max_pages_per_config)
-            page_batch = list(range(page_num, end_page))
+        for config in query_configs:
+            current_pdf_count = get_pdf_count()
+            if current_pdf_count >= MAX_PAPERS:
+                logger.info(f"Reached target PDF count ({current_pdf_count}/{MAX_PAPERS}), stopping")
+                break
             
-            # Fetch multiple pages in parallel
-            feed_results = fetch_multiple_feed_pages(page_batch, config)
+            logger.info(f"Fetching page {page_num} for config: {config}")
             
-            pages_processed = 0
-            for i, feed_data in enumerate(feed_results):
-                current_page = page_num + i
-                
-                if not feed_data or 'papers' not in feed_data:
-                    logger.info(f"No more data for config {config} at page {current_page}")
-                    break
-                
-                papers = feed_data['papers']
-                if not papers:
-                    logger.info(f"Empty papers list for config {config} at page {current_page}")
-                    break
-                
-                new_papers = []
-                for paper in papers:
-                    pid = paper.get('universal_paper_id') or paper.get('universalId')
-                    if not pid:
-                        continue
-                    pid_safe = str(pid).replace('/', '_')
-                    if pid_safe not in unique_papers:
-                        unique_papers.add(pid_safe)
-                        new_papers.append(paper)
-                        # Update progress bar for discovered papers, but don't break here
-                        total_pbar.update(1)
-                
-                # Process new_papers in parallel
-                if new_papers:
-                    cpu_count = os.cpu_count()
-                    max_workers = cpu_count
-                    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                        futures = [executor.submit(process_paper, paper) for paper in new_papers]
-                        for future in as_completed(futures):
-                            future.result()
-                
-                pages_processed += 1
-                # Check if we've reached the PDF limit after processing
-                if get_pdf_count() >= MAX_PAPERS:
-                    break
+            # Fetch single page for this config
+            feed_results = fetch_multiple_feed_pages([page_num], config)
             
-            page_num += pages_processed
+            if not feed_results or not feed_results[0] or 'papers' not in feed_results[0]:
+                logger.info(f"No data for config {config} at page {page_num}")
+                continue
             
-            # Rate limiting between batches
-            if pages_processed > 0:
-                time.sleep(0.5)  # Rate limiting
+            feed_data = feed_results[0]
+            papers = feed_data['papers']
+            if not papers:
+                logger.info(f"Empty papers list for config {config} at page {page_num}")
+                continue
+            
+            new_papers = []
+            for paper in papers:
+                pid = paper.get('universal_paper_id') or paper.get('universalId')
+                if not pid:
+                    continue
+                pid_safe = str(pid).replace('/', '_')
+                if pid_safe not in unique_papers:
+                    unique_papers.add(pid_safe)
+                    new_papers.append(paper)
+                    # Update progress bar for discovered papers
+                    total_pbar.update(1)
+            
+            # Process new_papers in parallel
+            if new_papers:
+                cpu_count = os.cpu_count()
+                max_workers = cpu_count
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    futures = [executor.submit(process_paper, paper) for paper in new_papers]
+                    for future in as_completed(futures):
+                        future.result()
+            
+            # Check if we've reached the PDF limit after processing this config
+            if get_pdf_count() >= MAX_PAPERS:
+                break
+        
+        # Rate limiting between page rounds
+        time.sleep(0.5)
+        page_num += 1
     
     total_pbar.close()
     final_pdf_count = get_pdf_count()
