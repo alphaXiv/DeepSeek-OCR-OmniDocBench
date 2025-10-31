@@ -85,13 +85,12 @@ def fetch_feed_page(page_num, params):
     return None
 
 def fetch_multiple_feed_pages(page_nums, config):
-    """Fetch multiple feed pages in parallel"""
-    with ThreadPoolExecutor(max_workers=min(len(page_nums), 5)) as executor:  # Limit to 5 concurrent requests
-        futures = [executor.submit(fetch_feed_page, page_num, config) for page_num in page_nums]
-        results = []
-        for future in as_completed(futures):
-            results.append(future.result())
-        return results
+    """Fetch multiple feed pages sequentially"""
+    results = []
+    for page_num in page_nums:
+        result = fetch_feed_page(page_num, config)
+        results.append(result)
+    return results
 
 def fetch_metadata(paper_id, retries=2):
     url = METADATA_URL.format(paper_id)
@@ -111,13 +110,6 @@ def get_pdf_count():
     if os.path.exists(PDF_DIR):
         return len([f for f in os.listdir(PDF_DIR) if f.endswith('.pdf')])
     return 0
-    """Fetch metadata for multiple papers in parallel"""
-    with ThreadPoolExecutor(max_workers=min(len(paper_ids), 10)) as executor:  # Limit concurrent metadata requests
-        futures = [executor.submit(fetch_metadata, pid, retries) for pid in paper_ids]
-        results = []
-        for future in as_completed(futures):
-            results.append(future.result())
-        return results
 
 def download_pdf(paper_id, version, retries=2):
     # Try versions from v0 to v5, use the first one that works
