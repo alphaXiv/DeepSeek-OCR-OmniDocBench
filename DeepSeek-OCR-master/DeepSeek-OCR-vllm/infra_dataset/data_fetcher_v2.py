@@ -38,7 +38,7 @@ ALL_PAPERS_URL = "https://api.alphaxiv.org/papers/v3/all"
 METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 
-PAGE_SIZE = 10000  # Updated to match API limit
+PAGE_SIZE = 100000  # Updated to match API limit
 MAX_PAPERS = 100000  # Updated to 100000 as requested
 
 def fetch_all_papers_page(limit=1000):
@@ -350,10 +350,10 @@ def main():
     total_pbar.refresh()
 
     # Add delay after every 1000 PDFs downloaded
-    if current_count > 0 and current_count % 1000 == 0:
-        logger.info(f"Downloaded {current_count} PDFs, taking a 5-second break...")
-        time.sleep(5)
-
+    # if current_count > 0 and current_count % 1000 == 0:
+    logger.info(f"Downloaded {current_count} PDFs, taking a 5-second break...")
+    time.sleep(5)
+            
     total_pbar.close()
     final_pdf_count = get_pdf_count()
     print(f"Collected {len(unique_papers)} unique papers, downloaded {final_pdf_count} PDFs")
