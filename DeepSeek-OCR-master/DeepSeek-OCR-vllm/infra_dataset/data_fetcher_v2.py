@@ -41,9 +41,9 @@ PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 PAGE_SIZE = 100000  # Updated to match API limit
 MAX_PAPERS = 100000  # Updated to 100000 as requested
 
-def fetch_all_papers_page(limit=1000):
-    """Fetch universal IDs from the new API"""
-    url = f"{ALL_PAPERS_URL}?limit={limit}"
+def fetch_all_papers_page(skip, limit=100000):
+    """Fetch universal IDs from the new API with pagination"""
+    url = f"{ALL_PAPERS_URL}?skip={skip}&limit={limit}"
 
     headers = {
         'Accept': 'application/json',
@@ -76,7 +76,7 @@ def fetch_all_papers_page(limit=1000):
             logger.warning(f"All papers fetch attempt {attempt+1} failed: {e}")
         time.sleep(1)
 
-    logger.error(f"Failed to fetch all papers page with limit={limit} after attempts")
+    logger.error(f"Failed to fetch all papers page with skip={skip} after attempts")
     return None
 
 def fetch_metadata(paper_id, retries=1):
@@ -302,58 +302,69 @@ def main():
     unique_papers = set()
     total_pbar = tqdm(desc="PDFs downloaded", unit="pdf")
 
-    batch_size = PAGE_SIZE  # 1000 IDs per batch
+    skip = PAGE_SIZE  # Start from skip=10000
+    batch_size = PAGE_SIZE  # 100000 IDs per batch
 
-    logger.info(f"Fetching all papers with limit={batch_size}")
+    while get_pdf_count() < MAX_PAPERS:
+        logger.info(f"Fetching papers with skip={skip}, limit={batch_size}")
 
-    # Fetch all universal IDs at once
-    batch_data = fetch_all_papers_page(batch_size)
+        # Fetch batch of universal IDs
+        batch_data = fetch_all_papers_page(skip, batch_size)
 
-    if not batch_data or 'universalIds' not in batch_data:
-        logger.info("No data available")
-        total_pbar.close()
-        return
+        if not batch_data or 'universalIds' not in batch_data:
+            logger.info(f"No more data available at skip={skip}")
+            break
 
-    universal_ids = batch_data['universalIds']
-    if not universal_ids:
-        logger.info("Empty universal IDs list")
-        total_pbar.close()
-        return
+        universal_ids = batch_data['universalIds']
+        if not universal_ids:
+            logger.info(f"Empty universal IDs list at skip={skip}")
+            break
 
-    logger.info(f"Processing {len(universal_ids)} papers")
+        logger.info(f"Processing {len(universal_ids)} papers from skip={skip}")
 
-    # Filter for new papers we haven't seen before
-    new_ids = []
-    for uid in universal_ids:
-        uid_safe = str(uid).replace('/', '_')
-        if uid_safe not in unique_papers:
-            unique_papers.add(uid_safe)
-            new_ids.append(uid)
+        # Filter for new papers we haven't seen before
+        new_ids = []
+        for uid in universal_ids:
+            uid_safe = str(uid).replace('/', '_')
+            if uid_safe not in unique_papers:
+                unique_papers.add(uid_safe)
+                new_ids.append(uid)
 
-    if not new_ids:
-        logger.info("No new papers to process")
-        total_pbar.close()
-        return
+        if not new_ids:
+            logger.info(f"No new papers in this batch (skip={skip})")
+            skip += 10000  # Increment skip by 10000
+            continue
 
-    logger.info(f"Processing {len(new_ids)} new papers")
+        logger.info(f"Processing {len(new_ids)} new papers from batch")
 
-    # Process new papers in parallel
-    cpu_count = os.cpu_count()
-    with ThreadPoolExecutor(max_workers=cpu_count) as executor:
-        futures = [executor.submit(process_paper, uid) for uid in new_ids]
-        for future in as_completed(futures):
-            future.result()
+        # Process new papers in parallel
+        cpu_count = os.cpu_count()
+        with ThreadPoolExecutor(max_workers=cpu_count) as executor:
+            futures = [executor.submit(process_paper, uid) for uid in new_ids]
+            for future in as_completed(futures):
+                future.result()
 
-    # Update progress bar after processing
-    current_count = get_pdf_count()
-    total_pbar.n = current_count
-    total_pbar.refresh()
+        # Update progress bar after processing this batch
+        current_count = get_pdf_count()
+        total_pbar.n = current_count
+        total_pbar.refresh()
 
-    # Add delay after every 1000 PDFs downloaded
-    # if current_count > 0 and current_count % 1000 == 0:
-    logger.info(f"Downloaded {current_count} PDFs, taking a 5-second break...")
-    time.sleep(5)
-            
+        # Add delay after every 1000 PDFs downloaded
+        # if current_count > 0 and current_count % 1000 == 0:
+        logger.info(f"Downloaded {current_count} PDFs, taking a 5-second break...")
+        # time.sleep(5)
+
+        # Check if we've reached the PDF limit
+        if get_pdf_count() >= MAX_PAPERS:
+            logger.info(f"Reached target PDF count ({get_pdf_count()}/{MAX_PAPERS}), stopping")
+            break
+
+        # Move to next batch - increment skip by 10000
+        skip += PAGE_SIZE
+
+        # Rate limiting between batches
+        time.sleep(20)
+
     total_pbar.close()
     final_pdf_count = get_pdf_count()
     print(f"Collected {len(unique_papers)} unique papers, downloaded {final_pdf_count} PDFs")
