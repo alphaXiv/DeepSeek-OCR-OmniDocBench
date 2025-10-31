@@ -343,7 +343,7 @@ def main():
                 })
     
     unique_papers = set()
-    total_pbar = tqdm(total=MAX_PAPERS, desc="Total PDFs downloaded")
+    total_pbar = tqdm(desc="PDFs downloaded", unit="pdf")
     
     page_num = 0
     max_pages_per_config = 100  # Limit pages per config to avoid too many requests
@@ -381,8 +381,7 @@ def main():
                 if pid_safe not in unique_papers:
                     unique_papers.add(pid_safe)
                     new_papers.append(paper)
-                    # Update progress bar for discovered papers
-                    total_pbar.update(1)
+                    # Don't update progress bar here - wait until actual PDFs are downloaded
             
             # Process new_papers in parallel
             if new_papers:
@@ -392,6 +391,11 @@ def main():
                     futures = [executor.submit(process_paper, paper) for paper in new_papers]
                     for future in as_completed(futures):
                         future.result()
+                
+                # Update progress bar after processing this batch
+                current_count = get_pdf_count()
+                total_pbar.n = current_count
+                total_pbar.refresh()
             
             # Check if we've reached the PDF limit after processing this config
             if get_pdf_count() >= MAX_PAPERS:
