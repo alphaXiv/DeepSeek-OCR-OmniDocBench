@@ -38,7 +38,7 @@ ALL_PAPERS_URL = "https://api.alphaxiv.org/papers/v3/all"
 METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 
-PAGE_SIZE = 100000  # Updated to match API limit
+PAGE_SIZE = 10000  # Updated to match API limit
 MAX_PAPERS = 100000  # Updated to 100000 as requested
 
 def fetch_all_papers_page(limit=1000):
