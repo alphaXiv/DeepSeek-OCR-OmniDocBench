@@ -35,7 +35,7 @@ SUMMARY_LOG = os.path.join(LOG_DIR, 'summary.jsonl')
 SESSION = requests.Session()
 
 # Updated URLs for new API
-ALL_PAPERS_URL = "https://alphaxiv.ngrok.app/papers/v3/all"
+ALL_PAPERS_URL = "https://api.alphaxiv.org/papers/v3/all"
 METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 
