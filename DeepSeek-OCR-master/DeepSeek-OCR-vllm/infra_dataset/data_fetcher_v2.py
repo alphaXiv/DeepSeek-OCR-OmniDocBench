@@ -31,7 +31,6 @@ if not logger.handlers:
 # Summary JSONL for consolidated per-paper records
 SUMMARY_LOG = os.path.join(LOG_DIR, 'summary.jsonl')
 
-# Shared requests session
 SESSION = requests.Session()
 
 # Updated URLs for new API
