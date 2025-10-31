@@ -7,7 +7,7 @@ Creates a dataset containing the original PDF files for archival and sharing.
 import os
 import sys
 from pathlib import Path
-from datasets import Dataset
+from datasets import Dataset, Features, Value
 import argparse
 from huggingface_hub import HfApi, create_repo
 from tqdm import tqdm
@@ -39,26 +39,36 @@ def create_pdf_dataset(pdf_dir: Path, dataset_name: str = "alphaxiv-pdfs", org_n
 
     # Prepare dataset data
     paper_ids = []
-    pdf_paths = []
+    pdf_data = []
     file_sizes = []
 
     for pdf_path in tqdm(pdf_files, desc="Processing PDFs"):
         paper_id = pdf_path.stem  # filename without extension
         file_size = pdf_path.stat().st_size
 
+        # Read PDF file as binary data
+        with open(pdf_path, 'rb') as f:
+            pdf_bytes = f.read()
+
         paper_ids.append(paper_id)
-        pdf_paths.append(str(pdf_path))
+        pdf_data.append(pdf_bytes)
         file_sizes.append(file_size)
 
-    # Create dataset
+    # Create dataset with proper features
+    features = Features({
+        "paper_id": Value("string"),
+        "pdf": Value("binary"),  # Binary PDF data
+        "file_size": Value("int64")
+    })
+    
     data = {
         "paper_id": paper_ids,
-        "pdf": pdf_paths,  # Will be loaded as binary files
+        "pdf": pdf_data,
         "file_size": file_sizes
     }
 
     print("📦 Creating dataset...")
-    dataset = Dataset.from_dict(data)
+    dataset = Dataset.from_dict(data, features=features)
 
     # Create repo if it doesn't exist
     repo_id = f"{org_name}/{dataset_name}"
