@@ -21,11 +21,15 @@ pip install huggingface_hub datasets
 echo "Fetching papers and downloading PDFs..."
 python data_fetcher.py
 
-# Step 3: Run OCR processing
+# Step 3: Upload PDFs to Hugging Face
+echo "Uploading PDF dataset to Hugging Face Hub..."
+./upload_pdfs.sh
+
+# Step 4: Run OCR processing
 echo "Running OCR on downloaded PDFs..."
 python ocr_processor.py
 
-# Step 4: Upload to Hugging Face
+# Step 5: Upload to Hugging Face
 echo "Uploading OCR images to Hugging Face Hub..."
 python upload_all_to_hf.py
 
