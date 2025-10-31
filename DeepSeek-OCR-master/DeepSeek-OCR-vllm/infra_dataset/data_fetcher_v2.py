@@ -41,9 +41,9 @@ PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 PAGE_SIZE = 1000  # Updated to match API limit
 MAX_PAPERS = 100000  # Updated to 100000 as requested
 
-def fetch_all_papers_page(skip, limit=1000):
+def fetch_all_papers_page(skip):
     """Fetch a page of universal IDs from the new API"""
-    url = f"{ALL_PAPERS_URL}?skip={skip}&limit={limit}"
+    url = f"{ALL_PAPERS_URL}?skip={skip}"
 
     headers = {
         'Accept': 'application/json',
@@ -304,13 +304,13 @@ def main():
     total_pbar = tqdm(desc="PDFs downloaded", unit="pdf")
 
     skip = 0
-    batch_size = PAGE_SIZE  # 1000 IDs per batch
+    # batch_size = PAGE_SIZE  # 1000 IDs per batch
 
     while get_pdf_count() < MAX_PAPERS:
-        logger.info(f"Fetching papers with skip={skip}, limit={batch_size}")
+        logger.info(f"Fetching papers with skip={skip}")
 
         # Fetch batch of universal IDs
-        batch_data = fetch_all_papers_page(skip, batch_size)
+        batch_data = fetch_all_papers_page(skip)
 
         if not batch_data or 'universalIds' not in batch_data:
             logger.info(f"No more data available at skip={skip}")
