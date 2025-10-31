@@ -41,9 +41,9 @@ PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 PAGE_SIZE = 1000  # Updated to match API limit
 MAX_PAPERS = 100000  # Updated to 100000 as requested
 
-def fetch_all_papers_page(skip):
+def fetch_all_papers_page(skip, limit=1000):
     """Fetch a page of universal IDs from the new API"""
-    url = f"{ALL_PAPERS_URL}?skip={skip}"
+    url = f"{ALL_PAPERS_URL}?skip={skip}&limit={limit}"
 
     headers = {
         'Accept': 'application/json',
@@ -252,10 +252,9 @@ def process_paper(universal_id):
     except Exception as e:
         logger.warning(f"Error saving metadata for {safe_key}: {e}")
 
-    # Only process if license is CC-BY-4.0
+    # Only process if license contains Creative Commons
     license_url = metadata.get('license')
-    allowed_license = "http://creativecommons.org/licenses/by/4.0/"
-    if not license_url or license_url.strip() != allowed_license:
+    if not license_url or 'creativecommons' not in license_url.lower():
         logger.info(f"Skipping {universal_id} due to license '{license_url}'")
         # Remove PDF
         if pdf_path:
@@ -304,13 +303,13 @@ def main():
     total_pbar = tqdm(desc="PDFs downloaded", unit="pdf")
 
     skip = 0
-    # batch_size = PAGE_SIZE  # 1000 IDs per batch
+    batch_size = PAGE_SIZE  # 1000 IDs per batch
 
     while get_pdf_count() < MAX_PAPERS:
-        logger.info(f"Fetching papers with skip={skip}")
+        logger.info(f"Fetching papers with skip={skip}, limit={batch_size}")
 
         # Fetch batch of universal IDs
-        batch_data = fetch_all_papers_page(skip)
+        batch_data = fetch_all_papers_page(skip, batch_size)
 
         if not batch_data or 'universalIds' not in batch_data:
             logger.info(f"No more data available at skip={skip}")
