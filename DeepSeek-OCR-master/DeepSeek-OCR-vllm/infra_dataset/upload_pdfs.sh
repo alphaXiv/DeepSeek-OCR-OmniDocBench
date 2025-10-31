@@ -15,11 +15,6 @@ if [ -z "$HF_TOKEN" ]; then
     exit 1
 fi
 
-# Install requirements if needed
-if ! python -c "import datasets, huggingface_hub, tqdm" 2>/dev/null; then
-    echo "📦 Installing required packages..."
-    pip install -r requirements-pdf-upload.txt
-fi
 
 # Run the upload script
 echo "⬆️ Starting upload..."
