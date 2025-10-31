@@ -306,7 +306,7 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
     print("Phase 1: Pre-processing all PDFs...")
 
     # Load all PDFs in parallel using threading
-    NUM_WORKERS = os.cpu_count()
+    NUM_WORKERS = os.cpu_count() 
     print(f"Loading {len(pdf_batch)} PDFs using {NUM_WORKERS} threads...")
     with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
         pdf_results = list(tqdm(
@@ -337,21 +337,37 @@ def preprocess_all_pdfs(pdf_batch, output_base_dir):
             # Log failed PDFs but continue
             print(f"Skipping failed PDF: {result['filename']} - {result.get('error', 'Unknown error')}")
 
-    # Now tokenize all images at once
-    all_images = []
+    # Process images in smaller batches to avoid OOM
+    images_per_tokenization_batch = 1000  # Process 1000 images at a time for tokenization
+
     for pdf_info in pdf_metadata_list:
-        all_images.extend(pdf_info['images'])
+        pdf_images = pdf_info['images']
+        if not pdf_images:
+            continue
 
-    print(f"Total images to process: {len(all_images)}")
+        # Process images for this PDF in smaller batches
+        for i in range(0, len(pdf_images), images_per_tokenization_batch):
+            batch_images = pdf_images[i:i + images_per_tokenization_batch]
 
-    # Pre-process all images in parallel (already threaded)
-    with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
-        all_batch_inputs = list(tqdm(
-            executor.map(process_single_image, all_images),
-            total=len(all_images),
-            desc="Tokenizing images"
-        ))
+            print(f"Tokenizing batch {i//images_per_tokenization_batch + 1} for {pdf_info['filename']}: {len(batch_images)} images")
 
+            # Tokenize this batch
+            with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+                batch_inputs = list(executor.map(process_single_image, batch_images))
+
+            all_batch_inputs.extend(batch_inputs)
+
+            # Clear this batch from memory
+            del batch_images
+            import gc
+            gc.collect()
+
+    # Clear images from PDF metadata to free memory (we don't need them anymore)
+    for pdf_info in pdf_metadata_list:
+        if 'images' in pdf_info:
+            del pdf_info['images']
+
+    print(f"Total tokenized inputs: {len(all_batch_inputs)}")
     return all_batch_inputs, pdf_metadata_list
 
 
@@ -387,7 +403,8 @@ def save_pdf_results(pdf_metadata_list, all_outputs):
     def save_single_pdf(pdf_info):
         """Save results for a single PDF"""
         try:
-            pdf_images = pdf_info['images']
+            # Reload images for this PDF (we cleared them from memory earlier)
+            pdf_images = pdf_to_images_high_quality(pdf_info['path'])
             pdf_output_dir = pdf_info['output_dir']
             pdf_filename = pdf_info['filename']
 
@@ -530,58 +547,36 @@ def main():
     logger.info(f"Found {len(pdf_files)} PDFs to process")
     print(f"Found {len(pdf_files)} PDFs to process")
 
-    # Process ALL PDFs at once for maximum GPU utilization
+    # Process PDFs in smaller chunks to avoid OOM
     max_images_per_batch = 2000  # Max images per LLM call (higher = better GPU util, but risk of OOM)
+    pdfs_per_chunk = 50  # Process 50 PDFs at a time to control memory usage
     print(f'LLM batch size: max {max_images_per_batch} images per inference call')
+    print(f'Processing PDFs in chunks of {pdfs_per_chunk} to avoid OOM')
 
     total_failed = 0
     total_processed = 0
 
-    # Process all PDFs in one big batch
-    batch_data = [(f, os.path.join(PDF_DIR, f)) for f in pdf_files]
+    # Process PDFs in chunks
+    for i in range(0, len(pdf_files), pdfs_per_chunk):
+        chunk_files = pdf_files[i:i + pdfs_per_chunk]
+        chunk_data = [(f, os.path.join(PDF_DIR, f)) for f in chunk_files]
 
-    try:
-        success_count, failed_count = process_batched_pdfs(batch_data, OCR_RESULTS_DIR, max_images_per_batch)
-        total_processed += success_count
-        total_failed += failed_count
+        print(f"\nProcessing chunk {i//pdfs_per_chunk + 1}/{(len(pdf_files) + pdfs_per_chunk - 1)//pdfs_per_chunk}: {len(chunk_files)} PDFs")
 
-        # Log results for all PDFs
-        for pdf_file in pdf_files:
-            paper_id = os.path.splitext(pdf_file)[0]
-            output_dir = os.path.join(OCR_RESULTS_DIR, paper_id)
-            log_path = os.path.join(LOG_DIR, f"{paper_id}.log")
+        try:
+            success_count, failed_count = process_batched_pdfs(chunk_data, OCR_RESULTS_DIR, max_images_per_batch)
+            total_processed += success_count
+            total_failed += failed_count
 
-            # For now, assume success (we could track individual failures if needed)
-            success = True  # This could be improved with more detailed tracking
+            # Force garbage collection to free memory
+            import gc
+            gc.collect()
 
-            try:
-                with open(log_path, 'w') as f:
-                    f.write(f"pdf: {os.path.join(PDF_DIR, pdf_file)}\n")
-                    f.write(f"output_dir: {output_dir}\n")
-                    f.write(f"success: {success}\n")
-                    f.write(f"timestamp: {datetime.utcnow().isoformat()}\n\n")
-            except Exception as e:
-                logger.warning(f"Failed to write per-paper log for {paper_id}: {e}")
+        except Exception as e:
+            logger.error(f"Chunk processing failed: {e}")
+            total_failed += len(chunk_files)
 
-            # Append summary record
-            record = {
-                'id': paper_id,
-                'pdf_path': os.path.join(PDF_DIR, pdf_file),
-                'output_dir': output_dir,
-                'success': success,
-                'log_path': log_path,
-                'timestamp': datetime.utcnow().isoformat()
-            }
-            try:
-                with open(SUMMARY_LOG, 'a') as sf:
-                    sf.write(json.dumps(record) + "\n")
-            except Exception as e:
-                logger.warning(f"Failed to write summary for {paper_id}: {e}")
-
-    except Exception as e:
-        logger.error(f"Batch processing failed: {e}")
-        total_failed += len(pdf_files)
-
+    # Log summary for all PDFs (simplified - could be enhanced)
     logger.info(f"OCR processing complete. total={len(pdf_files)}, processed={total_processed}, failed={total_failed}")
     print(f"OCR processing complete. total={len(pdf_files)}, processed={total_processed}, failed={total_failed}")
 
