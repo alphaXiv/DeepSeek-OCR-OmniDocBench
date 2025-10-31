@@ -119,12 +119,17 @@ def download_pdf(paper_id, version, retries=1):
                     continue  # Removed sleep delay
 
                 # stream to disk
-                total_bytes = 0
                 with open(pdf_path, 'wb') as f:
-                    for chunk in resp.iter_content(chunk_size=16384):  # Increased chunk size from 8192 to 16384
-                        if chunk:
-                            f.write(chunk)
-                            total_bytes += len(chunk)
+                    # Option 1: Stream in chunks (memory efficient for large files)
+                    # for chunk in resp.iter_content(chunk_size=16384):
+                    #     if chunk:
+                    #         f.write(chunk)
+                    #         total_bytes += len(chunk)
+
+                    # Option 2: Write all at once (faster for smaller files)
+                    content = resp.content
+                    f.write(content)
+                    total_bytes = len(content)
 
                 if total_bytes < 1024:
                     logger.warning(f"PDF {pdf_id} too small ({total_bytes} bytes), removing")
