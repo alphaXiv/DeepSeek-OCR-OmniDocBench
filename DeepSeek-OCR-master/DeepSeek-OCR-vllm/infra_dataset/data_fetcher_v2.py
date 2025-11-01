@@ -39,7 +39,7 @@ METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 
 PAGE_SIZE = 1000000  # Updated to match API limit
-MAX_PAPERS = 10000  # Updated to 100000 as requested
+MAX_PAPERS = 100000  # Target: 100,000 PDFs
 
 def fetch_all_papers_page(skip, limit=100000):
     """Fetch universal IDs from the new API with pagination"""
@@ -368,7 +368,7 @@ def main():
     unique_papers = set()
     total_pbar = tqdm(desc="PDFs downloaded", unit="pdf")
 
-    skip = MAX_PAPERS  # Start from skip=10000
+    skip = 0  # Start from beginning to find missing papers
     batch_size = PAGE_SIZE  # 100000 IDs per batch
 
     while get_pdf_count() < MAX_PAPERS:
@@ -398,7 +398,7 @@ def main():
 
         if not new_ids:
             logger.info(f"No new papers in this batch (skip={skip})")
-            skip += MAX_PAPERS  # Increment skip by 10000
+            skip += batch_size  # Move to next batch
             continue
 
         logger.info(f"Processing {len(new_ids)} new papers from batch")
@@ -415,25 +415,21 @@ def main():
         total_pbar.n = current_count
         total_pbar.refresh()
 
-        # Add delay after every 1000 PDFs downloaded
-        # if current_count > 0 and current_count % 1000 == 0:
-        logger.info(f"Downloaded {current_count} PDFs, taking a 5-second break...")
-        # time.sleep(5)
-
         # Check if we've reached the PDF limit
         if get_pdf_count() >= MAX_PAPERS:
             logger.info(f"Reached target PDF count ({get_pdf_count()}/{MAX_PAPERS}), stopping")
             break
 
-        # Move to next batch - increment skip by 10000
-        skip += MAX_PAPERS
+        # Move to next batch
+        skip += batch_size
 
         # Rate limiting between batches
         time.sleep(20)
 
     total_pbar.close()
     final_pdf_count = get_pdf_count()
-    print(f"Collected {len(unique_papers)} unique papers, downloaded {final_pdf_count} PDFs")
+    logger.info(f"Collection complete. Total PDFs: {final_pdf_count}/{MAX_PAPERS}")
+    print(f"Collection complete. Total PDFs: {final_pdf_count}/{MAX_PAPERS}")
 
 if __name__ == "__main__":
     main()
