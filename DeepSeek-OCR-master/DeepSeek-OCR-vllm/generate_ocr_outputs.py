@@ -21,36 +21,50 @@ os.environ['VLLM_USE_V1'] = '0'
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 
-def load_tokenized_batch(batch_file):
-    """Load a batch of tokenized data"""
-    with open(batch_file, 'rb') as f:
-        data = pickle.load(f)
-    return data
-
-
 def load_all_tokenized_data(tokenized_dir):
-    """Load all tokenized data from directory"""
+    """Load all tokenized data from directory with saved images"""
     batch_files = [os.path.join(tokenized_dir, f) for f in os.listdir(tokenized_dir)
                    if f.startswith('tokenized_batch_') and f.endswith('.pkl')]
     batch_files.sort()
 
     all_tokenized_data = []
     all_metadata = []
+    all_images = []
 
     for batch_file in batch_files:
         print(f"Loading {batch_file}")
-        batch_data = load_tokenized_batch(batch_file)
+        with open(batch_file, 'rb') as f:
+            batch_data = pickle.load(f)
+
         all_tokenized_data.extend(batch_data['tokenized_data'])
         all_metadata.extend(batch_data['metadata'])
 
-    return all_tokenized_data, all_metadata
+        # Load images for this batch
+        for image_path in batch_data['image_paths']:
+            if os.path.exists(image_path):
+                img = Image.open(image_path)
+                all_images.append(img)
+            else:
+                raise FileNotFoundError(f"Saved image not found: {image_path}")
+
+    return all_tokenized_data, all_metadata, all_images
 
 
 def load_single_tokenized_pdf(tokenized_file):
-    """Load tokenized data for a single PDF"""
+    """Load tokenized data for a single PDF with saved images"""
     with open(tokenized_file, 'rb') as f:
         data = pickle.load(f)
-    return data['tokenized_data'], data
+
+    # Load images from saved paths
+    original_images = []
+    for image_path in data['image_paths']:
+        if os.path.exists(image_path):
+            img = Image.open(image_path)
+            original_images.append(img)
+        else:
+            raise FileNotFoundError(f"Saved image not found: {image_path}")
+
+    return data['tokenized_data'], data, original_images
 
 
 def re_match(text):
@@ -268,28 +282,9 @@ def main():
 
     # Load tokenized data
     if args.tokenized_file:
-        tokenized_data, metadata = load_single_tokenized_pdf(args.tokenized_file)
-        # Need to reconstruct original images from PDFs
-        import fitz
-        pdf_path = metadata['pdf_path']
-        images = []
-        pdf_document = fitz.open(pdf_path)
-        zoom = 144 / 72.0
-        matrix = fitz.Matrix(zoom, zoom)
-        for page_num in range(pdf_document.page_count):
-            page = pdf_document[page_num]
-            pixmap = page.get_pixmap(matrix=matrix, alpha=False)
-            img_data = pixmap.tobytes("png")
-            img = Image.open(io.BytesIO(img_data))
-            images.append(img)
-        pdf_document.close()
-        original_images = images
+        tokenized_data, metadata, original_images = load_single_tokenized_pdf(args.tokenized_file)
     else:
-        tokenized_data, metadata = load_all_tokenized_data(args.tokenized_dir)
-        # This would require mapping back to original images - for now assume single batch
-        # In practice, you'd need to store original images or reconstruct them
-        print("Warning: Multi-batch processing requires original image reconstruction")
-        return
+        tokenized_data, metadata, original_images = load_all_tokenized_data(args.tokenized_dir)
 
     # Process in batches for VLLM
     for i in range(0, len(tokenized_data), args.batch_size):

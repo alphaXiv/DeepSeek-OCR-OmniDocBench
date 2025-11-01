@@ -58,9 +58,11 @@ def process_single_image(image):
 
 def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
     """
-    Tokenize a batch of PDFs and save tokenized data
+    Tokenize a batch of PDFs and save tokenized data with images
     """
     os.makedirs(output_dir, exist_ok=True)
+    images_dir = os.path.join(output_dir, 'images')
+    os.makedirs(images_dir, exist_ok=True)
 
     processor = DeepseekOCRProcessor()
 
@@ -72,11 +74,22 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
 
         all_tokenized_data = []
         batch_metadata = []
+        batch_image_paths = []
 
         for pdf_path in tqdm(batch_paths, desc="Tokenizing PDFs"):
             try:
                 # Convert PDF to images
                 images = pdf_to_images_high_quality(pdf_path)
+
+                # Save images and collect paths
+                pdf_name = os.path.basename(pdf_path).replace('.pdf', '')
+                pdf_image_paths = []
+
+                for page_idx, image in enumerate(images):
+                    image_filename = f"{pdf_name}_page_{page_idx:03d}.png"
+                    image_path = os.path.join(images_dir, image_filename)
+                    image.save(image_path, 'PNG')
+                    pdf_image_paths.append(image_path)
 
                 # Tokenize all images in this PDF
                 pdf_tokenized = []
@@ -85,15 +98,16 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
                     pdf_tokenized.append(tokenized_item)
 
                 # Save metadata
-                pdf_name = os.path.basename(pdf_path)
                 batch_metadata.append({
                     'pdf_path': pdf_path,
                     'pdf_name': pdf_name,
                     'num_pages': len(images),
-                    'tokenized_count': len(pdf_tokenized)
+                    'tokenized_count': len(pdf_tokenized),
+                    'image_paths': pdf_image_paths
                 })
 
                 all_tokenized_data.extend(pdf_tokenized)
+                batch_image_paths.extend(pdf_image_paths)
 
             except Exception as e:
                 print(f"Error processing {pdf_path}: {e}")
@@ -105,27 +119,41 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
             pickle.dump({
                 'tokenized_data': all_tokenized_data,
                 'metadata': batch_metadata,
+                'image_paths': batch_image_paths,
                 'batch_info': {
                     'batch_start': batch_start,
                     'batch_end': batch_end,
-                    'total_tokenized': len(all_tokenized_data)
+                    'total_tokenized': len(all_tokenized_data),
+                    'total_images': len(batch_image_paths)
                 }
             }, f)
 
-        print(f"Saved batch to {batch_file} ({len(all_tokenized_data)} tokenized items)")
+        print(f"Saved batch to {batch_file} ({len(all_tokenized_data)} tokenized items, {len(batch_image_paths)} images)")
 
 
 def tokenize_single_pdf(pdf_path, output_dir):
     """
-    Tokenize a single PDF and save tokenized data
+    Tokenize a single PDF and save tokenized data with images
     """
     os.makedirs(output_dir, exist_ok=True)
+    images_dir = os.path.join(output_dir, 'images')
+    os.makedirs(images_dir, exist_ok=True)
 
     try:
         print(f"Processing {pdf_path}")
 
         # Convert PDF to images
         images = pdf_to_images_high_quality(pdf_path)
+
+        # Save images and collect paths
+        pdf_name = os.path.basename(pdf_path).replace('.pdf', '')
+        image_paths = []
+
+        for page_idx, image in enumerate(images):
+            image_filename = f"{pdf_name}_page_{page_idx:03d}.png"
+            image_path = os.path.join(images_dir, image_filename)
+            image.save(image_path, 'PNG')
+            image_paths.append(image_path)
 
         # Tokenize all images
         tokenized_data = []
@@ -134,7 +162,6 @@ def tokenize_single_pdf(pdf_path, output_dir):
             tokenized_data.append(tokenized_item)
 
         # Save tokenized data
-        pdf_name = os.path.basename(pdf_path).replace('.pdf', '')
         output_file = os.path.join(output_dir, f"{pdf_name}_tokenized.pkl")
 
         with open(output_file, 'wb') as f:
@@ -142,10 +169,11 @@ def tokenize_single_pdf(pdf_path, output_dir):
                 'pdf_path': pdf_path,
                 'pdf_name': pdf_name,
                 'num_pages': len(images),
-                'tokenized_data': tokenized_data
+                'tokenized_data': tokenized_data,
+                'image_paths': image_paths
             }, f)
 
-        print(f"Saved tokenized data to {output_file} ({len(tokenized_data)} pages)")
+        print(f"Saved tokenized data to {output_file} ({len(tokenized_data)} pages, {len(image_paths)} images)")
 
     except Exception as e:
         print(f"Error processing {pdf_path}: {e}")
