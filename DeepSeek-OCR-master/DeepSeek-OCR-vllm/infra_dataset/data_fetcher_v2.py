@@ -38,11 +38,11 @@ ALL_PAPERS_URL = "https://api.alphaxiv.org/papers/v3/all"
 METADATA_URL = "https://api.alphaxiv.org/papers/v3/{}"
 PDF_URL = "https://fetcher.alphaxiv.org/v2/pdf/{}.pdf"
 
-PAGE_SIZE = 1000  # Updated to match API limit
-MAX_PAPERS = 100000  # Updated to 100000 as requested
+PAGE_SIZE = 1000000  # Updated to match API limit
+MAX_PAPERS = 10000  # Updated to 100000 as requested
 
-def fetch_all_papers_page(skip, limit=1000):
-    """Fetch a page of universal IDs from the new API with rate limit handling"""
+def fetch_all_papers_page(skip, limit=100000):
+    """Fetch universal IDs from the new API with pagination"""
     url = f"{ALL_PAPERS_URL}?skip={skip}&limit={limit}"
 
     headers = {
@@ -75,9 +75,17 @@ def fetch_all_papers_page(skip, limit=1000):
                         cleaned_ids.append(clean_id)
                     data['universalIds'] = cleaned_ids
                     return data
+<<<<<<< HEAD
                 else:
                     logger.warning(f"No universalIds in response data: {data}")
                     return None
+=======
+            else:
+                logger.warning(f"Non-200 status: {response.status_code}; text: {response.text[:200]}")
+        except Exception as e:
+            logger.warning(f"All papers fetch attempt {attempt+1} failed: {e}")
+        # time.sleep(1)
+>>>>>>> cb68a99a21d2a14f357f218d2a1d67cedbefb9cb
 
             elif response.status_code == 429:
                 # Rate limited - exponential backoff
@@ -352,8 +360,8 @@ def main():
     unique_papers = set()
     total_pbar = tqdm(desc="PDFs downloaded", unit="pdf")
 
-    skip = 0
-    batch_size = PAGE_SIZE  # 1000 IDs per batch
+    skip = MAX_PAPERS  # Start from skip=10000
+    batch_size = PAGE_SIZE  # 100000 IDs per batch
 
     while get_pdf_count() < MAX_PAPERS:
         logger.info(f"Fetching papers with skip={skip}, limit={batch_size}")
@@ -370,6 +378,8 @@ def main():
             logger.info(f"Empty universal IDs list at skip={skip}")
             break
 
+        logger.info(f"Processing {len(universal_ids)} papers from skip={skip}")
+
         # Filter for new papers we haven't seen before
         new_ids = []
         for uid in universal_ids:
@@ -380,7 +390,7 @@ def main():
 
         if not new_ids:
             logger.info(f"No new papers in this batch (skip={skip})")
-            skip += 1000  # Increment skip by 1000 for next batch
+            skip += MAX_PAPERS  # Increment skip by 10000
             continue
 
         logger.info(f"Processing {len(new_ids)} new papers from batch")
@@ -397,16 +407,25 @@ def main():
         total_pbar.n = current_count
         total_pbar.refresh()
 
+        # Add delay after every 1000 PDFs downloaded
+        # if current_count > 0 and current_count % 1000 == 0:
+        logger.info(f"Downloaded {current_count} PDFs, taking a 5-second break...")
+        # time.sleep(5)
+
         # Check if we've reached the PDF limit
         if get_pdf_count() >= MAX_PAPERS:
             logger.info(f"Reached target PDF count ({get_pdf_count()}/{MAX_PAPERS}), stopping")
             break
 
-        # Move to next batch - increment skip by 1000
-        skip += 1000
+        # Move to next batch - increment skip by 10000
+        skip += MAX_PAPERS
 
         # Rate limiting between batches
+<<<<<<< HEAD
         time.sleep(1)
+=======
+        time.sleep(20)
+>>>>>>> cb68a99a21d2a14f357f218d2a1d67cedbefb9cb
 
     total_pbar.close()
     final_pdf_count = get_pdf_count()
