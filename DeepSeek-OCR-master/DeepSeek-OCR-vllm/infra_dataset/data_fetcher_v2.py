@@ -75,17 +75,9 @@ def fetch_all_papers_page(skip, limit=100000):
                         cleaned_ids.append(clean_id)
                     data['universalIds'] = cleaned_ids
                     return data
-<<<<<<< HEAD
                 else:
                     logger.warning(f"No universalIds in response data: {data}")
                     return None
-=======
-            else:
-                logger.warning(f"Non-200 status: {response.status_code}; text: {response.text[:200]}")
-        except Exception as e:
-            logger.warning(f"All papers fetch attempt {attempt+1} failed: {e}")
-        # time.sleep(1)
->>>>>>> cb68a99a21d2a14f357f218d2a1d67cedbefb9cb
 
             elif response.status_code == 429:
                 # Rate limited - exponential backoff
@@ -155,7 +147,15 @@ def download_pdf(paper_id):
     # Try only v0 and v1 versions first (most common), then v2-v3 if needed
     version_priority = [0, 1, 2, 3]  # Reduced from 0-5 to 0-3, reordered for efficiency
 
+    max_attempts_per_version = 20  # Maximum retries per version
+    total_attempts = 0
+    max_total_attempts = 50  # Maximum total attempts across all versions
+
     for v in version_priority:
+        if total_attempts >= max_total_attempts:
+            logger.warning(f"Giving up on {paper_id} after {total_attempts} total attempts")
+            break
+
         pdf_id = f"{paper_id}v{v}"
         pdf_path = os.path.join(PDF_DIR, f"{pdf_id}.pdf")
         if os.path.exists(pdf_path):
@@ -166,8 +166,9 @@ def download_pdf(paper_id):
         attempt = 0
         base_delay = 15  # Start with 15 second delay for PDF rate limits
 
-        while True:  # Keep trying this version indefinitely
+        while attempt < max_attempts_per_version and total_attempts < max_total_attempts:
             attempt += 1
+            total_attempts += 1
             try:
                 resp = SESSION.get(url, timeout=15, stream=True)
                 if resp.status_code == 200:
@@ -197,14 +198,21 @@ def download_pdf(paper_id):
 
                 else:
                     logger.warning(f"PDF {pdf_id} returned status {resp.status_code}")
-                    break  # Try next version
+                    break  # Try next version immediately for non-429 errors
 
             except Exception as e:
                 logger.warning(f"Download {pdf_id} attempt {attempt} failed: {e}")
-                time.sleep(1)
+                if "Read timed out" in str(e):
+                    # For timeout errors, use shorter delay and give up faster
+                    time.sleep(2)
+                else:
+                    time.sleep(1)
                 continue
 
+        logger.warning(f"Gave up on version {v} for {paper_id} after {attempt} attempts")
+
     # All versions failed
+    logger.warning(f"All versions failed for {paper_id} after {total_attempts} total attempts")
     return False, None, None
 
 def process_paper(universal_id):
@@ -421,11 +429,7 @@ def main():
         skip += MAX_PAPERS
 
         # Rate limiting between batches
-<<<<<<< HEAD
-        time.sleep(1)
-=======
         time.sleep(20)
->>>>>>> cb68a99a21d2a14f357f218d2a1d67cedbefb9cb
 
     total_pbar.close()
     final_pdf_count = get_pdf_count()
