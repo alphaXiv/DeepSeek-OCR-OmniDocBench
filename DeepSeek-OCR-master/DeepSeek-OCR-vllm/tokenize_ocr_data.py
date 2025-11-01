@@ -184,7 +184,7 @@ if __name__ == "__main__":
     parser.add_argument("--input", "-i", required=True, help="Input PDF file or directory")
     parser.add_argument("--output", "-o", required=True, help="Output directory for tokenized data")
     parser.add_argument("--batch-size", "-b", type=int, default=50, help="Batch size for processing multiple PDFs")
-    parser.add_argument("--single", "-s", action="store_true", help="Process single PDF instead of batch")
+    # parser.add_argument("--single", "-s", action="store_true", help="Process single PDF instead of batch")
 
     args = parser.parse_args()
 
