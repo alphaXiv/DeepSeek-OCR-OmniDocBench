@@ -7,8 +7,19 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from PIL import Image
 import torch
+import logging
 from config import NUM_WORKERS, CROP_MODE
 from process.image_process import DeepseekOCRProcessor
+
+# Setup logger
+logger = logging.getLogger("tokenize_ocr")
+logger.setLevel(logging.INFO)
+fh = logging.FileHandler("tokenize_ocr.log")
+fh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+if not logger.handlers:
+    logger.addHandler(fh)
 
 
 def pdf_to_images_high_quality(pdf_path, dpi=144, image_format="PNG"):
@@ -64,13 +75,15 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
     images_dir = os.path.join(output_dir, 'images')
     os.makedirs(images_dir, exist_ok=True)
 
+    logger.info(f"Starting batch tokenization of {len(pdf_paths)} PDFs with batch_size={batch_size}")
+
     processor = DeepseekOCRProcessor()
 
     for batch_start in range(0, len(pdf_paths), batch_size):
         batch_end = min(batch_start + batch_size, len(pdf_paths))
         batch_paths = pdf_paths[batch_start:batch_end]
 
-        print(f"Processing batch {batch_start//batch_size + 1}: {len(batch_paths)} PDFs")
+        logger.info(f"Processing batch {batch_start//batch_size + 1}: {len(batch_paths)} PDFs")
 
         all_tokenized_data = []
         batch_metadata = []
@@ -78,6 +91,7 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
 
         for pdf_path in tqdm(batch_paths, desc="Tokenizing PDFs"):
             try:
+                logger.debug(f"Converting PDF to images: {pdf_path}")
                 # Convert PDF to images
                 images = pdf_to_images_high_quality(pdf_path)
 
@@ -90,6 +104,8 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
                     image_path = os.path.join(images_dir, image_filename)
                     image.save(image_path, 'PNG')
                     pdf_image_paths.append(image_path)
+
+                logger.debug(f"Saved {len(pdf_image_paths)} images for {pdf_name}")
 
                 # Tokenize all images in this PDF
                 pdf_tokenized = []
@@ -109,8 +125,10 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
                 all_tokenized_data.extend(pdf_tokenized)
                 batch_image_paths.extend(pdf_image_paths)
 
+                logger.debug(f"Tokenized {pdf_name}: {len(pdf_tokenized)} items")
+
             except Exception as e:
-                print(f"Error processing {pdf_path}: {e}")
+                logger.error(f"Error processing {pdf_path}: {e}")
                 continue
 
         # Save this batch
@@ -128,7 +146,9 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
                 }
             }, f)
 
-        print(f"Saved batch to {batch_file} ({len(all_tokenized_data)} tokenized items, {len(batch_image_paths)} images)")
+        logger.info(f"Saved batch to {batch_file} ({len(all_tokenized_data)} tokenized items, {len(batch_image_paths)} images)")
+
+    logger.info("Batch tokenization completed")
 
 
 def tokenize_single_pdf(pdf_path, output_dir):
@@ -139,9 +159,10 @@ def tokenize_single_pdf(pdf_path, output_dir):
     images_dir = os.path.join(output_dir, 'images')
     os.makedirs(images_dir, exist_ok=True)
 
-    try:
-        print(f"Processing {pdf_path}")
+    logger.info(f"Starting tokenization of single PDF: {pdf_path}")
 
+    try:
+        logger.debug(f"Converting PDF to images: {pdf_path}")
         # Convert PDF to images
         images = pdf_to_images_high_quality(pdf_path)
 
@@ -154,6 +175,8 @@ def tokenize_single_pdf(pdf_path, output_dir):
             image_path = os.path.join(images_dir, image_filename)
             image.save(image_path, 'PNG')
             image_paths.append(image_path)
+
+        logger.debug(f"Saved {len(image_paths)} images for {pdf_name}")
 
         # Tokenize all images
         tokenized_data = []
@@ -173,10 +196,10 @@ def tokenize_single_pdf(pdf_path, output_dir):
                 'image_paths': image_paths
             }, f)
 
-        print(f"Saved tokenized data to {output_file} ({len(tokenized_data)} pages, {len(image_paths)} images)")
+        logger.info(f"Saved tokenized data to {output_file} ({len(tokenized_data)} pages, {len(image_paths)} images)")
 
     except Exception as e:
-        print(f"Error processing {pdf_path}: {e}")
+        logger.error(f"Error processing {pdf_path}: {e}")
 
 
 if __name__ == "__main__":
@@ -188,6 +211,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    logger.info(f"Starting tokenization with args: input={args.input}, output={args.output}, batch_size={args.batch_size}, single={args.single}")
+
     if args.single:
         tokenize_single_pdf(args.input, args.output)
     else:
@@ -197,4 +222,7 @@ if __name__ == "__main__":
             pdf_paths = [os.path.join(args.input, f) for f in os.listdir(args.input)
                         if f.lower().endswith('.pdf')]
 
+        logger.info(f"Found {len(pdf_paths)} PDF files to process")
         tokenize_pdf_batch(pdf_paths, args.output, args.batch_size)
+
+    logger.info("Tokenization completed")

@@ -3,6 +3,7 @@ import pickle
 import argparse
 import re
 import io
+import logging
 from tqdm import tqdm
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
@@ -12,6 +13,16 @@ from deepseek_ocr import DeepseekOCRForCausalLM
 from vllm.model_executor.models.registry import ModelRegistry
 from vllm import LLM, SamplingParams
 from process.ngram_norepeat import NoRepeatNGramLogitsProcessor
+
+# Setup logger
+logger = logging.getLogger("generate_ocr")
+logger.setLevel(logging.INFO)
+fh = logging.FileHandler("generate_ocr.log")
+fh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+if not logger.handlers:
+    logger.addHandler(fh)
 
 
 # Set environment variables
@@ -23,6 +34,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 def load_all_tokenized_data(tokenized_dir):
     """Load all tokenized data from directory with saved images"""
+    logger.info(f"Loading all tokenized data from {tokenized_dir}")
     batch_files = [os.path.join(tokenized_dir, f) for f in os.listdir(tokenized_dir)
                    if f.startswith('tokenized_batch_') and f.endswith('.pkl')]
     batch_files.sort()
@@ -32,7 +44,7 @@ def load_all_tokenized_data(tokenized_dir):
     all_images = []
 
     for batch_file in batch_files:
-        print(f"Loading {batch_file}")
+        logger.debug(f"Loading {batch_file}")
         with open(batch_file, 'rb') as f:
             batch_data = pickle.load(f)
 
@@ -47,11 +59,13 @@ def load_all_tokenized_data(tokenized_dir):
             else:
                 raise FileNotFoundError(f"Saved image not found: {image_path}")
 
+    logger.info(f"Loaded {len(all_tokenized_data)} tokenized items and {len(all_images)} images")
     return all_tokenized_data, all_metadata, all_images
 
 
 def load_single_tokenized_pdf(tokenized_file):
     """Load tokenized data for a single PDF with saved images"""
+    logger.debug(f"Loading tokenized data from {tokenized_file}")
     with open(tokenized_file, 'rb') as f:
         data = pickle.load(f)
 
@@ -64,6 +78,7 @@ def load_single_tokenized_pdf(tokenized_file):
         else:
             raise FileNotFoundError(f"Saved image not found: {image_path}")
 
+    logger.debug(f"Loaded {len(original_images)} images from {tokenized_file}")
     return data['tokenized_data'], data, original_images
 
 
@@ -188,10 +203,13 @@ def pil_to_pdf_img2pdf(pil_images, output_path):
 def generate_ocr_outputs(tokenized_data, metadata, original_images, output_path, llm, sampling_params):
     """Generate OCR outputs from tokenized data"""
 
+    logger.info(f"Starting OCR generation for {len(tokenized_data)} items to {output_path}")
+
     os.makedirs(output_path, exist_ok=True)
     os.makedirs(f'{output_path}/images', exist_ok=True)
 
     # Generate outputs in batches
+    logger.debug("Starting VLLM generation")
     outputs_list = llm.generate(tokenized_data, sampling_params=sampling_params)
 
     # Process results
@@ -204,6 +222,7 @@ def generate_ocr_outputs(tokenized_data, metadata, original_images, output_path,
     draw_images = []
     jdx = 0
 
+    logger.debug("Processing generation results")
     for output, img in zip(outputs_list, original_images):
         content = output.outputs[0].text
 
@@ -232,6 +251,7 @@ def generate_ocr_outputs(tokenized_data, metadata, original_images, output_path,
         jdx += 1
 
     # Save outputs
+    logger.debug("Saving output files")
     with open(mmd_det_path, 'w', encoding='utf-8') as afile:
         afile.write(contents_det)
 
@@ -240,10 +260,13 @@ def generate_ocr_outputs(tokenized_data, metadata, original_images, output_path,
 
     pil_to_pdf_img2pdf(draw_images, pdf_out_path)
 
+    logger.info(f"Generated outputs saved to {output_path}")
     print(f"Generated outputs saved to {output_path}")
 
 
 def main():
+    logger.info("Starting OCR generation process")
+
     parser = argparse.ArgumentParser(description="Generate OCR outputs from tokenized data")
     parser.add_argument("--tokenized-dir", "-t", help="Directory containing tokenized data batches")
     parser.add_argument("--tokenized-file", "-f", help="Single tokenized data file")
@@ -253,7 +276,10 @@ def main():
 
     args = parser.parse_args()
 
+    logger.info(f"Arguments: tokenized_dir={args.tokenized_dir}, tokenized_file={args.tokenized_file}, output={args.output}, batch_size={args.batch_size}")
+
     # Initialize VLLM model
+    logger.debug("Initializing VLLM model")
     ModelRegistry.register_model("DeepseekOCRForCausalLM", DeepseekOCRForCausalLM)
 
     llm = LLM(
@@ -281,10 +307,13 @@ def main():
     )
 
     # Load tokenized data
+    logger.debug("Loading tokenized data")
     if args.tokenized_file:
         tokenized_data, metadata, original_images = load_single_tokenized_pdf(args.tokenized_file)
     else:
         tokenized_data, metadata, original_images = load_all_tokenized_data(args.tokenized_dir)
+
+    logger.info(f"Loaded {len(tokenized_data)} tokenized items and {len(original_images)} images")
 
     # Process in batches for VLLM
     for i in range(0, len(tokenized_data), args.batch_size):
@@ -292,10 +321,12 @@ def main():
         batch_tokenized = tokenized_data[i:batch_end]
         batch_images = original_images[i:batch_end]
 
-        print(f"Processing batch {i//args.batch_size + 1}: {len(batch_tokenized)} items")
+        logger.info(f"Processing batch {i//args.batch_size + 1}: {len(batch_tokenized)} items")
 
         batch_output_dir = os.path.join(args.output, f"batch_{i//args.batch_size + 1:04d}")
         generate_ocr_outputs(batch_tokenized, metadata, batch_images, batch_output_dir, llm, sampling_params)
+
+    logger.info("OCR generation process completed")
 
 
 if __name__ == "__main__":
