@@ -128,9 +128,9 @@ def main():
     parser.add_argument("--output-dir", "-o", default="./ocr_outputs", help="Directory for OCR outputs")
     parser.add_argument("--tokenize-batch-size", "-tb", type=int, default=20, help="Batch size for tokenization")
     parser.add_argument("--generate-batch-size", "-gb", type=int, default=50, help="Batch size for generation")
-    parser.add_argument("--max-workers", "-w", type=int, default=4, help="Maximum number of parallel tokenization threads")
-    parser.add_argument("--phase", choices=["tokenize", "generate", "both"], default="both",
-                       help="Which phase to run")
+    # parser.add_argument("--max-workers", "-w", type=int, default=4, help="Maximum number of parallel tokenization threads")
+    # parser.add_argument("--phase", choices=["tokenize", "generate", "both"], default="both",
+    #                    help="Which phase to run")
 
     args = parser.parse_args()
 
