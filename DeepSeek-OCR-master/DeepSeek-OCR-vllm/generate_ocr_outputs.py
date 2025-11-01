@@ -253,7 +253,7 @@ def main():
 
     args = parser.parse_args()
 
-
+    # Initialize VLLM model
     ModelRegistry.register_model("DeepseekOCRForCausalLM", DeepseekOCRForCausalLM)
 
     llm = LLM(
