@@ -42,7 +42,7 @@ PAGE_SIZE = 1000  # Updated to match API limit
 MAX_PAPERS = 100000  # Updated to 100000 as requested
 
 def fetch_all_papers_page(skip, limit=1000):
-    """Fetch a page of universal IDs from the new API"""
+    """Fetch a page of universal IDs from the new API with rate limit handling"""
     url = f"{ALL_PAPERS_URL}?skip={skip}&limit={limit}"
 
     headers = {
@@ -50,11 +50,16 @@ def fetch_all_papers_page(skip, limit=1000):
         'User-Agent': 'DeepSeek-OCR-Dataset/1.0'
     }
 
-    for attempt in range(2):  # Reduced from 3 to 2 attempts
+    attempt = 0
+    base_delay = 60  # Start with 1 minute delay for rate limits
+
+    while True:  # Keep trying indefinitely
+        attempt += 1
         try:
-            logger.info(f"Fetching all papers URL: {url}")
-            response = SESSION.get(url, timeout=10, headers=headers)  # Reduced timeout from 15 to 10
+            logger.info(f"Fetching all papers URL: {url} (attempt {attempt})")
+            response = SESSION.get(url, timeout=10, headers=headers)
             logger.info(f"All papers response status: {response.status_code}")
+
             if response.status_code == 200:
                 data = None
                 try:
@@ -70,26 +75,65 @@ def fetch_all_papers_page(skip, limit=1000):
                         cleaned_ids.append(clean_id)
                     data['universalIds'] = cleaned_ids
                     return data
-            else:
-                logger.warning(f"Non-200 status: {response.status_code}; text: {response.text[:200]}")
-        except Exception as e:
-            logger.warning(f"All papers fetch attempt {attempt+1} failed: {e}")
-        time.sleep(1)
+                else:
+                    logger.warning(f"No universalIds in response data: {data}")
+                    return None
 
-    logger.error(f"Failed to fetch all papers page with skip={skip} after attempts")
+            elif response.status_code == 429:
+                # Rate limited - exponential backoff
+                delay = min(base_delay * (2 ** (attempt - 1)), 1800)  # Max 30 minutes delay
+                logger.warning(f"Rate limited (429). Waiting {delay} seconds before retry {attempt}...")
+                time.sleep(delay)
+                continue
+
+            else:
+                logger.warning(f"Non-200/429 status: {response.status_code}; text: {response.text[:200]}")
+                # For other errors, retry with shorter delay
+                time.sleep(1)
+                continue
+
+        except Exception as e:
+            logger.warning(f"All papers fetch attempt {attempt} failed: {e}")
+            time.sleep(1)
+            continue
+
+    # This should never be reached due to infinite loop, but just in case
+    logger.error(f"Failed to fetch all papers page with skip={skip} after {attempt} attempts")
     return None
 
-def fetch_metadata(paper_id, retries=1):
+def fetch_metadata(paper_id):
+    """Fetch metadata for a paper with rate limit handling"""
     url = METADATA_URL.format(paper_id)
-    for attempt in range(retries):
+
+    attempt = 0
+    base_delay = 30  # Start with 30 second delay for metadata rate limits
+
+    while True:  # Keep trying indefinitely
+        attempt += 1
         try:
-            response = SESSION.get(url, timeout=10)  # Reduced timeout from 15 to 10
+            response = SESSION.get(url, timeout=10)
             response.raise_for_status()
             return response.json()
+
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 429:
+                # Rate limited - exponential backoff
+                delay = min(base_delay * (2 ** (attempt - 1)), 1800)  # Max 30 minute delay
+                logger.warning(f"Metadata rate limited (429) for {paper_id}. Waiting {delay} seconds before retry {attempt}...")
+                time.sleep(delay)
+                continue
+            else:
+                logger.warning(f"Metadata HTTP error for {paper_id}: {e}")
+                time.sleep(1)
+                continue
+
         except Exception as e:
-            logger.warning(f"Metadata fetch {paper_id} attempt {attempt+1} failed: {e}")
-            continue  # Removed sleep delay
-    logger.error(f"Metadata fetch failed for {paper_id} after {retries} attempts")
+            logger.warning(f"Metadata fetch attempt {attempt} failed for {paper_id}: {e}")
+            time.sleep(1)
+            continue
+
+    # This should never be reached due to infinite loop, but just in case
+    logger.error(f"Failed to fetch metadata for {paper_id} after {attempt} attempts")
     return None
 
 def get_pdf_count():
@@ -98,10 +142,11 @@ def get_pdf_count():
         return len([f for f in os.listdir(PDF_DIR) if f.endswith('.pdf')])
     return 0
 
-def download_pdf(paper_id, version, retries=1):
+def download_pdf(paper_id):
+    """Download PDF for a paper with rate limit handling"""
     # Try only v0 and v1 versions first (most common), then v2-v3 if needed
     version_priority = [0, 1, 2, 3]  # Reduced from 0-5 to 0-3, reordered for efficiency
-    
+
     for v in version_priority:
         pdf_id = f"{paper_id}v{v}"
         pdf_path = os.path.join(PDF_DIR, f"{pdf_id}.pdf")
@@ -110,43 +155,48 @@ def download_pdf(paper_id, version, retries=1):
             return True, v, pdf_path
 
         url = PDF_URL.format(pdf_id)
-        for attempt in range(retries):
+        attempt = 0
+        base_delay = 15  # Start with 15 second delay for PDF rate limits
+
+        while True:  # Keep trying this version indefinitely
+            attempt += 1
             try:
-                resp = SESSION.get(url, timeout=15, stream=True)  # Reduced timeout from 30 to 15
-                if resp.status_code != 200:
-                    logger.warning(f"PDF {pdf_id} attempt {attempt+1} returned status {resp.status_code}")
-                    continue  # Removed sleep delay
+                resp = SESSION.get(url, timeout=15, stream=True)
+                if resp.status_code == 200:
+                    # Success - download the file
+                    with open(pdf_path, 'wb') as f:
+                        content = resp.content
+                        f.write(content)
+                        total_bytes = len(content)
 
-                # stream to disk
-                with open(pdf_path, 'wb') as f:
-                    # Option 1: Stream in chunks (memory efficient for large files)
-                    # for chunk in resp.iter_content(chunk_size=16384):
-                    #     if chunk:
-                    #         f.write(chunk)
-                    #         total_bytes += len(chunk)
+                    if total_bytes < 1024:
+                        logger.warning(f"PDF {pdf_id} too small ({total_bytes} bytes), removing")
+                        try:
+                            os.remove(pdf_path)
+                        except Exception:
+                            pass
+                        break  # Try next version
 
-                    # Option 2: Write all at once (faster for smaller files)
-                    content = resp.content
-                    f.write(content)
-                    total_bytes = len(content)
+                    logger.info(f"Downloaded {pdf_id} ({total_bytes} bytes)")
+                    return True, v, pdf_path
 
-                if total_bytes < 1024:
-                    logger.warning(f"PDF {pdf_id} too small ({total_bytes} bytes), removing")
-                    try:
-                        os.remove(pdf_path)
-                    except Exception:
-                        pass
-                    continue  # Removed sleep delay
+                elif resp.status_code == 429:
+                    # Rate limited - exponential backoff
+                    delay = min(base_delay * (2 ** (attempt - 1)), 900)  # Max 15 minute delay
+                    logger.warning(f"PDF download rate limited (429) for {pdf_id}. Waiting {delay} seconds before retry {attempt}...")
+                    time.sleep(delay)
+                    continue
 
-                logger.info(f"Downloaded {pdf_id} ({total_bytes} bytes)")
-                return True, v, pdf_path
+                else:
+                    logger.warning(f"PDF {pdf_id} returned status {resp.status_code}")
+                    break  # Try next version
+
             except Exception as e:
-                logger.warning(f"Download {pdf_id} attempt {attempt+1} failed: {e}")
-                continue  # Removed sleep delay
+                logger.warning(f"Download {pdf_id} attempt {attempt} failed: {e}")
+                time.sleep(1)
+                continue
 
-        logger.info(f"No valid response for {pdf_id} after {retries} attempts, trying next version")
-
-    logger.error(f"No version found for {paper_id}")
+    # All versions failed
     return False, None, None
 
 def process_paper(universal_id):
@@ -159,7 +209,7 @@ def process_paper(universal_id):
     safe_key = str(universal_id).replace('/', '_')
 
     # Attempt to download using universal id only (v0..v5)
-    success, actual_version, pdf_path = download_pdf(universal_id, 1)
+    success, actual_version, pdf_path = download_pdf(universal_id)
 
     if not success:
         logger.info(f"Download failed for {universal_id}")
@@ -356,7 +406,7 @@ def main():
         skip += 1000
 
         # Rate limiting between batches
-        time.sleep(0.5)
+        time.sleep(1)
 
     total_pbar.close()
     final_pdf_count = get_pdf_count()
