@@ -223,7 +223,7 @@ def generate_ocr_outputs(tokenized_data, metadata, original_images, output_path,
     jdx = 0
 
     logger.debug("Processing generation results")
-    for output, img in zip(outputs_list, original_images):
+    for output, img in tqdm(zip(outputs_list, original_images), desc="Processing OCR results", unit="page", total=len(outputs_list), ncols=80):
         content = output.outputs[0].text
 
         if '<｜end▁of▁sentence｜>' in content:
@@ -316,7 +316,8 @@ def main():
     logger.info(f"Loaded {len(tokenized_data)} tokenized items and {len(original_images)} images")
 
     # Process in batches for VLLM
-    for i in range(0, len(tokenized_data), args.batch_size):
+    total_batches = (len(tokenized_data) + args.batch_size - 1) // args.batch_size
+    for i in tqdm(range(0, len(tokenized_data), args.batch_size), desc="Processing batches", unit="batch", total=total_batches, ncols=80):
         batch_end = min(i + args.batch_size, len(tokenized_data))
         batch_tokenized = tokenized_data[i:batch_end]
         batch_images = original_images[i:batch_end]

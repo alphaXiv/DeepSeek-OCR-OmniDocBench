@@ -89,27 +89,31 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
         batch_metadata = []
         batch_image_paths = []
 
-        for pdf_path in tqdm(batch_paths, desc="Tokenizing PDFs"):
+        for pdf_path in tqdm(batch_paths, desc=f"Batch {batch_start//batch_size + 1} PDFs", unit="PDF", ncols=80):
             try:
                 logger.debug(f"Converting PDF to images: {pdf_path}")
                 # Convert PDF to images
                 images = pdf_to_images_high_quality(pdf_path)
 
-                # Save images and collect paths
+                # Create PDF-specific image directory
                 pdf_name = os.path.basename(pdf_path).replace('.pdf', '')
+                pdf_images_dir = os.path.join(images_dir, pdf_name)
+                os.makedirs(pdf_images_dir, exist_ok=True)
+
+                # Save images and collect paths
                 pdf_image_paths = []
 
                 for page_idx, image in enumerate(images):
-                    image_filename = f"{pdf_name}_page_{page_idx:03d}.png"
-                    image_path = os.path.join(images_dir, image_filename)
+                    image_filename = f"page_{page_idx:03d}.png"
+                    image_path = os.path.join(pdf_images_dir, image_filename)
                     image.save(image_path, 'PNG')
                     pdf_image_paths.append(image_path)
 
-                logger.debug(f"Saved {len(pdf_image_paths)} images for {pdf_name}")
+                logger.debug(f"Saved {len(pdf_image_paths)} images for {pdf_name} in {pdf_images_dir}")
 
                 # Tokenize all images in this PDF
                 pdf_tokenized = []
-                for image in images:
+                for image in tqdm(images, desc=f"Tokenizing {pdf_name} pages", unit="page"):
                     tokenized_item = process_single_image(image)
                     pdf_tokenized.append(tokenized_item)
 
@@ -119,7 +123,8 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100):
                     'pdf_name': pdf_name,
                     'num_pages': len(images),
                     'tokenized_count': len(pdf_tokenized),
-                    'image_paths': pdf_image_paths
+                    'image_paths': pdf_image_paths,
+                    'images_dir': pdf_images_dir
                 })
 
                 all_tokenized_data.extend(pdf_tokenized)
@@ -166,21 +171,25 @@ def tokenize_single_pdf(pdf_path, output_dir):
         # Convert PDF to images
         images = pdf_to_images_high_quality(pdf_path)
 
-        # Save images and collect paths
+        # Create PDF-specific image directory
         pdf_name = os.path.basename(pdf_path).replace('.pdf', '')
+        pdf_images_dir = os.path.join(images_dir, pdf_name)
+        os.makedirs(pdf_images_dir, exist_ok=True)
+
+        # Save images and collect paths
         image_paths = []
 
         for page_idx, image in enumerate(images):
-            image_filename = f"{pdf_name}_page_{page_idx:03d}.png"
-            image_path = os.path.join(images_dir, image_filename)
+            image_filename = f"page_{page_idx:03d}.png"
+            image_path = os.path.join(pdf_images_dir, image_filename)
             image.save(image_path, 'PNG')
             image_paths.append(image_path)
 
-        logger.debug(f"Saved {len(image_paths)} images for {pdf_name}")
+        logger.debug(f"Saved {len(image_paths)} images for {pdf_name} in {pdf_images_dir}")
 
         # Tokenize all images
         tokenized_data = []
-        for image in tqdm(images, desc="Tokenizing pages"):
+        for image in tqdm(images, desc=f"Tokenizing {pdf_name}", unit="page", ncols=80):
             tokenized_item = process_single_image(image)
             tokenized_data.append(tokenized_item)
 
@@ -193,7 +202,8 @@ def tokenize_single_pdf(pdf_path, output_dir):
                 'pdf_name': pdf_name,
                 'num_pages': len(images),
                 'tokenized_data': tokenized_data,
-                'image_paths': image_paths
+                'image_paths': image_paths,
+                'images_dir': pdf_images_dir
             }, f)
 
         logger.info(f"Saved tokenized data to {output_file} ({len(tokenized_data)} pages, {len(image_paths)} images)")
