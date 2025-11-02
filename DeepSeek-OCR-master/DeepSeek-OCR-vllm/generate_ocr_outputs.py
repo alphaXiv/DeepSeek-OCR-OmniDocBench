@@ -35,29 +35,41 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 def load_all_tokenized_data(tokenized_dir):
     """Load all tokenized data from directory with saved images"""
     logger.info(f"Loading all tokenized data from {tokenized_dir}")
-    batch_files = [os.path.join(tokenized_dir, f) for f in os.listdir(tokenized_dir)
-                   if f.startswith('tokenized_batch_') and f.endswith('.pkl')]
-    batch_files.sort()
+
+    # Look for both batch files and individual PDF files
+    all_pickle_files = [os.path.join(tokenized_dir, f) for f in os.listdir(tokenized_dir)
+                       if f.endswith('.pkl')]
+    all_pickle_files.sort()
 
     all_tokenized_data = []
     all_metadata = []
     all_images = []
 
-    for batch_file in batch_files:
-        logger.debug(f"Loading {batch_file}")
-        with open(batch_file, 'rb') as f:
-            batch_data = pickle.load(f)
+    for pickle_file in all_pickle_files:
+        logger.debug(f"Loading {pickle_file}")
+        try:
+            with open(pickle_file, 'rb') as f:
+                data = pickle.load(f)
 
-        all_tokenized_data.extend(batch_data['tokenized_data'])
-        all_metadata.extend(batch_data['metadata'])
+            # Handle both batch format and individual PDF format
+            if 'tokenized_data' in data and 'metadata' in data and 'image_paths' in data:
+                # This is batch format or individual PDF format
+                all_tokenized_data.extend(data['tokenized_data'])
+                all_metadata.extend(data['metadata']) if isinstance(data['metadata'], list) else all_metadata.append(data['metadata'])
 
-        # Load images for this batch
-        for image_path in batch_data['image_paths']:
-            if os.path.exists(image_path):
-                img = Image.open(image_path)
-                all_images.append(img)
+                # Load images for this file
+                for image_path in data['image_paths']:
+                    if os.path.exists(image_path):
+                        img = Image.open(image_path)
+                        all_images.append(img)
+                    else:
+                        logger.warning(f"Saved image not found: {image_path}")
             else:
-                raise FileNotFoundError(f"Saved image not found: {image_path}")
+                logger.warning(f"Unexpected pickle file format in {pickle_file}")
+
+        except Exception as e:
+            logger.error(f"Error loading {pickle_file}: {e}")
+            continue
 
     logger.info(f"Loaded {len(all_tokenized_data)} tokenized items and {len(all_images)} images")
     return all_tokenized_data, all_metadata, all_images

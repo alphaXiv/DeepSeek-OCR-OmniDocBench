@@ -70,8 +70,8 @@ def process_single_image(image):
 
 def process_single_pdf(pdf_path, output_dir):
     """
-    Process a single PDF: convert to images, save them, and tokenize
-    Returns: (tokenized_data, metadata, image_paths)
+    Process a single PDF: convert to images, save them, tokenize, and save results
+    This function saves individual pickle files for multiprocessing compatibility
     """
     try:
         logger.debug(f"Converting PDF to images: {pdf_path}")
@@ -114,11 +114,24 @@ def process_single_pdf(pdf_path, output_dir):
             'images_dir': pdf_images_dir
         }
 
-        return pdf_tokenized, metadata, pdf_image_paths
+        # Save individual pickle file for this PDF
+        output_file = os.path.join(output_dir, f"{pdf_name}_tokenized.pkl")
+        with open(output_file, 'wb') as f:
+            pickle.dump({
+                'pdf_path': pdf_path,
+                'pdf_name': pdf_name,
+                'num_pages': len(images),
+                'tokenized_data': pdf_tokenized,
+                'image_paths': pdf_image_paths,
+                'images_dir': pdf_images_dir
+            }, f)
+
+        logger.info(f"Saved tokenized data to {output_file} ({len(pdf_tokenized)} pages, {len(pdf_image_paths)} images)")
+        return True  # Success
 
     except Exception as e:
         logger.error(f"Error processing {pdf_path}: {e}")
-        return [], {}, []
+        return False
 
 
 def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100, num_workers=None):
@@ -140,7 +153,7 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100, num_workers=None):
 
         logger.info(f"Processing batch {batch_start//batch_size + 1}: {len(batch_paths)} PDFs using {num_workers} workers")
 
-        # Process PDFs in parallel
+        # Process PDFs in parallel - each worker saves its own file
         with Pool(processes=num_workers) as pool:
             # Create partial function with output_dir
             from functools import partial
@@ -155,34 +168,12 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100, num_workers=None):
                 ncols=80
             ))
 
-        # Collect results
-        all_tokenized_data = []
-        batch_metadata = []
-        batch_image_paths = []
+        # Count successful processing
+        successful_count = sum(1 for result in results if result)
+        logger.info(f"Successfully processed {successful_count}/{len(batch_paths)} PDFs in batch {batch_start//batch_size + 1}")
 
-        for pdf_tokenized, metadata, image_paths in results:
-            if pdf_tokenized:  # Only add successful results
-                all_tokenized_data.extend(pdf_tokenized)
-                batch_metadata.append(metadata)
-                batch_image_paths.extend(image_paths)
-
-        # Save this batch
-        batch_file = os.path.join(output_dir, f"tokenized_batch_{batch_start//batch_size + 1:04d}.pkl")
-        with open(batch_file, 'wb') as f:
-            pickle.dump({
-                'tokenized_data': all_tokenized_data,
-                'metadata': batch_metadata,
-                'image_paths': batch_image_paths,
-                'batch_info': {
-                    'batch_start': batch_start,
-                    'batch_end': batch_end,
-                    'total_tokenized': len(all_tokenized_data),
-                    'total_images': len(batch_image_paths),
-                    'num_workers': num_workers
-                }
-            }, f)
-
-        logger.info(f"Saved batch to {batch_file} ({len(all_tokenized_data)} tokenized items, {len(batch_image_paths)} images)")
+        # Note: Individual pickle files are saved by each worker process
+        # No batch file needed since generation loads all individual files
 
     logger.info("Batch tokenization completed")
 
