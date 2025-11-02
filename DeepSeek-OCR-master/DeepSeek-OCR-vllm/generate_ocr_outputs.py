@@ -318,26 +318,84 @@ def main():
         include_stop_str_in_output=True,
     )
 
-    # Load tokenized data
-    logger.debug("Loading tokenized data")
+    # Load and process tokenized data in batches
+    logger.debug("Starting batch processing of tokenized data")
+
     if args.tokenized_file:
+        # Single file processing
         tokenized_data, metadata, original_images = load_single_tokenized_pdf(args.tokenized_file)
+        logger.info(f"Loaded {len(tokenized_data)} tokenized items and {len(original_images)} images")
+
+        # Process single file as one batch
+        batch_output_dir = os.path.join(args.output, "single_file")
+        generate_ocr_outputs(tokenized_data, metadata, original_images, batch_output_dir, llm, sampling_params)
     else:
-        tokenized_data, metadata, original_images = load_all_tokenized_data(args.tokenized_dir)
+        # Directory processing - load and process in batches
+        all_pickle_files = [os.path.join(args.tokenized_dir, f) for f in os.listdir(args.tokenized_dir)
+                           if f.endswith('.pkl')]
+        all_pickle_files.sort()
 
-    logger.info(f"Loaded {len(tokenized_data)} tokenized items and {len(original_images)} images")
+        logger.info(f"Found {len(all_pickle_files)} pickle files to process in batches")
 
-    # Process in batches for VLLM
-    total_batches = (len(tokenized_data) + args.batch_size - 1) // args.batch_size
-    for i in tqdm(range(0, len(tokenized_data), args.batch_size), desc="Processing batches", unit="batch", total=total_batches, ncols=80):
-        batch_end = min(i + args.batch_size, len(tokenized_data))
-        batch_tokenized = tokenized_data[i:batch_end]
-        batch_images = original_images[i:batch_end]
+        # Process files in batches (both loading and generation)
+        file_batch_size = args.batch_size  # Use same batch size for file loading
+        total_file_batches = (len(all_pickle_files) + file_batch_size - 1) // file_batch_size
 
-        logger.info(f"Processing batch {i//args.batch_size + 1}: {len(batch_tokenized)} items")
+        for file_batch_idx in range(0, len(all_pickle_files), file_batch_size):
+            file_batch_end = min(file_batch_idx + file_batch_size, len(all_pickle_files))
+            file_batch = all_pickle_files[file_batch_idx:file_batch_end]
 
-        batch_output_dir = os.path.join(args.output, f"batch_{i//args.batch_size + 1:04d}")
-        generate_ocr_outputs(batch_tokenized, metadata, batch_images, batch_output_dir, llm, sampling_params)
+            logger.info(f"Loading file batch {file_batch_idx//file_batch_size + 1}/{total_file_batches}: {len(file_batch)} files")
+
+            # Load this batch of files
+            batch_tokenized_data = []
+            batch_metadata = []
+            batch_images = []
+
+            for pickle_file in file_batch:
+                logger.debug(f"Loading {pickle_file}")
+                try:
+                    with open(pickle_file, 'rb') as f:
+                        data = pickle.load(f)
+
+                    # Handle individual PDF format
+                    if 'tokenized_data' in data and 'image_paths' in data:
+                        batch_tokenized_data.extend(data['tokenized_data'])
+                        batch_metadata.append(data)  # Single metadata dict per file
+
+                        # Load images for this file
+                        for image_path in data['image_paths']:
+                            if os.path.exists(image_path):
+                                img = Image.open(image_path)
+                                batch_images.append(img)
+                            else:
+                                logger.warning(f"Saved image not found: {image_path}")
+                    else:
+                        logger.warning(f"Unexpected pickle file format in {pickle_file}")
+
+                except Exception as e:
+                    logger.error(f"Error loading {pickle_file}: {e}")
+                    continue
+
+            logger.info(f"Loaded batch with {len(batch_tokenized_data)} tokenized items and {len(batch_images)} images")
+
+            if not batch_tokenized_data:
+                logger.warning(f"No valid data in file batch {file_batch_idx//file_batch_size + 1}, skipping")
+                continue
+
+            # Process this batch with VLLM (further subdivide if needed)
+            vllm_batch_size = args.batch_size
+            total_vllm_batches = (len(batch_tokenized_data) + vllm_batch_size - 1) // vllm_batch_size
+
+            for vllm_batch_idx in range(0, len(batch_tokenized_data), vllm_batch_size):
+                vllm_batch_end = min(vllm_batch_idx + vllm_batch_size, len(batch_tokenized_data))
+                vllm_tokenized = batch_tokenized_data[vllm_batch_idx:vllm_batch_end]
+                vllm_images = batch_images[vllm_batch_idx:vllm_batch_end]
+
+                logger.info(f"Processing VLLM batch {vllm_batch_idx//vllm_batch_size + 1}/{total_vllm_batches}: {len(vllm_tokenized)} items")
+
+                batch_output_dir = os.path.join(args.output, f"file_batch_{file_batch_idx//file_batch_size + 1:04d}_vllm_batch_{vllm_batch_idx//vllm_batch_size + 1:04d}")
+                generate_ocr_outputs(vllm_tokenized, batch_metadata, vllm_images, batch_output_dir, llm, sampling_params)
 
     logger.info("OCR generation process completed")
 
