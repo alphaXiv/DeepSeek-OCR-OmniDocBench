@@ -154,14 +154,13 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100, num_workers=None):
         logger.info(f"Processing batch {batch_start//batch_size + 1}: {len(batch_paths)} PDFs using {num_workers} workers")
 
         # Process PDFs in parallel - each worker saves its own file
-        with Pool(processes=num_workers) as pool:
-            # Create partial function with output_dir
-            from functools import partial
-            process_pdf_with_output = partial(process_single_pdf, output_dir=output_dir)
+        # Create argument tuples for starmap: (pdf_path, output_dir)
+        pdf_args = [(pdf_path, output_dir) for pdf_path in batch_paths]
 
-            # Process PDFs in parallel with progress bar
+        with Pool(processes=num_workers) as pool:
+            # Use starmap to pass multiple arguments
             results = list(tqdm(
-                pool.imap(process_pdf_with_output, batch_paths),
+                pool.starmap(process_single_pdf, pdf_args),
                 desc=f"Batch {batch_start//batch_size + 1} PDFs",
                 unit="PDF",
                 total=len(batch_paths),
