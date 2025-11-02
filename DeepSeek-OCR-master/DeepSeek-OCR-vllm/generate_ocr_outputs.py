@@ -212,6 +212,61 @@ def pil_to_pdf_img2pdf(pil_images, output_path):
         print(f"error: {e}")
 
 
+def save_pdf_results(outputs_list, metadata, original_images, output_path):
+    """Save OCR results for a single PDF"""
+
+    logger.debug(f"Saving results for {len(outputs_list)} pages to {output_path}")
+
+    # Process results
+    mmd_det_path = os.path.join(output_path, 'ocr_detailed.mmd')
+    mmd_path = os.path.join(output_path, 'ocr_content.mmd')
+    pdf_out_path = os.path.join(output_path, 'ocr_layout.pdf')
+
+    contents_det = ''
+    contents = ''
+    draw_images = []
+    jdx = 0
+
+    for output, img in zip(outputs_list, original_images):
+        content = output.outputs[0].text
+
+        if '<｜end▁of▁sentence｜>' in content:
+            content = content.replace('<｜end▁of▁sentence｜>', '')
+        else:
+            if SKIP_REPEAT:
+                continue
+
+        page_num = f'\n<--- Page {jdx + 1} --->'
+        contents_det += content + f'\n{page_num}\n'
+
+        image_draw = img.copy()
+        matches_ref, matches_images, mathes_other = re_match(content)
+        result_image = process_image_with_refs(image_draw, matches_ref, jdx, output_path)
+
+        draw_images.append(result_image)
+
+        for idx, a_match_image in enumerate(matches_images):
+            content = content.replace(a_match_image, f'![](images/' + str(jdx) + '_' + str(idx) + '.jpg)\n')
+
+        for idx, a_match_other in enumerate(mathes_other):
+            content = content.replace(a_match_other, '').replace('\\coloneqq', ':=').replace('\\eqqcolon', '=:').replace('\n\n\n\n', '\n\n').replace('\n\n\n', '\n\n')
+
+        contents += content + f'\n{page_num}\n'
+        jdx += 1
+
+    # Save outputs
+    logger.debug("Saving output files")
+    with open(mmd_det_path, 'w', encoding='utf-8') as afile:
+        afile.write(contents_det)
+
+    with open(mmd_path, 'w', encoding='utf-8') as afile:
+        afile.write(contents)
+
+    pil_to_pdf_img2pdf(draw_images, pdf_out_path)
+
+    logger.debug(f"Saved PDF results to {output_path}")
+
+
 def generate_ocr_outputs(tokenized_data, metadata, original_images, output_path, llm, sampling_params):
     """Generate OCR outputs from tokenized data"""
 
@@ -284,7 +339,7 @@ def main():
     parser.add_argument("--tokenized-file", "-f", help="Single tokenized data file")
     parser.add_argument("--original-pdfs", "-p", help="Directory containing original PDF files")
     parser.add_argument("--output", "-o", required=True, help="Output directory")
-    parser.add_argument("--batch-size", "-b", type=int, default=10, help="Number of pickle files to load per batch (each batch processed as one VLLM batch)")
+    parser.add_argument("--batch-size", "-b", type=int, default=10, help="Number of pickle files to load per VLLM batch (each PDF gets its own output directory)")
 
     args = parser.parse_args()
 
@@ -326,9 +381,21 @@ def main():
         tokenized_data, metadata, original_images = load_single_tokenized_pdf(args.tokenized_file)
         logger.info(f"Loaded {len(tokenized_data)} tokenized items and {len(original_images)} images")
 
-        # Process single file as one batch
-        batch_output_dir = os.path.join(args.output, "single_file")
-        generate_ocr_outputs(tokenized_data, metadata, original_images, batch_output_dir, llm, sampling_params)
+        # Process single file
+        pdf_name = os.path.splitext(os.path.basename(args.tokenized_file))[0]
+        # Remove .pdf extension if present for cleaner folder names
+        if pdf_name.endswith('.pdf'):
+            pdf_name = pdf_name[:-4]
+        pdf_output_dir = os.path.join(args.output, pdf_name)
+        os.makedirs(pdf_output_dir, exist_ok=True)
+        os.makedirs(f'{pdf_output_dir}/images', exist_ok=True)
+
+        # Generate outputs
+        logger.debug("Starting VLLM generation")
+        outputs_list = llm.generate(tokenized_data, sampling_params=sampling_params)
+
+        # Save results
+        save_pdf_results(outputs_list, metadata, original_images, pdf_output_dir)
     else:
         # Directory processing - load pickle files in batches and process each batch through VLLM
         all_pickle_files = [os.path.join(args.tokenized_dir, f) for f in os.listdir(args.tokenized_dir)
@@ -353,6 +420,7 @@ def main():
             batch_tokenized_data = []
             batch_metadata = []
             batch_images = []
+            pdf_info = []  # Track which PDF each item belongs to
 
             for pickle_file in tqdm(file_batch, desc=f"Loading batch {file_batch_idx//file_batch_size + 1}", unit="file", ncols=80):
                 logger.debug(f"Loading {pickle_file}")
@@ -362,16 +430,34 @@ def main():
 
                     # Handle individual PDF format
                     if 'tokenized_data' in data and 'image_paths' in data:
+                        pdf_name = os.path.splitext(os.path.basename(pickle_file))[0]  # Get PDF name without .pkl
+                        # Remove .pdf extension if present for cleaner folder names
+                        if pdf_name.endswith('.pdf'):
+                            pdf_name = pdf_name[:-4]
+                        num_items = len(data['tokenized_data'])
+                        num_images = len(data['image_paths'])
+
                         batch_tokenized_data.extend(data['tokenized_data'])
                         batch_metadata.append(data)  # Single metadata dict per file
 
                         # Load images for this file
+                        pdf_images = []
                         for image_path in data['image_paths']:
                             if os.path.exists(image_path):
                                 img = Image.open(image_path)
-                                batch_images.append(img)
+                                pdf_images.append(img)
                             else:
                                 logger.warning(f"Saved image not found: {image_path}")
+                        batch_images.extend(pdf_images)
+
+                        # Track PDF info for splitting results later
+                        pdf_info.append({
+                            'name': pdf_name,
+                            'num_items': num_items,
+                            'num_images': num_images,
+                            'images': pdf_images,
+                            'metadata': data
+                        })
                     else:
                         logger.warning(f"Unexpected pickle file format in {pickle_file}")
 
@@ -388,8 +474,36 @@ def main():
             # Process this entire batch through VLLM as one large batch
             logger.info(f"Processing batch {file_batch_idx//file_batch_size + 1} through VLLM: {len(batch_tokenized_data)} items")
 
-            batch_output_dir = os.path.join(args.output, f"batch_{file_batch_idx//file_batch_size + 1:04d}")
-            generate_ocr_outputs(batch_tokenized_data, batch_metadata, batch_images, batch_output_dir, llm, sampling_params)
+            # Generate outputs in batches
+            logger.debug("Starting VLLM generation")
+            outputs_list = llm.generate(batch_tokenized_data, sampling_params=sampling_params)
+
+            # Split results back by PDF and save each PDF separately
+            item_offset = 0
+            image_offset = 0
+
+            for pdf_data in pdf_info:
+                pdf_name = pdf_data['name']
+                num_items = pdf_data['num_items']
+                num_images = pdf_data['num_images']
+                pdf_images = pdf_data['images']
+                pdf_metadata = pdf_data['metadata']
+
+                # Extract this PDF's results from the batch
+                pdf_outputs = outputs_list[item_offset:item_offset + num_items]
+
+                # Create PDF-specific output directory
+                pdf_output_dir = os.path.join(args.output, pdf_name)
+                os.makedirs(pdf_output_dir, exist_ok=True)
+                os.makedirs(f'{pdf_output_dir}/images', exist_ok=True)
+
+                logger.info(f"Saving results for PDF: {pdf_name} to {pdf_output_dir}")
+
+                # Process and save this PDF's results
+                save_pdf_results(pdf_outputs, pdf_metadata, pdf_images, pdf_output_dir)
+
+                item_offset += num_items
+                image_offset += num_images
 
     logger.info("OCR generation process completed")
 
