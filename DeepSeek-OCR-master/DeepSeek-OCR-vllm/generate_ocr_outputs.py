@@ -1,11 +1,10 @@
-import threading
-import queue
 import os
 import pickle
 import argparse
 import re
 import io
 import logging
+import threading
 from tqdm import tqdm
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
@@ -34,100 +33,72 @@ os.environ['VLLM_USE_V1'] = '0'
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 
-def load_batch_background(file_batch, batch_queue, batch_idx):
-    """Load a batch of pickle files in the background"""
-    try:
-        logger.info(f"Background loading batch {batch_idx}: {len(file_batch)} files")
+def load_all_pickle_files(tokenized_dir):
+    """Load all pickle file paths from directory"""
+    logger.info(f"Loading all pickle file paths from {tokenized_dir}")
 
-        batch_tokenized_data = []
-        pdf_info = []
-
-        for pickle_file in file_batch:
-            logger.debug(f"Loading {pickle_file}")
-            try:
-                with open(pickle_file, 'rb') as f:
-                    data = pickle.load(f)
-
-                # Handle individual PDF format
-                if 'tokenized_data' in data and 'image_paths' in data:
-                    pdf_name = os.path.splitext(os.path.basename(pickle_file))[0]
-                    if pdf_name.endswith('.pdf'):
-                        pdf_name = pdf_name[:-4]
-                    num_items = len(data['tokenized_data'])
-                    num_images = len(data['image_paths'])
-
-                    batch_tokenized_data.extend(data['tokenized_data'])
-
-                    # Track PDF info for splitting results later
-                    pdf_info.append({
-                        'name': pdf_name,
-                        'num_items': num_items,
-                        'num_images': num_images,
-                        'image_paths': data['image_paths'],
-                        'metadata': data
-                    })
-                else:
-                    logger.warning(f"Unexpected pickle file format in {pickle_file}")
-
-            except Exception as e:
-                logger.error(f"Error loading {pickle_file}: {e}")
-                continue
-
-        batch_data = {
-            'tokenized_data': batch_tokenized_data,
-            'pdf_info': pdf_info,
-            'batch_idx': batch_idx
-        }
-
-        batch_queue.put(batch_data)
-        logger.info(f"Background loading completed for batch {batch_idx}: {len(batch_tokenized_data)} items from {len(pdf_info)} PDFs")
-
-    except Exception as e:
-        logger.error(f"Background loading failed for batch {batch_idx}: {e}")
-        batch_queue.put(None)  # Signal failure
-
-
-def load_all_tokenized_data(tokenized_dir):
-    """Load all tokenized data from directory with saved images"""
-    logger.info(f"Loading all tokenized data from {tokenized_dir}")
-
-    # Look for both batch files and individual PDF files
     all_pickle_files = [os.path.join(tokenized_dir, f) for f in os.listdir(tokenized_dir)
                        if f.endswith('.pkl')]
     all_pickle_files.sort()
 
-    all_tokenized_data = []
-    all_metadata = []
-    all_images = []
+    logger.info(f"Found {len(all_pickle_files)} pickle files")
+    return all_pickle_files
 
-    for pickle_file in all_pickle_files:
-        logger.debug(f"Loading {pickle_file}")
+
+def load_pickle_batch(file_batch, batch_idx):
+    """Load a batch of pickle files using threading for parallel loading"""
+    logger.info(f"Loading batch {batch_idx}: {len(file_batch)} files")
+
+    batch_tokenized_data = []
+    pdf_info = []
+    lock = threading.Lock()
+
+    def load_single_pickle(pickle_file):
+        """Load a single pickle file and append to shared lists"""
         try:
+            logger.debug(f"Loading {pickle_file}")
             with open(pickle_file, 'rb') as f:
                 data = pickle.load(f)
 
-            # Handle both batch format and individual PDF format
-            if 'tokenized_data' in data and 'metadata' in data and 'image_paths' in data:
-                # This is batch format or individual PDF format
-                all_tokenized_data.extend(data['tokenized_data'])
-                all_metadata.extend(data['metadata']) if isinstance(data['metadata'], list) else all_metadata.append(data['metadata'])
+            # Handle individual PDF format
+            if 'tokenized_data' in data and 'image_paths' in data:
+                pdf_name = os.path.splitext(os.path.basename(pickle_file))[0]
+                if pdf_name.endswith('.pdf'):
+                    pdf_name = pdf_name[:-4]
+                num_items = len(data['tokenized_data'])
+                num_images = len(data['image_paths'])
 
-                # Load images for this file
-                for image_path in data['image_paths']:
-                    if os.path.exists(image_path):
-                        img = Image.open(image_path)
-                        all_images.append(img)
-                    else:
-                        logger.warning(f"Saved image not found: {image_path}")
+                pdf_data = {
+                    'name': pdf_name,
+                    'num_items': num_items,
+                    'num_images': num_images,
+                    'image_paths': data['image_paths'],
+                    'metadata': data,
+                    'tokenized_data': data['tokenized_data']
+                }
+
+                with lock:
+                    batch_tokenized_data.extend(data['tokenized_data'])
+                    pdf_info.append(pdf_data)
             else:
                 logger.warning(f"Unexpected pickle file format in {pickle_file}")
 
         except Exception as e:
             logger.error(f"Error loading {pickle_file}: {e}")
-            continue
 
-    logger.info(f"Loaded {len(all_tokenized_data)} tokenized items and {len(all_images)} images")
-    return all_tokenized_data, all_metadata, all_images
+    # Create and start threads for parallel loading
+    threads = []
+    for pickle_file in file_batch:
+        thread = threading.Thread(target=load_single_pickle, args=(pickle_file,))
+        threads.append(thread)
+        thread.start()
+
+    # Wait for all threads to complete
+    for thread in threads:
+        thread.join()
+
+    logger.info(f"Batch {batch_idx} loaded: {len(batch_tokenized_data)} items from {len(pdf_info)} PDFs")
+    return batch_tokenized_data, pdf_info
 
 
 def load_single_tokenized_pdf(tokenized_file):
@@ -147,6 +118,63 @@ def load_single_tokenized_pdf(tokenized_file):
 
     logger.debug(f"Loaded {len(original_images)} images from {tokenized_file}")
     return data['tokenized_data'], data, original_images
+
+
+def save_single_pdf(pdf_data, pdf_outputs, args_output):
+    """Save a single PDF with its results and images using threading for image loading"""
+    try:
+        pdf_name = pdf_data['name']
+        num_items = pdf_data['num_items']
+        image_paths = pdf_data['image_paths']
+        pdf_metadata = pdf_data['metadata']
+
+        # Load images for this PDF only during saving (lazy loading) using threading
+        image_results = []
+        lock = threading.Lock()
+
+        def load_single_image(image_path, index):
+            """Load a single image and store it at the correct index"""
+            try:
+                if os.path.exists(image_path):
+                    img = Image.open(image_path)
+                    with lock:
+                        image_results.append((index, img))
+                else:
+                    logger.warning(f"Saved image not found: {image_path}")
+                    with lock:
+                        image_results.append((index, None))
+            except Exception as e:
+                logger.error(f"Error loading image {image_path}: {e}")
+                with lock:
+                    image_results.append((index, None))
+
+        # Start threads for parallel image loading
+        image_threads = []
+        for idx, image_path in enumerate(image_paths):
+            thread = threading.Thread(target=load_single_image, args=(image_path, idx))
+            image_threads.append(thread)
+            thread.start()
+
+        # Wait for all image loading threads to complete
+        for thread in image_threads:
+            thread.join()
+
+        # Sort images back to correct order and filter out None values
+        image_results.sort(key=lambda x: x[0])  # Sort by index
+        pdf_images = [img for idx, img in image_results if img is not None]  # Filter None values
+
+        # Create PDF-specific output directory
+        pdf_output_dir = os.path.join(args_output, pdf_name)
+        os.makedirs(pdf_output_dir, exist_ok=True)
+        os.makedirs(f'{pdf_output_dir}/images', exist_ok=True)
+
+        logger.info(f"Saving results for PDF: {pdf_name} to {pdf_output_dir}")
+
+        # Process and save this PDF's results
+        save_pdf_results(pdf_outputs, pdf_metadata, pdf_images, pdf_output_dir)
+
+    except Exception as e:
+        logger.error(f"Error saving PDF {pdf_data.get('name', 'unknown')}: {e}")
 
 
 def re_match(text):
@@ -452,117 +480,60 @@ def main():
         # Save results
         save_pdf_results(outputs_list, metadata, original_images, pdf_output_dir)
     else:
-        # Directory processing - load pickle files in batches and process each batch through VLLM
-        all_pickle_files = [os.path.join(args.tokenized_dir, f) for f in os.listdir(args.tokenized_dir)
-                           if f.endswith('.pkl')]
-        all_pickle_files.sort()
+        # Directory processing - load all pickle file paths first, then process in batches
+        all_pickle_files = load_all_pickle_files(args.tokenized_dir)
 
-        logger.info(f"Found {len(all_pickle_files)} pickle files to process in batches")
+        logger.info(f"Processing {len(all_pickle_files)} pickle files in batches of {args.batch_size}")
 
-        # Process files in batches with background loading
+        # Process files in batches sequentially
         file_batch_size = args.batch_size  # Number of pickle files to load per batch
         total_file_batches = (len(all_pickle_files) + file_batch_size - 1) // file_batch_size
-        batch_queue = queue.Queue(maxsize=2)  # Buffer up to 2 batches
 
-        # Start background loading for first batch
-        current_batch_idx = 0
-        if current_batch_idx < total_file_batches:
-            file_batch_start = current_batch_idx * file_batch_size
-            file_batch_end = min((current_batch_idx + 1) * file_batch_size, len(all_pickle_files))
-            first_batch = all_pickle_files[file_batch_start:file_batch_end]
-            background_thread = threading.Thread(
-                target=load_batch_background,
-                args=(first_batch, batch_queue, current_batch_idx + 1)
-            )
-            background_thread.start()
-            current_batch_idx += 1
-
-        # Process batches with overlapping I/O and computation
         processed_batches = 0
-        while processed_batches < total_file_batches:
-            # Wait for current batch to be loaded
-            try:
-                batch_data = batch_queue.get(timeout=300)  # 5 minute timeout
-                if batch_data is None:
-                    logger.error("Batch loading failed, skipping")
-                    break
-            except queue.Empty:
-                logger.error("Timeout waiting for batch to load")
-                break
+        for batch_idx in range(total_file_batches):
+            file_batch_start = batch_idx * file_batch_size
+            file_batch_end = min((batch_idx + 1) * file_batch_size, len(all_pickle_files))
+            file_batch = all_pickle_files[file_batch_start:file_batch_end]
 
-            batch_tokenized_data = batch_data['tokenized_data']
-            pdf_info = batch_data['pdf_info']
-            batch_idx = batch_data['batch_idx']
+            logger.info(f"Processing batch {batch_idx + 1}/{total_file_batches}: files {file_batch_start + 1}-{file_batch_end}")
 
-            logger.info(f"Processing batch {batch_idx}/{total_file_batches}: {len(batch_tokenized_data)} items from {len(pdf_info)} PDFs")
+            # Load this batch of pickle files
+            batch_tokenized_data, pdf_info = load_pickle_batch(file_batch, batch_idx + 1)
 
             if not batch_tokenized_data:
-                logger.warning(f"No valid data in batch {batch_idx}, skipping")
-                # Start loading next batch if available
-                if current_batch_idx < total_file_batches:
-                    file_batch_start = current_batch_idx * file_batch_size
-                    file_batch_end = min((current_batch_idx + 1) * file_batch_size, len(all_pickle_files))
-                    next_batch = all_pickle_files[file_batch_start:file_batch_end]
-                    background_thread = threading.Thread(
-                        target=load_batch_background,
-                        args=(next_batch, batch_queue, current_batch_idx + 1)
-                    )
-                    background_thread.start()
-                    current_batch_idx += 1
+                logger.warning(f"No valid data in batch {batch_idx + 1}, skipping")
                 continue
-
-            # Start background loading for next batch while processing current
-            if current_batch_idx < total_file_batches:
-                file_batch_start = current_batch_idx * file_batch_size
-                file_batch_end = min((current_batch_idx + 1) * file_batch_size, len(all_pickle_files))
-                next_batch = all_pickle_files[file_batch_start:file_batch_end]
-                background_thread = threading.Thread(
-                    target=load_batch_background,
-                    args=(next_batch, batch_queue, current_batch_idx + 1)
-                )
-                background_thread.start()
-                current_batch_idx += 1
 
             # Process this batch through VLLM
             logger.debug("Starting VLLM generation")
             outputs_list = llm.generate(batch_tokenized_data, sampling_params=sampling_params)
 
-            # Split results back by PDF and save each PDF separately
+            # Split results back by PDF and save each PDF separately using threading
             item_offset = 0
+            pdf_save_threads = []
 
             for pdf_data in pdf_info:
                 pdf_name = pdf_data['name']
                 num_items = pdf_data['num_items']
-                image_paths = pdf_data['image_paths']
-                pdf_metadata = pdf_data['metadata']
 
                 # Extract this PDF's results from the batch
                 pdf_outputs = outputs_list[item_offset:item_offset + num_items]
 
-                # Load images for this PDF on-demand (in parallel for speed)
-                from concurrent.futures import ThreadPoolExecutor
-                def load_image(image_path):
-                    if os.path.exists(image_path):
-                        return Image.open(image_path)
-                    else:
-                        logger.warning(f"Saved image not found: {image_path}")
-                        return None
-
-                with ThreadPoolExecutor(max_workers=min(8, len(image_paths))) as executor:
-                    pdf_images = list(executor.map(load_image, image_paths))
-                pdf_images = [img for img in pdf_images if img is not None]  # Filter out None values
-
-                # Create PDF-specific output directory
-                pdf_output_dir = os.path.join(args.output, pdf_name)
-                os.makedirs(pdf_output_dir, exist_ok=True)
-                os.makedirs(f'{pdf_output_dir}/images', exist_ok=True)
-
-                logger.info(f"Saving results for PDF: {pdf_name} to {pdf_output_dir}")
-
-                # Process and save this PDF's results
-                save_pdf_results(pdf_outputs, pdf_metadata, pdf_images, pdf_output_dir)
+                # Start a thread to save this PDF
+                save_thread = threading.Thread(
+                    target=save_single_pdf,
+                    args=(pdf_data, pdf_outputs, args.output)
+                )
+                pdf_save_threads.append(save_thread)
+                save_thread.start()
 
                 item_offset += num_items
+
+            # Wait for all PDF saving threads to complete
+            for thread in pdf_save_threads:
+                thread.join()
+
+            logger.info(f"Completed saving {len(pdf_info)} PDFs from batch {batch_idx + 1}")
 
             processed_batches += 1
 
