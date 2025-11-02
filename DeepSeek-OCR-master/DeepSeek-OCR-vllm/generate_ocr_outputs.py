@@ -284,7 +284,7 @@ def main():
     parser.add_argument("--tokenized-file", "-f", help="Single tokenized data file")
     parser.add_argument("--original-pdfs", "-p", help="Directory containing original PDF files")
     parser.add_argument("--output", "-o", required=True, help="Output directory")
-    parser.add_argument("--batch-size", "-b", type=int, default=100, help="Batch size for VLLM generation")
+    parser.add_argument("--batch-size", "-b", type=int, default=10, help="Number of pickle files to load per batch (each batch processed as one VLLM batch)")
 
     args = parser.parse_args()
 
@@ -330,16 +330,18 @@ def main():
         batch_output_dir = os.path.join(args.output, "single_file")
         generate_ocr_outputs(tokenized_data, metadata, original_images, batch_output_dir, llm, sampling_params)
     else:
-        # Directory processing - load and process in batches
+        # Directory processing - load pickle files in batches and process each batch through VLLM
         all_pickle_files = [os.path.join(args.tokenized_dir, f) for f in os.listdir(args.tokenized_dir)
                            if f.endswith('.pkl')]
         all_pickle_files.sort()
 
         logger.info(f"Found {len(all_pickle_files)} pickle files to process in batches")
 
-        # Process files in batches (both loading and generation)
-        file_batch_size = args.batch_size  # Use same batch size for file loading
+        # Process files in batches for both loading and VLLM generation
+        file_batch_size = args.batch_size  # Number of pickle files to load per batch
         total_file_batches = (len(all_pickle_files) + file_batch_size - 1) // file_batch_size
+
+        logger.info(f"Processing {len(all_pickle_files)} files in {total_file_batches} file batches of size {file_batch_size}")
 
         for file_batch_idx in range(0, len(all_pickle_files), file_batch_size):
             file_batch_end = min(file_batch_idx + file_batch_size, len(all_pickle_files))
@@ -347,12 +349,12 @@ def main():
 
             logger.info(f"Loading file batch {file_batch_idx//file_batch_size + 1}/{total_file_batches}: {len(file_batch)} files")
 
-            # Load this batch of files
+            # Load this batch of pickle files
             batch_tokenized_data = []
             batch_metadata = []
             batch_images = []
 
-            for pickle_file in file_batch:
+            for pickle_file in tqdm(file_batch, desc=f"Loading batch {file_batch_idx//file_batch_size + 1}", unit="file", ncols=80):
                 logger.debug(f"Loading {pickle_file}")
                 try:
                     with open(pickle_file, 'rb') as f:
@@ -383,19 +385,11 @@ def main():
                 logger.warning(f"No valid data in file batch {file_batch_idx//file_batch_size + 1}, skipping")
                 continue
 
-            # Process this batch with VLLM (further subdivide if needed)
-            vllm_batch_size = args.batch_size
-            total_vllm_batches = (len(batch_tokenized_data) + vllm_batch_size - 1) // vllm_batch_size
+            # Process this entire batch through VLLM as one large batch
+            logger.info(f"Processing batch {file_batch_idx//file_batch_size + 1} through VLLM: {len(batch_tokenized_data)} items")
 
-            for vllm_batch_idx in range(0, len(batch_tokenized_data), vllm_batch_size):
-                vllm_batch_end = min(vllm_batch_idx + vllm_batch_size, len(batch_tokenized_data))
-                vllm_tokenized = batch_tokenized_data[vllm_batch_idx:vllm_batch_end]
-                vllm_images = batch_images[vllm_batch_idx:vllm_batch_end]
-
-                logger.info(f"Processing VLLM batch {vllm_batch_idx//vllm_batch_size + 1}/{total_vllm_batches}: {len(vllm_tokenized)} items")
-
-                batch_output_dir = os.path.join(args.output, f"file_batch_{file_batch_idx//file_batch_size + 1:04d}_vllm_batch_{vllm_batch_idx//vllm_batch_size + 1:04d}")
-                generate_ocr_outputs(vllm_tokenized, batch_metadata, vllm_images, batch_output_dir, llm, sampling_params)
+            batch_output_dir = os.path.join(args.output, f"batch_{file_batch_idx//file_batch_size + 1:04d}")
+            generate_ocr_outputs(batch_tokenized_data, batch_metadata, batch_images, batch_output_dir, llm, sampling_params)
 
     logger.info("OCR generation process completed")
 
