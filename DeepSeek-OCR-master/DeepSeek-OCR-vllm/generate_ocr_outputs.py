@@ -1,3 +1,5 @@
+import threading
+import queue
 import os
 import pickle
 import argparse
@@ -30,6 +32,59 @@ if torch.version.cuda == '11.8':
     os.environ["TRITON_PTXAS_PATH"] = "/usr/local/cuda-11.8/bin/ptxas"
 os.environ['VLLM_USE_V1'] = '0'
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+
+
+def load_batch_background(file_batch, batch_queue, batch_idx):
+    """Load a batch of pickle files in the background"""
+    try:
+        logger.info(f"Background loading batch {batch_idx}: {len(file_batch)} files")
+
+        batch_tokenized_data = []
+        pdf_info = []
+
+        for pickle_file in file_batch:
+            logger.debug(f"Loading {pickle_file}")
+            try:
+                with open(pickle_file, 'rb') as f:
+                    data = pickle.load(f)
+
+                # Handle individual PDF format
+                if 'tokenized_data' in data and 'image_paths' in data:
+                    pdf_name = os.path.splitext(os.path.basename(pickle_file))[0]
+                    if pdf_name.endswith('.pdf'):
+                        pdf_name = pdf_name[:-4]
+                    num_items = len(data['tokenized_data'])
+                    num_images = len(data['image_paths'])
+
+                    batch_tokenized_data.extend(data['tokenized_data'])
+
+                    # Track PDF info for splitting results later
+                    pdf_info.append({
+                        'name': pdf_name,
+                        'num_items': num_items,
+                        'num_images': num_images,
+                        'image_paths': data['image_paths'],
+                        'metadata': data
+                    })
+                else:
+                    logger.warning(f"Unexpected pickle file format in {pickle_file}")
+
+            except Exception as e:
+                logger.error(f"Error loading {pickle_file}: {e}")
+                continue
+
+        batch_data = {
+            'tokenized_data': batch_tokenized_data,
+            'pdf_info': pdf_info,
+            'batch_idx': batch_idx
+        }
+
+        batch_queue.put(batch_data)
+        logger.info(f"Background loading completed for batch {batch_idx}: {len(batch_tokenized_data)} items from {len(pdf_info)} PDFs")
+
+    except Exception as e:
+        logger.error(f"Background loading failed for batch {batch_idx}: {e}")
+        batch_queue.put(None)  # Signal failure
 
 
 def load_all_tokenized_data(tokenized_dir):
@@ -339,7 +394,7 @@ def main():
     parser.add_argument("--tokenized-file", "-f", help="Single tokenized data file")
     parser.add_argument("--original-pdfs", "-p", help="Directory containing original PDF files")
     parser.add_argument("--output", "-o", required=True, help="Output directory")
-    parser.add_argument("--batch-size", "-b", type=int, default=10, help="Number of pickle files to load per VLLM batch (each PDF gets its own output directory)")
+    parser.add_argument("--batch-size", "-b", type=int, default=50, help="Number of pickle files to load per VLLM batch (each PDF gets its own output directory)")
 
     args = parser.parse_args()
 
@@ -404,67 +459,71 @@ def main():
 
         logger.info(f"Found {len(all_pickle_files)} pickle files to process in batches")
 
-        # Process files in batches for both loading and VLLM generation
+        # Process files in batches with background loading
         file_batch_size = args.batch_size  # Number of pickle files to load per batch
         total_file_batches = (len(all_pickle_files) + file_batch_size - 1) // file_batch_size
+        batch_queue = queue.Queue(maxsize=2)  # Buffer up to 2 batches
 
-        logger.info(f"Processing {len(all_pickle_files)} files in {total_file_batches} file batches of size {file_batch_size}")
+        # Start background loading for first batch
+        current_batch_idx = 0
+        if current_batch_idx < total_file_batches:
+            file_batch_start = current_batch_idx * file_batch_size
+            file_batch_end = min((current_batch_idx + 1) * file_batch_size, len(all_pickle_files))
+            first_batch = all_pickle_files[file_batch_start:file_batch_end]
+            background_thread = threading.Thread(
+                target=load_batch_background,
+                args=(first_batch, batch_queue, current_batch_idx + 1)
+            )
+            background_thread.start()
+            current_batch_idx += 1
 
-        for file_batch_idx in range(0, len(all_pickle_files), file_batch_size):
-            file_batch_end = min(file_batch_idx + file_batch_size, len(all_pickle_files))
-            file_batch = all_pickle_files[file_batch_idx:file_batch_end]
+        # Process batches with overlapping I/O and computation
+        processed_batches = 0
+        while processed_batches < total_file_batches:
+            # Wait for current batch to be loaded
+            try:
+                batch_data = batch_queue.get(timeout=300)  # 5 minute timeout
+                if batch_data is None:
+                    logger.error("Batch loading failed, skipping")
+                    break
+            except queue.Empty:
+                logger.error("Timeout waiting for batch to load")
+                break
 
-            logger.info(f"Loading file batch {file_batch_idx//file_batch_size + 1}/{total_file_batches}: {len(file_batch)} files")
+            batch_tokenized_data = batch_data['tokenized_data']
+            pdf_info = batch_data['pdf_info']
+            batch_idx = batch_data['batch_idx']
 
-            # Load this batch of pickle files
-            batch_tokenized_data = []
-            batch_metadata = []
-            batch_images = []
-            pdf_info = []  # Track which PDF each item belongs to
-
-            for pickle_file in tqdm(file_batch, desc=f"Loading batch {file_batch_idx//file_batch_size + 1}", unit="file", ncols=80):
-                logger.debug(f"Loading {pickle_file}")
-                try:
-                    with open(pickle_file, 'rb') as f:
-                        data = pickle.load(f)
-
-                    # Handle individual PDF format
-                    if 'tokenized_data' in data and 'image_paths' in data:
-                        pdf_name = os.path.splitext(os.path.basename(pickle_file))[0]  # Get PDF name without .pkl
-                        # Remove .pdf extension if present for cleaner folder names
-                        if pdf_name.endswith('.pdf'):
-                            pdf_name = pdf_name[:-4]
-                        num_items = len(data['tokenized_data'])
-                        num_images = len(data['image_paths'])
-
-                        batch_tokenized_data.extend(data['tokenized_data'])
-                        batch_metadata.append(data)  # Single metadata dict per file
-
-                        # Track PDF info for splitting results later (don't load images yet)
-                        pdf_info.append({
-                            'name': pdf_name,
-                            'num_items': num_items,
-                            'num_images': num_images,
-                            'image_paths': data['image_paths'],  # Store paths instead of loaded images
-                            'metadata': data
-                        })
-                    else:
-                        logger.warning(f"Unexpected pickle file format in {pickle_file}")
-
-                except Exception as e:
-                    logger.error(f"Error loading {pickle_file}: {e}")
-                    continue
-
-            logger.info(f"Loaded batch with {len(batch_tokenized_data)} tokenized items from {len(pdf_info)} PDFs")
+            logger.info(f"Processing batch {batch_idx}/{total_file_batches}: {len(batch_tokenized_data)} items from {len(pdf_info)} PDFs")
 
             if not batch_tokenized_data:
-                logger.warning(f"No valid data in file batch {file_batch_idx//file_batch_size + 1}, skipping")
+                logger.warning(f"No valid data in batch {batch_idx}, skipping")
+                # Start loading next batch if available
+                if current_batch_idx < total_file_batches:
+                    file_batch_start = current_batch_idx * file_batch_size
+                    file_batch_end = min((current_batch_idx + 1) * file_batch_size, len(all_pickle_files))
+                    next_batch = all_pickle_files[file_batch_start:file_batch_end]
+                    background_thread = threading.Thread(
+                        target=load_batch_background,
+                        args=(next_batch, batch_queue, current_batch_idx + 1)
+                    )
+                    background_thread.start()
+                    current_batch_idx += 1
                 continue
 
-            # Process this entire batch through VLLM as one large batch
-            logger.info(f"Processing batch {file_batch_idx//file_batch_size + 1} through VLLM: {len(batch_tokenized_data)} items")
+            # Start background loading for next batch while processing current
+            if current_batch_idx < total_file_batches:
+                file_batch_start = current_batch_idx * file_batch_size
+                file_batch_end = min((current_batch_idx + 1) * file_batch_size, len(all_pickle_files))
+                next_batch = all_pickle_files[file_batch_start:file_batch_end]
+                background_thread = threading.Thread(
+                    target=load_batch_background,
+                    args=(next_batch, batch_queue, current_batch_idx + 1)
+                )
+                background_thread.start()
+                current_batch_idx += 1
 
-            # Generate outputs in batches
+            # Process this batch through VLLM
             logger.debug("Starting VLLM generation")
             outputs_list = llm.generate(batch_tokenized_data, sampling_params=sampling_params)
 
@@ -504,6 +563,8 @@ def main():
                 save_pdf_results(pdf_outputs, pdf_metadata, pdf_images, pdf_output_dir)
 
                 item_offset += num_items
+
+            processed_batches += 1
 
     logger.info("OCR generation process completed")
 
