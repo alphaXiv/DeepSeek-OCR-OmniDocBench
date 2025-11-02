@@ -94,10 +94,10 @@ def process_single_pdf(pdf_path, output_dir):
 
         logger.debug(f"Saved {len(pdf_image_paths)} images for {pdf_name} in {pdf_images_dir}")
 
-        # Tokenize all images in this PDF using multiprocessing
-        with Pool(processes=min(cpu_count(), len(images))) as pool:
+        # Tokenize all images in this PDF using threading (safe within multiprocessing workers)
+        with ThreadPoolExecutor(max_workers=min(cpu_count(), len(images))) as executor:
             pdf_tokenized = list(tqdm(
-                pool.imap(process_single_image, images),
+                executor.map(process_single_image, images),
                 desc=f"Tokenizing {pdf_name}",
                 unit="page",
                 total=len(images),
@@ -209,10 +209,10 @@ def tokenize_single_pdf(pdf_path, output_dir):
 
         logger.debug(f"Saved {len(image_paths)} images for {pdf_name} in {pdf_images_dir}")
 
-        # Tokenize all images using multiprocessing
-        with Pool(processes=min(cpu_count(), len(images))) as pool:
+        # Tokenize all images using threading
+        with ThreadPoolExecutor(max_workers=min(cpu_count(), len(images))) as executor:
             tokenized_data = list(tqdm(
-                pool.imap(process_single_image, images),
+                executor.map(process_single_image, images),
                 desc=f"Tokenizing {pdf_name}",
                 unit="page",
                 total=len(images),
