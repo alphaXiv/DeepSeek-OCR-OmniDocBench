@@ -440,22 +440,12 @@ def main():
                         batch_tokenized_data.extend(data['tokenized_data'])
                         batch_metadata.append(data)  # Single metadata dict per file
 
-                        # Load images for this file
-                        pdf_images = []
-                        for image_path in data['image_paths']:
-                            if os.path.exists(image_path):
-                                img = Image.open(image_path)
-                                pdf_images.append(img)
-                            else:
-                                logger.warning(f"Saved image not found: {image_path}")
-                        batch_images.extend(pdf_images)
-
-                        # Track PDF info for splitting results later
+                        # Track PDF info for splitting results later (don't load images yet)
                         pdf_info.append({
                             'name': pdf_name,
                             'num_items': num_items,
                             'num_images': num_images,
-                            'images': pdf_images,
+                            'image_paths': data['image_paths'],  # Store paths instead of loaded images
                             'metadata': data
                         })
                     else:
@@ -465,7 +455,7 @@ def main():
                     logger.error(f"Error loading {pickle_file}: {e}")
                     continue
 
-            logger.info(f"Loaded batch with {len(batch_tokenized_data)} tokenized items and {len(batch_images)} images")
+            logger.info(f"Loaded batch with {len(batch_tokenized_data)} tokenized items from {len(pdf_info)} PDFs")
 
             if not batch_tokenized_data:
                 logger.warning(f"No valid data in file batch {file_batch_idx//file_batch_size + 1}, skipping")
@@ -480,17 +470,28 @@ def main():
 
             # Split results back by PDF and save each PDF separately
             item_offset = 0
-            image_offset = 0
 
             for pdf_data in pdf_info:
                 pdf_name = pdf_data['name']
                 num_items = pdf_data['num_items']
-                num_images = pdf_data['num_images']
-                pdf_images = pdf_data['images']
+                image_paths = pdf_data['image_paths']
                 pdf_metadata = pdf_data['metadata']
 
                 # Extract this PDF's results from the batch
                 pdf_outputs = outputs_list[item_offset:item_offset + num_items]
+
+                # Load images for this PDF on-demand (in parallel for speed)
+                from concurrent.futures import ThreadPoolExecutor
+                def load_image(image_path):
+                    if os.path.exists(image_path):
+                        return Image.open(image_path)
+                    else:
+                        logger.warning(f"Saved image not found: {image_path}")
+                        return None
+
+                with ThreadPoolExecutor(max_workers=min(8, len(image_paths))) as executor:
+                    pdf_images = list(executor.map(load_image, image_paths))
+                pdf_images = [img for img in pdf_images if img is not None]  # Filter out None values
 
                 # Create PDF-specific output directory
                 pdf_output_dir = os.path.join(args.output, pdf_name)
@@ -503,7 +504,6 @@ def main():
                 save_pdf_results(pdf_outputs, pdf_metadata, pdf_images, pdf_output_dir)
 
                 item_offset += num_items
-                image_offset += num_images
 
     logger.info("OCR generation process completed")
 
