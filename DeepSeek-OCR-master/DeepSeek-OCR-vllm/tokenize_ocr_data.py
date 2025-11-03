@@ -134,7 +134,7 @@ def process_single_pdf(pdf_path, output_dir):
         return False
 
 
-def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100, num_workers=None):
+def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100, num_workers=None, start_batch=1):
     """
     Tokenize a batch of PDFs and save tokenized data with images using multiprocessing
     """
@@ -145,13 +145,50 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100, num_workers=None):
     if num_workers is None:
         num_workers = min(cpu_count(), 4)  # Default to 4 workers max to avoid memory issues
 
-    logger.info(f"Starting batch tokenization of {len(pdf_paths)} PDFs with batch_size={batch_size}, num_workers={num_workers}")
+    logger.info(f"Starting batch tokenization of {len(pdf_paths)} PDFs with batch_size={batch_size}, num_workers={num_workers}, start_batch={start_batch}")
 
-    for batch_start in range(0, len(pdf_paths), batch_size):
-        batch_end = min(batch_start + batch_size, len(pdf_paths))
-        batch_paths = pdf_paths[batch_start:batch_end]
+    # Calculate starting batch index (batches are 1-indexed in logs)
+    start_batch_idx = (start_batch - 1) * batch_size
 
-        logger.info(f"Processing batch {batch_start//batch_size + 1}: {len(batch_paths)} PDFs using {num_workers} workers")
+    # Filter out PDFs that have already been processed (check if tokenized file exists)
+    filtered_pdf_paths = []
+    skipped_count = 0
+
+    for pdf_path in pdf_paths:
+        pdf_name = os.path.basename(pdf_path).replace('.pdf', '')
+        tokenized_file = os.path.join(output_dir, f"{pdf_name}_tokenized.pkl")
+
+        if os.path.exists(tokenized_file):
+            skipped_count += 1
+            logger.debug(f"Skipping already processed PDF: {pdf_name}")
+        else:
+            filtered_pdf_paths.append(pdf_path)
+
+    if skipped_count > 0:
+        logger.info(f"Skipped {skipped_count} already processed PDFs")
+
+    # Adjust start_batch_idx if we've filtered out processed PDFs
+    if start_batch_idx >= len(filtered_pdf_paths):
+        logger.warning(f"Start batch {start_batch} would be beyond available PDFs ({len(filtered_pdf_paths)} remaining). Starting from beginning.")
+        start_batch_idx = 0
+        actual_start_batch = 1
+    else:
+        actual_start_batch = start_batch
+
+    logger.info(f"Processing {len(filtered_pdf_paths)} remaining PDFs starting from batch {actual_start_batch}")
+
+    if not filtered_pdf_paths:
+        logger.info("All PDFs have already been processed. Nothing to do.")
+        return
+
+    for batch_start in range(start_batch_idx, len(filtered_pdf_paths), batch_size):
+        batch_end = min(batch_start + batch_size, len(filtered_pdf_paths))
+        batch_paths = filtered_pdf_paths[batch_start:batch_end]
+
+        # Calculate actual batch number for logging (1-indexed)
+        batch_num = (batch_start // batch_size) + actual_start_batch
+
+        logger.info(f"Processing batch {batch_num}: {len(batch_paths)} PDFs using {num_workers} workers")
 
         # Process PDFs in parallel - each worker saves its own file
         # Create argument tuples for starmap: (pdf_path, output_dir)
@@ -161,7 +198,7 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100, num_workers=None):
             # Use starmap to pass multiple arguments
             results = list(tqdm(
                 pool.starmap(process_single_pdf, pdf_args),
-                desc=f"Batch {batch_start//batch_size + 1} PDFs",
+                desc=f"Batch {batch_num} PDFs",
                 unit="PDF",
                 total=len(batch_paths),
                 ncols=80
@@ -169,7 +206,7 @@ def tokenize_pdf_batch(pdf_paths, output_dir, batch_size=100, num_workers=None):
 
         # Count successful processing
         successful_count = sum(1 for result in results if result)
-        logger.info(f"Successfully processed {successful_count}/{len(batch_paths)} PDFs in batch {batch_start//batch_size + 1}")
+        logger.info(f"Successfully processed {successful_count}/{len(batch_paths)} PDFs in batch {batch_num}")
 
         # Note: Individual pickle files are saved by each worker process
         # No batch file needed since generation loads all individual files
@@ -244,10 +281,11 @@ if __name__ == "__main__":
     parser.add_argument("--batch-size", "-b", type=int, default=50, help="Batch size for processing multiple PDFs")
     parser.add_argument("--workers", "-w", type=int, default=None, help="Number of worker processes (default: min(cpu_count, 4))")
     parser.add_argument("--single", "-s", action="store_true", help="Process single PDF instead of batch")
+    parser.add_argument("--start-batch", type=int, default=1, help="Start processing from this batch number (for resuming interrupted runs)")
 
     args = parser.parse_args()
 
-    logger.info(f"Starting tokenization with args: input={args.input}, output={args.output}, batch_size={args.batch_size}, workers={args.workers}, single={args.single}")
+    logger.info(f"Starting tokenization with args: input={args.input}, output={args.output}, batch_size={args.batch_size}, workers={args.workers}, single={args.single}, start_batch={args.start_batch}")
 
     if args.single:
         tokenize_single_pdf(args.input, args.output)
@@ -259,6 +297,6 @@ if __name__ == "__main__":
                         if f.lower().endswith('.pdf')]
 
         logger.info(f"Found {len(pdf_paths)} PDF files to process")
-        tokenize_pdf_batch(pdf_paths, args.output, args.batch_size, args.workers)
+        tokenize_pdf_batch(pdf_paths, args.output, args.batch_size, args.workers, args.start_batch)
 
     logger.info("Tokenization completed")

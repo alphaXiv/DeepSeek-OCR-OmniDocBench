@@ -540,9 +540,18 @@ def main():
 
         logger.info(f"Processing {len(all_pickle_files)} pickle files in batches of {args.batch_size}")
 
-        # Create progress tracking file
+        # Create progress tracking file (initialize if it doesn't exist)
         progress_file = os.path.join(args.output, "processing_progress.txt")
         os.makedirs(args.output, exist_ok=True)
+
+        # Initialize progress file if it doesn't exist (first run)
+        if not os.path.exists(progress_file):
+            with open(progress_file, 'w') as f:
+                f.write("Processed batches: 0\n")
+                f.write("Processed files: 0\n")
+                f.write("Last batch: 0\n")
+                f.write("Last file: none\n")
+            logger.info("Initialized new progress file for first run")
 
         # Auto-resume from last processed file if no start-from specified
         if not args.start_from:
