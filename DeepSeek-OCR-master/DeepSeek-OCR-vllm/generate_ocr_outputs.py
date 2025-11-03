@@ -33,6 +33,34 @@ os.environ['VLLM_USE_V1'] = '0'
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 
+def load_processing_progress(progress_file):
+    """Load progress from previous run to enable resuming"""
+    if not os.path.exists(progress_file):
+        return None
+
+    try:
+        with open(progress_file, 'r') as f:
+            lines = f.readlines()
+
+        progress = {}
+        for line in lines:
+            if ':' in line:
+                key, value = line.strip().split(':', 1)
+                progress[key.strip()] = value.strip()
+
+        last_file = progress.get('Last file')
+        if last_file:
+            # Remove .pkl extension for consistency
+            if last_file.endswith('.pkl'):
+                last_file = last_file[:-4]
+            return last_file
+
+    except Exception as e:
+        logger.warning(f"Could not read progress file: {e}")
+
+    return None
+
+
 def load_all_pickle_files(tokenized_dir):
     """Load all pickle file paths from directory"""
     logger.info(f"Loading all pickle file paths from {tokenized_dir}")
@@ -423,10 +451,11 @@ def main():
     parser.add_argument("--original-pdfs", "-p", help="Directory containing original PDF files")
     parser.add_argument("--output", "-o", required=True, help="Output directory")
     parser.add_argument("--batch-size", "-b", type=int, default=50, help="Number of pickle files to load per VLLM batch (each PDF gets its own output directory)")
+    parser.add_argument("--start-from", "-s", help="Start processing from this pickle file (filename without .pkl extension). Useful for resuming interrupted runs.")
 
     args = parser.parse_args()
 
-    logger.info(f"Arguments: tokenized_dir={args.tokenized_dir}, tokenized_file={args.tokenized_file}, output={args.output}, batch_size={args.batch_size}")
+    logger.info(f"Arguments: tokenized_dir={args.tokenized_dir}, tokenized_file={args.tokenized_file}, output={args.output}, batch_size={args.batch_size}, start_from={args.start_from}")
 
     # Initialize VLLM model
     logger.debug("Initializing VLLM model")
@@ -479,23 +508,62 @@ def main():
 
         # Save results
         save_pdf_results(outputs_list, metadata, original_images, pdf_output_dir)
-    else:
-        # Directory processing - load all pickle file paths first, then process in batches
+
+    elif args.tokenized_dir:
         all_pickle_files = load_all_pickle_files(args.tokenized_dir)
 
+        # Filter files based on start-from parameter
+        if args.start_from:
+            start_filename = f"{args.start_from}.pkl"
+            # Find files that come after the start file (alphabetically)
+            filtered_files = []
+            found_start = False
+            for file_path in all_pickle_files:
+                filename = os.path.basename(file_path)
+                if not found_start and filename == start_filename:
+                    found_start = True
+                    filtered_files.append(file_path)  # Include the start file
+                elif found_start:
+                    filtered_files.append(file_path)
+
+            if not found_start:
+                logger.warning(f"Start file '{start_filename}' not found. Processing all files.")
+                filtered_files = all_pickle_files
+            else:
+                logger.info(f"Starting from file: {start_filename} ({len(filtered_files)} files to process)")
+
+            all_pickle_files = filtered_files
+
+        if not all_pickle_files:
+            logger.warning("No files to process. Exiting.")
+            return
+
         logger.info(f"Processing {len(all_pickle_files)} pickle files in batches of {args.batch_size}")
+
+        # Create progress tracking file
+        progress_file = os.path.join(args.output, "processing_progress.txt")
+        os.makedirs(args.output, exist_ok=True)
+
+        # Auto-resume from last processed file if no start-from specified
+        if not args.start_from:
+            last_processed = load_processing_progress(progress_file)
+            if last_processed:
+                args.start_from = last_processed
+                logger.info(f"Auto-resuming from last processed file: {last_processed}")
 
         # Process files in batches sequentially
         file_batch_size = args.batch_size  # Number of pickle files to load per batch
         total_file_batches = (len(all_pickle_files) + file_batch_size - 1) // file_batch_size
 
         processed_batches = 0
+        total_files_processed = 0
+
         for batch_idx in range(total_file_batches):
             file_batch_start = batch_idx * file_batch_size
             file_batch_end = min((batch_idx + 1) * file_batch_size, len(all_pickle_files))
             file_batch = all_pickle_files[file_batch_start:file_batch_end]
 
-            logger.info(f"Processing batch {batch_idx + 1}/{total_file_batches}: files {file_batch_start + 1}-{file_batch_end}")
+            logger.info(f"Processing batch {batch_idx + 1}/{total_file_batches}: files {file_batch_start + 1}-{file_batch_end} ({len(file_batch)} files)")
 
             # Load this batch of pickle files
             batch_tokenized_data, pdf_info = load_pickle_batch(file_batch, batch_idx + 1)
@@ -533,9 +601,24 @@ def main():
             for thread in pdf_save_threads:
                 thread.join()
 
-            logger.info(f"Completed saving {len(pdf_info)} PDFs from batch {batch_idx + 1}")
-
+            # Update progress
             processed_batches += 1
+            total_files_processed += len(pdf_info)
+
+            # Write progress to file
+            with open(progress_file, 'w') as f:
+                f.write(f"Processed batches: {processed_batches}/{total_file_batches}\n")
+                f.write(f"Processed files: {total_files_processed}/{len(all_pickle_files)}\n")
+                f.write(f"Last batch: {batch_idx + 1}\n")
+                f.write(f"Last file: {os.path.basename(file_batch[-1])}\n")
+
+            logger.info(f"Completed saving {len(pdf_info)} PDFs from batch {batch_idx + 1} (Total: {total_files_processed}/{len(all_pickle_files)} files)")
+
+        logger.info(f"Processing complete! Total files processed: {total_files_processed}")
+
+    else:
+        logger.error("Either --tokenized-file or --tokenized-dir must be provided")
+        return
 
     logger.info("OCR generation process completed")
 
