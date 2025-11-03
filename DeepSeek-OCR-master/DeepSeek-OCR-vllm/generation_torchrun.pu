@@ -5,6 +5,8 @@ import re
 import io
 import logging
 import threading
+import torch.distributed as dist
+from datetime import timedelta
 from tqdm import tqdm
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
@@ -30,10 +32,90 @@ if not logger.handlers:
 if torch.version.cuda == '11.8':
     os.environ["TRITON_PTXAS_PATH"] = "/usr/local/cuda-11.8/bin/ptxas"
 os.environ['VLLM_USE_V1'] = '0'
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+
+
+def setup_ddp():
+    """Initialize the distributed process group for torchrun"""
+    # torchrun sets these environment variables
+    rank = int(os.environ.get('RANK', 0))
+    local_rank = int(os.environ.get('LOCAL_RANK', 0))
+    world_size = int(os.environ.get('WORLD_SIZE', 1))
+
+    # Set device for this process
+    torch.cuda.set_device(local_rank)
+
+    # Configure for single-machine multi-GPU setup
+    if world_size > 1:
+        # Set environment variables for NCCL (single machine)
+        os.environ['NCCL_SOCKET_IFNAME'] = 'lo'  # Use loopback interface
+        os.environ['NCCL_IB_DISABLE'] = '1'       # Disable InfiniBand
+        os.environ['NCCL_P2P_DISABLE'] = '1'      # Disable P2P
+        os.environ['NCCL_SHM_DISABLE'] = '0'      # Enable shared memory
+        os.environ['NCCL_DEBUG'] = 'WARN'         # Reduce debug output
+        os.environ['NCCL_TIMEOUT'] = '1800000'    # 30 minute timeout in ms
+
+        # Use NCCL for GPU communication
+        backend = "nccl"
+    else:
+        # Single GPU - use gloo
+        backend = "gloo"
+
+    try:
+        # Initialize the process group
+        dist.init_process_group(
+            backend=backend,
+            rank=rank,
+            world_size=world_size,
+            timeout=timedelta(seconds=1800)  # 30 minute timeout
+        )
+    except Exception as e:
+        print(f"Failed to initialize process group with {backend}: {e}")
+        # Fallback to gloo if nccl fails
+        if backend == "nccl":
+            print("Falling back to gloo backend...")
+            dist.init_process_group(
+                backend="gloo",
+                rank=rank,
+                world_size=world_size,
+                timeout=timedelta(seconds=1800)
+            )
+        else:
+            raise e
+
+    return rank, local_rank, world_size
+
+
+def cleanup_ddp():
+    """Clean up the distributed process group"""
+    dist.destroy_process_group()
 
 
 def load_processing_progress(progress_file):
+    """Load progress from previous run to enable resuming"""
+    if not os.path.exists(progress_file):
+        return None
+
+    try:
+        with open(progress_file, 'r') as f:
+            lines = f.readlines()
+
+        progress = {}
+        for line in lines:
+            if ':' in line:
+                key, value = line.strip().split(':', 1)
+                progress[key.strip()] = value.strip()
+
+        last_file = progress.get('Last file')
+        if last_file:
+            # Remove .pkl extension for consistency
+            if last_file.endswith('.pkl'):
+                last_file = last_file[:-4]
+            return last_file
+
+    except Exception as e:
+        logger.warning(f"Could not read progress file: {e}")
+
+    return None
     """Load progress from previous run to enable resuming"""
     if not os.path.exists(progress_file):
         return None
@@ -444,22 +526,40 @@ def generate_ocr_outputs(tokenized_data, metadata, original_images, output_path,
 
 
 def main():
-    logger.info("Starting OCR generation process")
-
     parser = argparse.ArgumentParser(description="Generate OCR outputs from tokenized data")
     parser.add_argument("--tokenized-dir", "-t", help="Directory containing tokenized data batches")
     parser.add_argument("--tokenized-file", "-f", help="Single tokenized data file")
     parser.add_argument("--original-pdfs", "-p", help="Directory containing original PDF files")
     parser.add_argument("--output", "-o", required=True, help="Output directory")
     parser.add_argument("--batch-size", "-b", type=int, default=50, help="Number of pickle files to load per VLLM batch (each PDF gets its own output directory)")
-    parser.add_argument("--start-from", "-s", help="Start processing from this pickle file (filename without .pkl extension). Useful for resuming interrupted runs.")
 
     args = parser.parse_args()
 
-    logger.info(f"Arguments: tokenized_dir={args.tokenized_dir}, tokenized_file={args.tokenized_file}, output={args.output}, batch_size={args.batch_size}, start_from={args.start_from}")
+    # Check if running with torchrun (distributed)
+    is_distributed = 'RANK' in os.environ and 'WORLD_SIZE' in os.environ
+
+    if is_distributed:
+        # torchrun mode - each process handles its portion
+        rank, local_rank, world_size = setup_ddp()
+        ddp_worker(rank, local_rank, world_size, args)
+        cleanup_ddp()
+    else:
+        # Single process mode
+        ddp_worker(0, 0, 1, args)
+
+
+def ddp_worker(rank, local_rank, world_size, args):
+    """Worker function for distributed processing with torchrun"""
+
+    # Set up logging - only rank 0 logs
+    if rank == 0:
+        logger.info("Starting OCR generation process")
+        logger.info(f"Arguments: tokenized_dir={args.tokenized_dir}, tokenized_file={args.tokenized_file}, output={args.output}, batch_size={args.batch_size}")
+        logger.info(f"Distributed setup: rank={rank}, local_rank={local_rank}, world_size={world_size}")
 
     # Initialize VLLM model
-    logger.debug("Initializing VLLM model")
+    if rank == 0:
+        logger.debug("Initializing VLLM model")
     ModelRegistry.register_model("DeepseekOCRForCausalLM", DeepseekOCRForCausalLM)
 
     llm = LLM(
@@ -487,66 +587,48 @@ def main():
     )
 
     # Load and process tokenized data in batches
-    logger.debug("Starting batch processing of tokenized data")
+    if rank == 0:
+        logger.debug("Starting batch processing of tokenized data")
 
     if args.tokenized_file:
-        # Single file processing
-        tokenized_data, metadata, original_images = load_single_tokenized_pdf(args.tokenized_file)
-        logger.info(f"Loaded {len(tokenized_data)} tokenized items and {len(original_images)} images")
+        # Single file processing - only rank 0 handles this
+        if rank == 0:
+            tokenized_data, metadata, original_images = load_single_tokenized_pdf(args.tokenized_file)
+            logger.info(f"Loaded {len(tokenized_data)} tokenized items and {len(original_images)} images")
 
-        # Process single file
-        pdf_name = os.path.splitext(os.path.basename(args.tokenized_file))[0]
-        # Remove .pdf extension if present for cleaner folder names
-        if pdf_name.endswith('.pdf'):
-            pdf_name = pdf_name[:-4]
-        pdf_output_dir = os.path.join(args.output, pdf_name)
-        os.makedirs(pdf_output_dir, exist_ok=True)
-        os.makedirs(f'{pdf_output_dir}/images', exist_ok=True)
+            # Process single file
+            pdf_name = os.path.splitext(os.path.basename(args.tokenized_file))[0]
+            # Remove .pdf extension if present for cleaner folder names
+            if pdf_name.endswith('.pdf'):
+                pdf_name = pdf_name[:-4]
+            pdf_output_dir = os.path.join(args.output, pdf_name)
+            os.makedirs(pdf_output_dir, exist_ok=True)
+            os.makedirs(f'{pdf_output_dir}/images', exist_ok=True)
 
-        # Generate outputs
-        logger.debug("Starting VLLM generation")
-        outputs_list = llm.generate(tokenized_data, sampling_params=sampling_params)
+            # Generate outputs
+            logger.debug("Starting VLLM generation")
+            outputs_list = llm.generate(tokenized_data, sampling_params=sampling_params)
 
-        # Save results
-        save_pdf_results(outputs_list, metadata, original_images, pdf_output_dir)
+            # Save results
+            save_pdf_results(outputs_list, metadata, original_images, pdf_output_dir)
 
     elif args.tokenized_dir:
         all_pickle_files = load_all_pickle_files(args.tokenized_dir)
 
-        # Filter files based on start-from parameter
-        if args.start_from:
-            start_filename = f"{args.start_from}.pkl"
-            # Find files that come after the start file (alphabetically)
-            filtered_files = []
-            found_start = False
-            for file_path in all_pickle_files:
-                filename = os.path.basename(file_path)
-                if not found_start and filename == start_filename:
-                    found_start = True
-                    filtered_files.append(file_path)  # Include the start file
-                elif found_start:
-                    filtered_files.append(file_path)
-
-            if not found_start:
-                logger.warning(f"Start file '{start_filename}' not found. Processing all files.")
-                filtered_files = all_pickle_files
-            else:
-                logger.info(f"Starting from file: {start_filename} ({len(filtered_files)} files to process)")
-
-            all_pickle_files = filtered_files
-
         if not all_pickle_files:
-            logger.warning("No files to process. Exiting.")
+            if rank == 0:
+                logger.warning("No files to process. Exiting.")
             return
 
-        logger.info(f"Processing {len(all_pickle_files)} pickle files in batches of {args.batch_size}")
+        if rank == 0:
+            logger.info(f"Processing {len(all_pickle_files)} pickle files in batches of {args.batch_size}")
 
         # Create progress tracking file (initialize if it doesn't exist)
         progress_file = os.path.join(args.output, "processing_progress.txt")
         os.makedirs(args.output, exist_ok=True)
 
-        # Initialize progress file if it doesn't exist (first run)
-        if not os.path.exists(progress_file):
+        # Initialize progress file if it doesn't exist (first run) - only rank 0
+        if rank == 0 and not os.path.exists(progress_file):
             with open(progress_file, 'w') as f:
                 f.write("Processed batches: 0\n")
                 f.write("Processed files: 0\n")
@@ -554,36 +636,45 @@ def main():
                 f.write("Last file: none\n")
             logger.info("Initialized new progress file for first run")
 
-        # Auto-resume from last processed file if no start-from specified
-        if not args.start_from:
-            last_processed = load_processing_progress(progress_file)
-            if last_processed:
-                args.start_from = last_processed
-                logger.info(f"Auto-resuming from last processed file: {last_processed}")
+        # Synchronize all processes
+        dist.barrier()
 
-        # Process files in batches sequentially
-        file_batch_size = args.batch_size  # Number of pickle files to load per batch
-        total_file_batches = (len(all_pickle_files) + file_batch_size - 1) // file_batch_size
+        # Divide files among processes
+        files_per_process = (len(all_pickle_files) + world_size - 1) // world_size
+        start_idx = rank * files_per_process
+        end_idx = min(start_idx + files_per_process, len(all_pickle_files))
+        process_files = all_pickle_files[start_idx:end_idx]
+
+        if rank == 0:
+            logger.info(f"Distributed workload: {world_size} processes, each handling ~{files_per_process} files")
+            logger.info(f"Rank {rank}: processing files {start_idx} to {end_idx-1} ({len(process_files)} files)")
+
+        # Process this process's assigned files
+        file_batch_size = args.batch_size
+        total_file_batches = (len(process_files) + file_batch_size - 1) // file_batch_size
 
         processed_batches = 0
         total_files_processed = 0
 
         for batch_idx in range(total_file_batches):
             file_batch_start = batch_idx * file_batch_size
-            file_batch_end = min((batch_idx + 1) * file_batch_size, len(all_pickle_files))
-            file_batch = all_pickle_files[file_batch_start:file_batch_end]
+            file_batch_end = min((batch_idx + 1) * file_batch_size, len(process_files))
+            file_batch = process_files[file_batch_start:file_batch_end]
 
-            logger.info(f"Processing batch {batch_idx + 1}/{total_file_batches}: files {file_batch_start + 1}-{file_batch_end} ({len(file_batch)} files)")
+            if rank == 0:
+                logger.info(f"Rank {rank} - Processing batch {batch_idx + 1}/{total_file_batches}: files {file_batch_start + 1}-{file_batch_end} ({len(file_batch)} files)")
 
             # Load this batch of pickle files
             batch_tokenized_data, pdf_info = load_pickle_batch(file_batch, batch_idx + 1)
 
             if not batch_tokenized_data:
-                logger.warning(f"No valid data in batch {batch_idx + 1}, skipping")
+                if rank == 0:
+                    logger.warning(f"No valid data in batch {batch_idx + 1}, skipping")
                 continue
 
             # Process this batch through VLLM
-            logger.debug("Starting VLLM generation")
+            if rank == 0:
+                logger.debug(f"Rank {rank} - Starting VLLM generation")
             outputs_list = llm.generate(batch_tokenized_data, sampling_params=sampling_params)
 
             # Split results back by PDF and save each PDF separately using threading
@@ -615,22 +706,26 @@ def main():
             processed_batches += 1
             total_files_processed += len(pdf_info)
 
-            # Write progress to file
-            with open(progress_file, 'w') as f:
-                f.write(f"Processed batches: {processed_batches}/{total_file_batches}\n")
-                f.write(f"Processed files: {total_files_processed}/{len(all_pickle_files)}\n")
-                f.write(f"Last batch: {batch_idx + 1}\n")
-                f.write(f"Last file: {os.path.basename(file_batch[-1])}\n")
+            # Update global progress file - only rank 0 writes
+            if rank == 0:
+                with open(progress_file, 'w') as f:
+                    f.write(f"Processed batches: {processed_batches}/{total_file_batches}\n")
+                    f.write(f"Processed files: {total_files_processed}/{len(process_files)}\n")
+                    f.write(f"Last batch: {batch_idx + 1}\n")
+                    f.write(f"Last file: {os.path.basename(file_batch[-1]) if file_batch else 'none'}\n")
 
-            logger.info(f"Completed saving {len(pdf_info)} PDFs from batch {batch_idx + 1} (Total: {total_files_processed}/{len(all_pickle_files)} files)")
+                logger.info(f"Rank {rank} - Completed saving {len(pdf_info)} PDFs from batch {batch_idx + 1} (Total: {total_files_processed}/{len(process_files)} files)")
 
-        logger.info(f"Processing complete! Total files processed: {total_files_processed}")
+        if rank == 0:
+            logger.info(f"Rank {rank} - Processing complete! Total files processed: {total_files_processed}")
 
     else:
-        logger.error("Either --tokenized-file or --tokenized-dir must be provided")
+        if rank == 0:
+            logger.error("Either --tokenized-file or --tokenized-dir must be provided")
         return
 
-    logger.info("OCR generation process completed")
+    if rank == 0:
+        logger.info("OCR generation process completed")
 
 
 if __name__ == "__main__":
