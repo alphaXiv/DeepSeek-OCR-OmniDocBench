@@ -67,9 +67,10 @@ def load_all_pickle_files(tokenized_dir):
 
     all_pickle_files = [os.path.join(tokenized_dir, f) for f in os.listdir(tokenized_dir)
                        if f.endswith('.pkl')]
-    all_pickle_files.sort()
+    # Sort by modification time (oldest first) instead of alphabetically
+    all_pickle_files.sort(key=os.path.getmtime)
 
-    logger.info(f"Found {len(all_pickle_files)} pickle files")
+    logger.info(f"Found {len(all_pickle_files)} pickle files (sorted by modification time)")
     return all_pickle_files
 
 
