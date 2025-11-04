@@ -72,7 +72,7 @@ def load_all_pickle_files(tokenized_dir):
     all_pickle_files = [os.path.join(tokenized_dir, f) for f in os.listdir(tokenized_dir)
                        if f.endswith('.pkl')]
     # Sort by modification time (oldest first) instead of alphabetically
-    all_pickle_files.sort(key=os.path.getmtime)
+    # all_pickle_files.sort(key=os.path.getmtime)
 
     logger.info(f"Found {len(all_pickle_files)} pickle files (sorted by modification time)")
     return all_pickle_files
@@ -133,8 +133,9 @@ def async_loader(file_paths, buffer_size=4, batch_size=50):
             batch_files = file_paths[i:i + batch_size]
             logger.debug(f"Loading batch {i//batch_size + 1}: {len(batch_files)} files")
 
-            # Load this batch using the existing batch loading logic
-            batch_tokenized_data, pdf_info = load_pickle_batch_sync(batch_files, i//batch_size + 1)
+            # Load this batch using the threaded per-file loader to reduce producer latency
+            # (load_pickle_batch starts threads to read individual files in parallel)
+            batch_tokenized_data, pdf_info = load_pickle_batch(batch_files, i//batch_size + 1)
 
             if batch_tokenized_data:
                 batch_data = {
@@ -777,15 +778,38 @@ def main():
                 logger.debug("Starting VLLM generation")
                 vllm_start_time = time.time()
 
-                # While VLLM is processing, prefetch next batch in background
+                # Prefetch the next batch in a background thread so loading can overlap with generation.
+                # Use ThreadPoolExecutor with 1 worker to avoid blocking the main consumer loop on next(async_iter).
                 try:
-                    next_batch = next(async_iter)
-                    logger.debug("Prefetched next batch in background")
-                except StopIteration:
-                    next_batch = None
+                    from concurrent.futures import ThreadPoolExecutor
 
-                # Complete VLLM generation
-                outputs_list = llm.generate(batch_tokenized_data, sampling_params=sampling_params)
+                    def _get_next(it):
+                        try:
+                            return next(it)
+                        except StopIteration:
+                            return None
+
+                    with ThreadPoolExecutor(max_workers=1) as _prefetch_executor:
+                        future_next = _prefetch_executor.submit(_get_next, async_iter)
+
+                        # Run VLLM generation while the next batch is being loaded
+                        outputs_list = llm.generate(batch_tokenized_data, sampling_params=sampling_params)
+
+                        # Retrieve the prefetched batch (will be immediate if already loaded)
+                        next_batch = future_next.result()
+                        if next_batch is not None:
+                            logger.debug("Prefetched next batch in background")
+                        else:
+                            logger.debug("No next batch (end of iterator)")
+
+                except Exception:
+                    # Fallback to previous behavior on unexpected errors
+                    try:
+                        next_batch = next(async_iter)
+                        logger.debug("Prefetched next batch in background (fallback)")
+                    except StopIteration:
+                        next_batch = None
+
                 vllm_time = time.time() - vllm_start_time
                 logger.info(f"VLLM generation completed in {vllm_time:.2f} seconds ({len(batch_tokenized_data)/vllm_time:.1f} items/sec)")
 
