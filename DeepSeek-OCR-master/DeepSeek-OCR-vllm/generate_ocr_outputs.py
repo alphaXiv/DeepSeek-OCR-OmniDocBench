@@ -5,6 +5,8 @@ import re
 import io
 import logging
 import threading
+import time
+import queue
 from tqdm import tqdm
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
@@ -76,10 +78,78 @@ def load_all_pickle_files(tokenized_dir):
     return all_pickle_files
 
 
+def load_single_pickle_sync(pickle_file):
+    """Load a single pickle file synchronously (for async loader)"""
+    try:
+        logger.debug(f"Loading {pickle_file}")
+        with open(pickle_file, 'rb') as f:
+            data = pickle.load(f)
+
+        # Handle individual PDF format
+        if 'tokenized_data' in data and 'image_paths' in data:
+            pdf_name = os.path.splitext(os.path.basename(pickle_file))[0]
+            if pdf_name.endswith('.pdf'):
+                pdf_name = pdf_name[:-4]
+            num_items = len(data['tokenized_data'])
+            num_images = len(data['image_paths'])
+
+            pdf_data = {
+                'name': pdf_name,
+                'num_items': num_items,
+                'num_images': num_images,
+                'image_paths': data['image_paths'],
+                'metadata': data,
+                'tokenized_data': data['tokenized_data']
+            }
+
+            return {
+                'tokenized_data': data['tokenized_data'],
+                'pdf_info': [pdf_data],
+                'file_path': pickle_file
+            }
+        else:
+            logger.warning(f"Unexpected pickle file format in {pickle_file}")
+            return None
+
+    except Exception as e:
+        logger.error(f"Error loading {pickle_file}: {e}")
+        return None
+
+
+def async_loader(file_paths, buffer_size=64):
+    """
+    Async prefetcher using Producer-Consumer pattern to overlap CPU loading with GPU inference
+    """
+    q = queue.Queue(maxsize=buffer_size)
+    stop_token = object()
+
+    def producer():
+        """Producer thread that loads pickle files and puts them in queue"""
+        logger.info(f"Starting async loader producer with buffer size {buffer_size}")
+        for path in file_paths:
+            data = load_single_pickle_sync(path)
+            if data is not None:
+                q.put(data)
+        q.put(stop_token)
+        logger.info("Async loader producer finished")
+
+    # Start producer thread as daemon
+    producer_thread = threading.Thread(target=producer, daemon=True)
+    producer_thread.start()
+
+    # Consumer: yield items from queue
+    while True:
+        item = q.get()
+        if item is stop_token:
+            break
+        yield item
+
+
 def load_pickle_batch(file_batch, batch_idx):
     """Load a batch of pickle files using threading for parallel loading"""
     logger.info(f"Loading batch {batch_idx}: {len(file_batch)} files")
 
+    start_time = time.time()
     batch_tokenized_data = []
     pdf_info = []
     lock = threading.Lock()
@@ -128,7 +198,8 @@ def load_pickle_batch(file_batch, batch_idx):
     for thread in threads:
         thread.join()
 
-    logger.info(f"Batch {batch_idx} loaded: {len(batch_tokenized_data)} items from {len(pdf_info)} PDFs")
+    loading_time = time.time() - start_time
+    logger.info(f"Batch {batch_idx} loaded: {len(batch_tokenized_data)} items from {len(pdf_info)} PDFs in {loading_time:.2f} seconds ({len(batch_tokenized_data)/loading_time:.1f} items/sec)")
     return batch_tokenized_data, pdf_info
 
 
@@ -528,10 +599,16 @@ def main():
 
         # Generate outputs
         logger.debug("Starting VLLM generation")
+        vllm_start_time = time.time()
         outputs_list = llm.generate(tokenized_data, sampling_params=sampling_params)
+        vllm_time = time.time() - vllm_start_time
+        logger.info(f"VLLM generation completed in {vllm_time:.2f} seconds ({len(tokenized_data)/vllm_time:.1f} items/sec)")
 
         # Save results
+        save_start_time = time.time()
         save_pdf_results(outputs_list, metadata, original_images, pdf_output_dir)
+        save_time = time.time() - save_start_time
+        logger.info(f"PDF saving completed in {save_time:.2f} seconds")
 
     elif args.tokenized_dir:
         all_pickle_files = load_all_pickle_files(args.tokenized_dir)
@@ -562,7 +639,8 @@ def main():
             logger.warning("No files to process. Exiting.")
             return
 
-        logger.info(f"Processing {len(all_pickle_files)} pickle files in batches of {args.batch_size}")
+        # Use async prefetcher for TRUE overlapping CPU loading with GPU inference
+        logger.info(f"Starting async pipelined processing of {len(all_pickle_files)} pickle files with buffer size 4")
 
         # Create progress tracking file (initialize if it doesn't exist)
         progress_file = os.path.join(args.output, "processing_progress.txt")
@@ -584,91 +662,146 @@ def main():
                 args.start_from = last_processed
                 logger.info(f"Auto-resuming from last processed file: {last_processed}")
 
-        # Process files in batches sequentially
-        file_batch_size = args.batch_size  # Number of pickle files to load per batch
-        total_file_batches = (len(all_pickle_files) + file_batch_size - 1) // file_batch_size
+        # Filter files for resume if needed
+        if args.start_from:
+            start_filename = f"{args.start_from}.pkl"
+            filtered_files = []
+            found_start = False
+            for file_path in all_pickle_files:
+                filename = os.path.basename(file_path)
+                if not found_start and filename == start_filename:
+                    found_start = True
+                    filtered_files.append(file_path)
+                elif found_start:
+                    filtered_files.append(file_path)
 
+            if not found_start:
+                logger.warning(f"Start file '{start_filename}' not found. Processing all files.")
+                filtered_files = all_pickle_files
+            else:
+                logger.info(f"Starting from file: {start_filename} ({len(filtered_files)} files to process)")
+
+            all_pickle_files = filtered_files
+
+        if not all_pickle_files:
+            logger.warning("No files to process. Exiting.")
+            return
+
+        # TRUE PIPELINING: Process one batch while next is loading
         processed_batches = 0
         total_files_processed = 0
 
-        for batch_idx in range(total_file_batches):
-            file_batch_start = batch_idx * file_batch_size
-            file_batch_end = min((batch_idx + 1) * file_batch_size, len(all_pickle_files))
-            file_batch = all_pickle_files[file_batch_start:file_batch_end]
+        # Use async loader for true overlap between CPU loading and GPU inference
+        async_iter = iter(async_loader(all_pickle_files, buffer_size=4))
 
-            logger.info(f"Processing batch {batch_idx + 1}/{total_file_batches}: files {file_batch_start + 1}-{file_batch_end} ({len(file_batch)} files)")
+        try:
+            # Get first batch
+            current_batch = next(async_iter)
+            batch_idx = 0
 
-            # Load this batch of pickle files
-            batch_tokenized_data, pdf_info = load_pickle_batch(file_batch, batch_idx + 1)
+            while current_batch is not None:
+                batch_tokenized_data = current_batch['tokenized_data']
+                pdf_info = current_batch['pdf_info']
+                file_path = current_batch['file_path']
 
-            if not batch_tokenized_data:
-                logger.warning(f"No valid data in batch {batch_idx + 1}, skipping")
-                continue
+                logger.info(f"Processing pipelined batch {batch_idx + 1}: {os.path.basename(file_path)} ({len(batch_tokenized_data)} items)")
 
-            # Process this batch through VLLM
-            logger.debug("Starting VLLM generation")
-            outputs_list = llm.generate(batch_tokenized_data, sampling_params=sampling_params)
-
-            # Split results back by PDF and save each PDF separately using multiprocessing (fail-safe)
-            item_offset = 0
-            pdf_save_args = []
-
-            for pdf_data in pdf_info:
-                pdf_name = pdf_data['name']
-                num_items = pdf_data['num_items']
-
-                # Extract this PDF's results from the batch
-                pdf_outputs = outputs_list[item_offset:item_offset + num_items]
-
-                # Prepare arguments for multiprocessing
-                pdf_save_args.append((pdf_data, pdf_outputs, args.output))
-
-                item_offset += num_items
-
-            # Use multiprocessing to save PDFs in parallel with fail-safety
-            num_processes = min(len(pdf_save_args), cpu_count())  # Don't create more processes than needed
-            logger.info(f"Saving {len(pdf_save_args)} PDFs using {num_processes} processes")
-
-            successful_saves = 0
-            failed_saves = 0
-
-            with ProcessPoolExecutor(max_workers=num_processes) as executor:
-                # Submit all tasks
-                future_to_pdf = {
-                    executor.submit(save_single_pdf_safe, *args): args[0]['name']
-                    for args in pdf_save_args
-                }
-
-                # Process completed tasks as they finish
-                for future in as_completed(future_to_pdf):
-                    pdf_name = future_to_pdf[future]
+                if not batch_tokenized_data:
+                    logger.warning(f"No valid data in batch {batch_idx + 1}, skipping")
                     try:
-                        success, saved_pdf_name, error = future.result()
-                        if success:
-                            successful_saves += 1
-                            logger.debug(f"Successfully saved PDF: {saved_pdf_name}")
-                        else:
+                        current_batch = next(async_iter)
+                        batch_idx += 1
+                        continue
+                    except StopIteration:
+                        break
+
+                # Start VLLM generation for current batch
+                logger.debug("Starting VLLM generation")
+                vllm_start_time = time.time()
+
+                # While VLLM is processing, prefetch next batch in background
+                try:
+                    next_batch = next(async_iter)
+                    logger.debug("Prefetched next batch in background")
+                except StopIteration:
+                    next_batch = None
+
+                # Complete VLLM generation
+                outputs_list = llm.generate(batch_tokenized_data, sampling_params=sampling_params)
+                vllm_time = time.time() - vllm_start_time
+                logger.info(f"VLLM generation completed in {vllm_time:.2f} seconds ({len(batch_tokenized_data)/vllm_time:.1f} items/sec)")
+
+                # Process and save results while next batch might be loading
+                item_offset = 0
+                pdf_save_args = []
+
+                for pdf_data in pdf_info:
+                    pdf_name = pdf_data['name']
+                    num_items = pdf_data['num_items']
+
+                    # Extract this PDF's results from the batch
+                    pdf_outputs = outputs_list[item_offset:item_offset + num_items]
+
+                    # Prepare arguments for multiprocessing
+                    pdf_save_args.append((pdf_data, pdf_outputs, args.output))
+
+                    item_offset += num_items
+
+                # Use multiprocessing to save PDFs in parallel with fail-safety
+                num_processes = min(len(pdf_save_args), cpu_count())  # Don't create more processes than needed
+                logger.info(f"Saving {len(pdf_save_args)} PDFs using {num_processes} processes")
+
+                saving_start_time = time.time()
+                successful_saves = 0
+                failed_saves = 0
+
+                with ProcessPoolExecutor(max_workers=num_processes) as executor:
+                    # Submit all tasks
+                    future_to_pdf = {
+                        executor.submit(save_single_pdf_safe, *args): args[0]['name']
+                        for args in pdf_save_args
+                    }
+
+                    # Process completed tasks as they finish
+                    for future in as_completed(future_to_pdf):
+                        pdf_name = future_to_pdf[future]
+                        try:
+                            success, saved_pdf_name, error = future.result()
+                            if success:
+                                successful_saves += 1
+                                logger.debug(f"Successfully saved PDF: {saved_pdf_name}")
+                            else:
+                                failed_saves += 1
+                                logger.error(f"Failed to save PDF {saved_pdf_name}: {error}")
+                        except Exception as e:
                             failed_saves += 1
-                            logger.error(f"Failed to save PDF {saved_pdf_name}: {error}")
-                    except Exception as e:
-                        failed_saves += 1
-                        logger.error(f"Unexpected error saving PDF {pdf_name}: {str(e)}")
+                            logger.error(f"Unexpected error saving PDF {pdf_name}: {str(e)}")
 
-            logger.info(f"PDF saving completed: {successful_saves} successful, {failed_saves} failed")
+                saving_time = time.time() - saving_start_time
+                logger.info(f"PDF saving completed: {successful_saves} successful, {failed_saves} failed in {saving_time:.2f} seconds ({successful_saves/saving_time:.1f} PDFs/sec if successful_saves > 0 else 'N/A')")
 
-            # Update progress (only count successful saves)
-            processed_batches += 1
-            total_files_processed += successful_saves
+                # Update progress (only count successful saves)
+                processed_batches += 1
+                total_files_processed += successful_saves
 
-            # Write progress to file
-            with open(progress_file, 'w') as f:
-                f.write(f"Processed batches: {processed_batches}/{total_file_batches}\n")
-                f.write(f"Processed files: {total_files_processed}/{len(all_pickle_files)}\n")
-                f.write(f"Last batch: {batch_idx + 1}\n")
-                f.write(f"Last file: {os.path.basename(file_batch[-1])}\n")
-                f.write(f"Successful saves in last batch: {successful_saves}/{len(pdf_info)}\n")
+                # Write progress to file
+                with open(progress_file, 'w') as f:
+                    f.write(f"Processed batches: {processed_batches}\n")
+                    f.write(f"Processed files: {total_files_processed}/{len(all_pickle_files)}\n")
+                    f.write(f"Last batch: {batch_idx + 1}\n")
+                    f.write(f"Last file: {os.path.basename(file_path)}\n")
+                    f.write(f"Successful saves in last batch: {successful_saves}/{len(pdf_info)}\n")
 
-            logger.info(f"Completed batch {batch_idx + 1}: {successful_saves}/{len(pdf_info)} PDFs saved successfully (Total: {total_files_processed}/{len(all_pickle_files)} files)")
+                logger.info(f"Completed pipelined batch {batch_idx + 1}: {successful_saves}/{len(pdf_info)} PDFs saved successfully (Total: {total_files_processed}/{len(all_pickle_files)} files)")
+
+                # Move to next batch
+                current_batch = next_batch
+                batch_idx += 1
+
+        except StopIteration:
+            pass
+
+        logger.info(f"Pipelined processing complete! Total files processed: {total_files_processed}")
 
         logger.info(f"Processing complete! Total files processed: {total_files_processed}")
 
