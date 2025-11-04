@@ -14,6 +14,8 @@ from deepseek_ocr import DeepseekOCRForCausalLM
 from vllm.model_executor.models.registry import ModelRegistry
 from vllm import LLM, SamplingParams
 from process.ngram_norepeat import NoRepeatNGramLogitsProcessor
+from multiprocessing import Pool, cpu_count
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # Setup logger
 logger = logging.getLogger("generate_ocr")
@@ -149,6 +151,26 @@ def load_single_tokenized_pdf(tokenized_file):
     return data['tokenized_data'], data, original_images
 
 
+def save_single_pdf_safe(pdf_data, pdf_outputs, args_output):
+    """
+    Fail-safe wrapper for saving a single PDF with multiprocessing compatibility
+    Returns (success: bool, pdf_name: str, error: str or None)
+    """
+    try:
+        pdf_name = pdf_data['name']
+        logger.debug(f"Starting to save PDF: {pdf_name}")
+
+        save_single_pdf(pdf_data, pdf_outputs, args_output)
+
+        logger.debug(f"Successfully saved PDF: {pdf_name}")
+        return (True, pdf_name, None)
+
+    except Exception as e:
+        error_msg = f"Error saving PDF {pdf_data.get('name', 'unknown')}: {str(e)}"
+        logger.error(error_msg)
+        return (False, pdf_data.get('name', 'unknown'), error_msg)
+
+
 def save_single_pdf(pdf_data, pdf_outputs, args_output):
     """Save a single PDF with its results and images using threading for image loading"""
     try:
@@ -204,6 +226,7 @@ def save_single_pdf(pdf_data, pdf_outputs, args_output):
 
     except Exception as e:
         logger.error(f"Error saving PDF {pdf_data.get('name', 'unknown')}: {e}")
+        raise  # Re-raise for multiprocessing error handling
 
 
 def re_match(text):
@@ -586,9 +609,9 @@ def main():
             logger.debug("Starting VLLM generation")
             outputs_list = llm.generate(batch_tokenized_data, sampling_params=sampling_params)
 
-            # Split results back by PDF and save each PDF separately using threading
+            # Split results back by PDF and save each PDF separately using multiprocessing (fail-safe)
             item_offset = 0
-            pdf_save_threads = []
+            pdf_save_args = []
 
             for pdf_data in pdf_info:
                 pdf_name = pdf_data['name']
@@ -597,23 +620,45 @@ def main():
                 # Extract this PDF's results from the batch
                 pdf_outputs = outputs_list[item_offset:item_offset + num_items]
 
-                # Start a thread to save this PDF
-                save_thread = threading.Thread(
-                    target=save_single_pdf,
-                    args=(pdf_data, pdf_outputs, args.output)
-                )
-                pdf_save_threads.append(save_thread)
-                save_thread.start()
+                # Prepare arguments for multiprocessing
+                pdf_save_args.append((pdf_data, pdf_outputs, args.output))
 
                 item_offset += num_items
 
-            # Wait for all PDF saving threads to complete
-            for thread in pdf_save_threads:
-                thread.join()
+            # Use multiprocessing to save PDFs in parallel with fail-safety
+            num_processes = min(len(pdf_save_args), cpu_count())  # Don't create more processes than needed
+            logger.info(f"Saving {len(pdf_save_args)} PDFs using {num_processes} processes")
 
-            # Update progress
+            successful_saves = 0
+            failed_saves = 0
+
+            with ProcessPoolExecutor(max_workers=num_processes) as executor:
+                # Submit all tasks
+                future_to_pdf = {
+                    executor.submit(save_single_pdf_safe, *args): args[0]['name']
+                    for args in pdf_save_args
+                }
+
+                # Process completed tasks as they finish
+                for future in as_completed(future_to_pdf):
+                    pdf_name = future_to_pdf[future]
+                    try:
+                        success, saved_pdf_name, error = future.result()
+                        if success:
+                            successful_saves += 1
+                            logger.debug(f"Successfully saved PDF: {saved_pdf_name}")
+                        else:
+                            failed_saves += 1
+                            logger.error(f"Failed to save PDF {saved_pdf_name}: {error}")
+                    except Exception as e:
+                        failed_saves += 1
+                        logger.error(f"Unexpected error saving PDF {pdf_name}: {str(e)}")
+
+            logger.info(f"PDF saving completed: {successful_saves} successful, {failed_saves} failed")
+
+            # Update progress (only count successful saves)
             processed_batches += 1
-            total_files_processed += len(pdf_info)
+            total_files_processed += successful_saves
 
             # Write progress to file
             with open(progress_file, 'w') as f:
@@ -621,8 +666,9 @@ def main():
                 f.write(f"Processed files: {total_files_processed}/{len(all_pickle_files)}\n")
                 f.write(f"Last batch: {batch_idx + 1}\n")
                 f.write(f"Last file: {os.path.basename(file_batch[-1])}\n")
+                f.write(f"Successful saves in last batch: {successful_saves}/{len(pdf_info)}\n")
 
-            logger.info(f"Completed saving {len(pdf_info)} PDFs from batch {batch_idx + 1} (Total: {total_files_processed}/{len(all_pickle_files)} files)")
+            logger.info(f"Completed batch {batch_idx + 1}: {successful_saves}/{len(pdf_info)} PDFs saved successfully (Total: {total_files_processed}/{len(all_pickle_files)} files)")
 
         logger.info(f"Processing complete! Total files processed: {total_files_processed}")
 
