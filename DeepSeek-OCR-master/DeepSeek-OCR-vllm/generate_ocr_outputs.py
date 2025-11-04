@@ -116,20 +116,36 @@ def load_single_pickle_sync(pickle_file):
         return None
 
 
-def async_loader(file_paths, buffer_size=64):
+def async_loader(file_paths, buffer_size=4, batch_size=50):
     """
     Async prefetcher using Producer-Consumer pattern to overlap CPU loading with GPU inference
+    Loads batches of pickle files for efficient VLLM processing
     """
     q = queue.Queue(maxsize=buffer_size)
     stop_token = object()
 
     def producer():
-        """Producer thread that loads pickle files and puts them in queue"""
-        logger.info(f"Starting async loader producer with buffer size {buffer_size}")
-        for path in file_paths:
-            data = load_single_pickle_sync(path)
-            if data is not None:
-                q.put(data)
+        """Producer thread that loads batches of pickle files and puts them in queue"""
+        logger.info(f"Starting async loader producer with buffer size {buffer_size}, batch size {batch_size}")
+
+        # Process files in batches
+        for i in range(0, len(file_paths), batch_size):
+            batch_files = file_paths[i:i + batch_size]
+            logger.debug(f"Loading batch {i//batch_size + 1}: {len(batch_files)} files")
+
+            # Load this batch using the existing batch loading logic
+            batch_tokenized_data, pdf_info = load_pickle_batch_sync(batch_files, i//batch_size + 1)
+
+            if batch_tokenized_data:
+                batch_data = {
+                    'tokenized_data': batch_tokenized_data,
+                    'pdf_info': pdf_info,
+                    'file_paths': batch_files,
+                    'batch_idx': i//batch_size + 1
+                }
+                q.put(batch_data)
+                logger.debug(f"Queued batch {i//batch_size + 1} with {len(batch_tokenized_data)} items")
+
         q.put(stop_token)
         logger.info("Async loader producer finished")
 
@@ -143,6 +159,47 @@ def async_loader(file_paths, buffer_size=64):
         if item is stop_token:
             break
         yield item
+
+
+def load_pickle_batch_sync(file_batch, batch_idx):
+    """Load a batch of pickle files synchronously (for async loader)"""
+    logger.debug(f"Loading batch {batch_idx}: {len(file_batch)} files")
+
+    batch_tokenized_data = []
+    pdf_info = []
+
+    for pickle_file in file_batch:
+        try:
+            with open(pickle_file, 'rb') as f:
+                data = pickle.load(f)
+
+            # Handle individual PDF format
+            if 'tokenized_data' in data and 'image_paths' in data:
+                pdf_name = os.path.splitext(os.path.basename(pickle_file))[0]
+                if pdf_name.endswith('.pdf'):
+                    pdf_name = pdf_name[:-4]
+                num_items = len(data['tokenized_data'])
+                num_images = len(data['image_paths'])
+
+                pdf_data = {
+                    'name': pdf_name,
+                    'num_items': num_items,
+                    'num_images': num_images,
+                    'image_paths': data['image_paths'],
+                    'metadata': data,
+                    'tokenized_data': data['tokenized_data']
+                }
+
+                batch_tokenized_data.extend(data['tokenized_data'])
+                pdf_info.append(pdf_data)
+            else:
+                logger.warning(f"Unexpected pickle file format in {pickle_file}")
+
+        except Exception as e:
+            logger.error(f"Error loading {pickle_file}: {e}")
+
+    logger.debug(f"Batch {batch_idx} loaded: {len(batch_tokenized_data)} items from {len(pdf_info)} PDFs")
+    return batch_tokenized_data, pdf_info
 
 
 def load_pickle_batch(file_batch, batch_idx):
@@ -692,7 +749,8 @@ def main():
         total_files_processed = 0
 
         # Use async loader for true overlap between CPU loading and GPU inference
-        async_iter = iter(async_loader(all_pickle_files, buffer_size=4))
+        # Now loads proper batches instead of individual files
+        async_iter = iter(async_loader(all_pickle_files, buffer_size=4, batch_size=args.batch_size))
 
         try:
             # Get first batch
@@ -702,9 +760,9 @@ def main():
             while current_batch is not None:
                 batch_tokenized_data = current_batch['tokenized_data']
                 pdf_info = current_batch['pdf_info']
-                file_path = current_batch['file_path']
+                file_paths = current_batch['file_paths']
 
-                logger.info(f"Processing pipelined batch {batch_idx + 1}: {os.path.basename(file_path)} ({len(batch_tokenized_data)} items)")
+                logger.info(f"Processing pipelined batch {batch_idx + 1}: {len(file_paths)} files ({len(batch_tokenized_data)} items)")
 
                 if not batch_tokenized_data:
                     logger.warning(f"No valid data in batch {batch_idx + 1}, skipping")
@@ -789,7 +847,7 @@ def main():
                     f.write(f"Processed batches: {processed_batches}\n")
                     f.write(f"Processed files: {total_files_processed}/{len(all_pickle_files)}\n")
                     f.write(f"Last batch: {batch_idx + 1}\n")
-                    f.write(f"Last file: {os.path.basename(file_path)}\n")
+                    f.write(f"Last files: {', '.join([os.path.basename(fp) for fp in file_paths])}\n")
                     f.write(f"Successful saves in last batch: {successful_saves}/{len(pdf_info)}\n")
 
                 logger.info(f"Completed pipelined batch {batch_idx + 1}: {successful_saves}/{len(pdf_info)} PDFs saved successfully (Total: {total_files_processed}/{len(all_pickle_files)} files)")
