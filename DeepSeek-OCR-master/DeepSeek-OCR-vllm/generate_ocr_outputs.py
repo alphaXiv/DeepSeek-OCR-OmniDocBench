@@ -316,9 +316,11 @@ def save_single_pdf(pdf_data, pdf_outputs, args_output):
             """Load a single image and store it at the correct index"""
             try:
                 if os.path.exists(image_path):
-                    img = Image.open(image_path)
+                    # Open inside context, copy to release the file handle immediately
+                    with Image.open(image_path) as _img:
+                        img_copy = _img.copy()
                     with lock:
-                        image_results.append((index, img))
+                        image_results.append((index, img_copy))
                 else:
                     logger.warning(f"Saved image not found: {image_path}")
                     with lock:
@@ -467,6 +469,11 @@ def pil_to_pdf_img2pdf(pil_images, output_path):
         img.save(img_buffer, format='JPEG', quality=95)
         img_bytes = img_buffer.getvalue()
         image_bytes_list.append(img_bytes)
+        # Close image to release resources
+        try:
+            img.close()
+        except Exception:
+            pass
 
     try:
         pdf_bytes = img2pdf.convert(image_bytes_list)
@@ -474,6 +481,9 @@ def pil_to_pdf_img2pdf(pil_images, output_path):
             f.write(pdf_bytes)
     except Exception as e:
         print(f"error: {e}")
+    finally:
+        # Ensure we free the list
+        image_bytes_list.clear()
 
 
 def save_pdf_results(outputs_list, metadata, original_images, output_path):
@@ -830,7 +840,11 @@ def main():
                     item_offset += num_items
 
                 # Use multiprocessing to save PDFs in parallel with fail-safety
-                num_processes = min(len(pdf_save_args), cpu_count())  # Don't create more processes than needed
+                # Limit number of saver processes to avoid hitting OS file descriptor limits
+                # (torch and PIL may create file descriptors / shared memory objects per process).
+                # max_saver_procs = max(1, cpu_count() // 2)
+                # num_processes = min(len(pdf_save_args), max_saver_procs)
+                num_processes = os.cpu_count()
                 logger.info(f"Saving {len(pdf_save_args)} PDFs using {num_processes} processes")
 
                 saving_start_time = time.time()
