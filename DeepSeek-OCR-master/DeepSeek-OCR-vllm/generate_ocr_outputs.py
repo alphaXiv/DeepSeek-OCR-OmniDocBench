@@ -751,7 +751,7 @@ def main():
 
         # Use async loader for true overlap between CPU loading and GPU inference
         # Now loads proper batches instead of individual files
-        async_iter = iter(async_loader(all_pickle_files, buffer_size=64, batch_size=args.batch_size))
+        async_iter = iter(async_loader(all_pickle_files, buffer_size=8, batch_size=args.batch_size))
 
         try:
             # Get first batch
