@@ -494,7 +494,7 @@ def main():
         max_model_len=8192,
         swap_space=0,
         max_num_seqs=MAX_CONCURRENCY,
-        tensor_parallel_size=0,
+        tensor_parallel_size=1,
         gpu_memory_utilization=0.9,
         disable_mm_preprocessor_cache=True,
         dtype='bfloat16'
