@@ -17,7 +17,7 @@ from vllm.model_executor.models.registry import ModelRegistry
 from vllm import LLM, SamplingParams
 from process.ngram_norepeat import NoRepeatNGramLogitsProcessor
 from multiprocessing import Pool, cpu_count
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Setup logger
 logger = logging.getLogger("generate_ocr")
@@ -308,42 +308,26 @@ def save_single_pdf(pdf_data, pdf_outputs, args_output):
         image_paths = pdf_data['image_paths']
         pdf_metadata = pdf_data['metadata']
 
-        # Load images for this PDF only during saving (lazy loading) using threading
-        image_results = []
-        lock = threading.Lock()
-
-        def load_single_image(image_path, index):
-            """Load a single image and store it at the correct index"""
+        # Load images for this PDF only during saving (lazy loading)
+        # NOTE: avoid starting many threads here because saver processes are already parallel;
+        # too many threads across processes causes excessive file descriptor and disk contention.
+        pdf_images = []
+        for idx, image_path in enumerate(image_paths):
             try:
                 if os.path.exists(image_path):
-                    # Open inside context, copy to release the file handle immediately
                     with Image.open(image_path) as _img:
                         img_copy = _img.copy()
-                    with lock:
-                        image_results.append((index, img_copy))
+                    pdf_images.append(img_copy)
                 else:
                     logger.warning(f"Saved image not found: {image_path}")
-                    with lock:
-                        image_results.append((index, None))
+                    # keep ordering by appending None; later we filter
+                    pdf_images.append(None)
             except Exception as e:
                 logger.error(f"Error loading image {image_path}: {e}")
-                with lock:
-                    image_results.append((index, None))
+                pdf_images.append(None)
 
-        # Start threads for parallel image loading
-        image_threads = []
-        for idx, image_path in enumerate(image_paths):
-            thread = threading.Thread(target=load_single_image, args=(image_path, idx))
-            image_threads.append(thread)
-            thread.start()
-
-        # Wait for all image loading threads to complete
-        for thread in image_threads:
-            thread.join()
-
-        # Sort images back to correct order and filter out None values
-        image_results.sort(key=lambda x: x[0])  # Sort by index
-        pdf_images = [img for idx, img in image_results if img is not None]  # Filter None values
+        # Filter out None values while preserving order
+        pdf_images = [img for img in pdf_images if img is not None]
 
         # Create PDF-specific output directory
         pdf_output_dir = os.path.join(args_output, pdf_name)
@@ -681,6 +665,27 @@ def main():
     elif args.tokenized_dir:
         all_pickle_files = load_all_pickle_files(args.tokenized_dir)
 
+        # Remove pickles for PDFs that already have saved OCR outputs to avoid re-processing
+        # We consider a PDF "processed" if its output directory contains any of the marker files
+        # produced by the saver (ocr_content.mmd, ocr_detailed.mmd, ocr_layout.pdf, combined.mmd, combined_layouts.pdf).
+        markers = ('ocr_content.mmd', 'ocr_detailed.mmd', 'ocr_layout.pdf', 'combined.mmd', 'combined_layouts.pdf')
+        filtered_files = []
+        skipped = 0
+        for p in all_pickle_files:
+            pdf_name = os.path.splitext(os.path.basename(p))[0]
+            out_dir = os.path.join(args.output, pdf_name)
+            # If any marker exists in the output dir, treat as already processed
+            if os.path.isdir(out_dir) and any(os.path.exists(os.path.join(out_dir, m)) for m in markers):
+                skipped += 1
+                logger.info(f"Skipping already-processed PDF: {pdf_name}")
+                continue
+            filtered_files.append(p)
+
+        if skipped > 0:
+            logger.info(f"Skipped {skipped} already-processed pickle files (output exists in {args.output})")
+
+        all_pickle_files = filtered_files
+
         # Filter files based on start-from parameter
         if args.start_from:
             start_filename = f"{args.start_from}.pkl"
@@ -841,17 +846,23 @@ def main():
 
                 # Use multiprocessing to save PDFs in parallel with fail-safety
                 # Limit number of saver processes to avoid hitting OS file descriptor limits
-                # (torch and PIL may create file descriptors / shared memory objects per process).
-                # max_saver_procs = max(1, cpu_count() // 2)
-                # num_processes = min(len(pdf_save_args), max_saver_procs)
-                num_processes = os.cpu_count()
-                logger.info(f"Saving {len(pdf_save_args)} PDFs using {num_processes} processes")
+                # and excessive disk contention. Allow override with SAVE_WORKERS env var.
+                try:
+                    env_workers = int(os.environ.get('SAVE_WORKERS', 0))
+                except Exception:
+                    env_workers = 0
+
+                default_workers = cpu_count() // 2
+                
+                max_saver_procs = env_workers if env_workers > 0 else default_workers
+                num_processes = min(len(pdf_save_args), max_saver_procs)
+                logger.info(f"Saving {len(pdf_save_args)} PDFs using {num_processes} processes (max_saver_procs={max_saver_procs})")
 
                 saving_start_time = time.time()
                 successful_saves = 0
                 failed_saves = 0
 
-                with ProcessPoolExecutor(max_workers=num_processes) as executor:
+                with ThreadPoolExecutor(max_workers=num_processes) as executor:
                     # Submit all tasks
                     future_to_pdf = {
                         executor.submit(save_single_pdf_safe, *args): args[0]['name']
