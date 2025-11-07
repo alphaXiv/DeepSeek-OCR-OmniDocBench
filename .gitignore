@@ -1,26 +1,2 @@
-<<<<<<< HEAD
-**/__pycache__/
-# check_data/
-**/.ipynb_checkpoints/
-.ipynb_checkpoints
-**log
-debug.py
-test.py
-run_cal_metric.py
-output/
-old_results
-det_test
-old_configs
-check_data
-trace
-old_demo_data
-old_run_cal_metric.py
-old_test.py
-old_tools
-old_trace
-result/
-configs/
-=======
-OmniDocBench/
-olmocr/
->>>>>>> fb5a74401d6ae68b76c00dfb0fbc9050043fd272
+# Ignore local cloned/checked-out subprojects and large folders
+...existing code...
