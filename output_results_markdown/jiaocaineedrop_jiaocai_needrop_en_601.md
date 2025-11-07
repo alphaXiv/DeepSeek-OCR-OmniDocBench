@@ -1,0 +1,34 @@
+被子植物与我们的生活息息相关，我们日常生活中的衣、食、住、行，往往都离不开它们。例如，制造汽车和自行车轮胎的原料就来自橡胶树。许多中药材也来自被子植物，如人参、枸杞、杜仲、黄连、甘草等。关于被子植物与我们日常生活的关系，你还能举出哪些更为重要的例子呢？
+
+### 技能训练
+
+#### 比较
+
+![Close-up image of a leaf of the White netted grass (白网纹草), identified as a dicotyledon (双子叶植物), characterized by its complex, reticulate venation pattern (netted veins).]()![](_page_0_Picture_3.jpeg)
+
+白网纹草  
+(双子叶植物)
+
+叶片上粗细不等的脉络叫叶脉。请仔细观察左右两图中的植物，比较它们的叶脉，说说这两者之间有什么区别。
+
+![Close-up image of a leaf of the Silver-line Bird's Nest Fig (银线鸟巢凤梨), identified as a monocotyledon (单子叶植物), characterized by its parallel venation pattern.]()![](_page_0_Picture_6.jpeg)
+
+银线鸟巢凤梨  
+(单子叶植物)
+
+#### 练习
+
+1. 判断下列说法是否正确。正确的画“√”，错误的画“×”。
+
+(1) 松的球果不是果实。 ( )  
+(2) 裸子植物和被子植物的种子中都有胚。 ( )  
+(3) 裸子植物的种子比被子植物的种子能得到更好的保护。 ( )
+
+2. 将种子的结构与其相应的功能用线连接起来。
+
+| 种皮 | 保护胚     |
+|----|---------|
+| 胚  | 能发育成新植株 |
+| 胚乳 | 储藏养料    |
+
+3. 被子植物具有哪些特点，使它们成为地球上分布最广泛的植物类群？

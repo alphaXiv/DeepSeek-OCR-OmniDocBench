@@ -1,0 +1,25 @@
+这四个点中,只要知道了其中两个点,就可以画出另外两个点。譬如,若知道了  $M_2, M_3$  两个点,则只要分别过  $M_2, M_3$  画出投影线(平行于相应坐标轴的直线),它们的交点就是  $M$  点,再过  $M$  画投影线(平行于  $z$  轴),它与  $xOy$  面的交点就是  $M_1$ 。
+
+根据上述道理,为了画出两个曲面的交线  $\Gamma$ , 就只要先画出  $\Gamma$  上每个点在某两个坐标面上的投影。
+
+曲线  $\Gamma$  上的所有点在  $xOy$  面上的投影组成的曲线称为  $\Gamma$  在  $xOy$  面上的投影。显然曲线  $\Gamma$  在  $xOy$  面上的投影就是以  $\Gamma$  为准线、母线平行于  $z$  轴的柱面与  $xOy$  面的交线,这个柱面称为  $\Gamma$  沿  $z$  轴的投影柱面。类似地可考虑  $\Gamma$  在  $xOz$  面、 $yOz$  面上的投影。
+
+![Diagram 3.27: A 3D Cartesian coordinate system with axes x, y, and z originating from O. A point M is shown in the first octant. M_1 is the projection of M onto the xOy plane. M_3 is the projection of M_1 onto the x-axis. M_2 is the projection of M_1 onto the y-axis. The lines connecting O, M_3, M_1, and M_2 form a rectangle in the xOy plane, and M is vertically above M_1.]()![](_page_0_Picture_3.jpeg)
+
+图 3.27
+
+例3.6 求曲线  $\Gamma$ :
+
+$$x^2 + y^2 + z^2 = 4, \quad (3.36)$$
+
+$$x^2 + y^2 - 2x = 0 \quad (3.37)$$
+
+在各坐标面上的投影的方程,并且画出曲线  $\Gamma$  及其在各坐标面上的投影(这条曲线  $\Gamma$  称为维维安尼曲线)。
+
+解  $\Gamma$  沿  $z$  轴的投影柱面的方程应当不含  $z$ , 且  $\Gamma$  上的点应适合这个方程,显然方程(3.37)就符合要求。但是要注意,一般说来,投影柱面可能只是柱面(3.37)的一部分,这要根据曲线  $\Gamma$  上的点的坐标有哪些限制来决定。对于本题来说,由方程(3.36)知,  $\Gamma$  上的点应满足
+
+$$|x| \le 2, |y| \le 2, |z| \le 2;$$
+
+显然满足方程(3.37)的点均满足这些要求,因此整个柱面(3.37)都是  $\Gamma$  沿  $z$  轴的投影柱面,从面  $\Gamma$  在  $xOy$  面上的投影的方程是
+
+$$\left\{ \begin{array}{l} x^2 + y^2 - 2x = 0, \\ z = 0. \end{array} \right. \quad (3.38)$$

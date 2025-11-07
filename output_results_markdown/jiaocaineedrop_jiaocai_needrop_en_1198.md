@@ -1,0 +1,57 @@
+$$\text{所以 } x_1 + x_2 = \frac{8k^2}{3 + 4k^2}, x_1x_2 = \frac{4k^2 - 12}{3 + 4k^2},$$
+
+$$\text{(法一)} |AF_2| = \sqrt{(x_1 - 1)^2 + y_1^2} = \sqrt{1 + k^2}|x_1 - 1|, |F_2B| = \sqrt{(x_2 - 1)^2 + y_2^2} = \sqrt{1 + k^2}|x_2 - 1|,$$
+
+$$|AF_2| \cdot |F_2B| = (1 + k^2)|x_1x_2 - (x_1 + x_2) + 1| = (1 + k^2) \left| \frac{4k^2 - 12}{3 + 4k^2} - \frac{8k^2}{3 + 4k^2} + 1 \right| = (1 + k^2) \left| \frac{9}{3 + 4k^2} \right| = (1 + k^2) \frac{9}{3 + 4k^2} = \frac{9}{4} \left( 1 + \frac{1}{3 + 4k^2} \right),$$
+
+当  $k^2 = 0$  时, 取最大值为 3, 所以  $|AF_2| \cdot |F_2B|$  的取值范围  $\left(\frac{9}{4}, 3\right]$ .
+
+又当  $k$  不存在, 即  $AB \perp x$  轴时,  $|AF_2| \cdot |F_2B|$  取值为  $\frac{9}{4}$ .
+
+所以  $|AF_2| \cdot |F_2B|$  的取值范围  $\left[\frac{9}{4}, 3\right]$ ,
+
+$$\text{(法二)} |AF_2| \cdot |F_2B| = \overrightarrow{AF_2} \cdot \overrightarrow{F_2B} = -\overrightarrow{F_2A} \cdot \overrightarrow{F_2B} = -(x_1 - 1)(x_2 - 1) - y_1y_2$$
+
+$$= -(x_1 - 1)(x_2 - 1) - k^2(x_1 - 1)(x_2 - 1) = -(1 + k^2)[x_1x_2 - (x_1 + x_2) + 1] = -(1 + k^2) \left( \frac{4k^2 - 12}{3 + 4k^2} - \frac{8k^2}{3 + 4k^2} + 1 \right) = (1 + k^2) \frac{9}{3 + 4k^2} = \frac{9}{4} \left( 1 + \frac{1}{3 + 4k^2} \right),$$
+
+当  $k^2 = 0$  时, 取最大值为 3, 所以  $|AF_2| \cdot |F_2B|$  的取值范围  $\left(\frac{9}{4}, 3\right]$ .
+
+又当  $k$  不存在, 即  $AB \perp x$  轴时,  $|AF_2| \cdot |F_2B|$  取值为  $\frac{9}{4}$ .
+
+所以  $|AF_2| \cdot |F_2B|$  的取值范围  $\left[\frac{9}{4}, 3\right]$ .
+
+例26. (2022·全国·南京外国语学校模拟预测) 已知抛物线  $C: x^2 = 4y$ ,  $F$  为其焦点, 过  $F$  的直线  $l$  与  $C$  交于不同的两点  $A, B$ .
+
+(1) 若直线  $l$  斜率为 3, 求  $|AB|$ ;
+
+(2) 如图,  $C$  在点  $A$  处的切线与在点  $B$  处的切线交于点  $P$ , 连接  $PF$ , 证明:  $|PF|^2 = |AF| \cdot |BF|$ .
+
+【解析】(1) 由抛物线  $C: x^2 = 4y$ , 得  $F(0, 1)$ ,
+
+若直线  $l$  的斜率为 3, 则直线  $l$  的方程为  $y = 3x + 1$ .
+
+设  $A(x_1, y_1)$ ,  $B(x_2, y_2)$ ,
+
+$$\text{由 } \begin{cases} y = 3x + 1 \\ x^2 = 4y \end{cases} \text{ 消去 } y \text{ 得 } x^2 - 12x - 4 = 0, \text{ 所以 } \Delta > 0, x_1 + x_2 = 12,$$
+
+$$\text{所以 } |AB| = |AF| + |FB| = y_1 + 1 + y_2 + 1 = 3(x_1 + x_2) + 4 = 40.$$
+
+(2) 证明: 由题可知, 直线  $l$  的斜率存在, 设直线  $l$  的方程为  $y = kx + 1$ ,  $A(x_1, y_1)$ ,  $B(x_2, y_2)$ ,
+
+$$\text{抛物线方程为 } x^2 = 4y, \text{ 即 } y = \frac{x^2}{4}, y' = \frac{x}{2},$$
+
+所以以  $A, B$  为切点的切线方程分别为  $x_1x = 2y + 2y_1$ ,  $x_2x = 2y + 2y_2$ .
+
+$$\text{由 } \begin{cases} y = kx + 1 \\ x^2 = 4y \end{cases} \text{ 消去 } y \text{ 得 } x^2 - 4kx - 4 = 0, \text{ 所以 } \Delta > 0, x_1 + x_2 = 4k, x_1x_2 = -4.$$
+
+$$\text{这两条切线的斜率分别为 } k_1 = \frac{x_1}{2}, k_2 = \frac{x_2}{2}.$$
+
+$$\text{由 } k_1k_2 = \frac{x_1x_2}{4} = \frac{-4}{4} = -1, \text{ 故 } PA \perp BP.$$
+
+$$\text{设 } P(x_0, y_0), \text{ 则由 } \begin{cases} x_1x = 2y + 2y_1 \\ x_2x = 2y + 2y_2 \end{cases} \text{ 可得 } x_0 = \frac{2(y_1 - y_2)}{x_1 - x_2} = 2k, y_0 = \frac{1}{2}x_1x_0 - y_1 = kx_1 - y_1 = -1,$$
+
+当  $k = 0$  时, 则  $x_0 = 0$ , 可得  $AB \perp PF$ ;
+
+$$\text{当 } k \neq 0 \text{ 时, 则 } x_0 \neq 0, k_{AB} = \frac{x_0}{2}, k_{PF} = \frac{-2}{x_0}, \text{ 所以 } k_{AB} \cdot k_{PF} = \frac{-2}{x_0} \cdot \frac{x_0}{2} = -1,$$
+
+![Diagram showing a parabola C: x^2 = 4y, focus F, a line l intersecting C at points A and B, and the intersection point P of the tangents at A and B.]()![](_page_0_Picture_28.jpeg)

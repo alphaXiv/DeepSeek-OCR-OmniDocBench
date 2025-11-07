@@ -1,0 +1,16 @@
+**Table 1.** The mean pH values, organic matter content (%), metal contents ( $\mu\text{g g}^{-1}$ ) in sediments fractions and total metal content from acid digestion ( $\pm$  Standard Deviation). The data shown are the mean of 18 samples per site for the dry weather and 6 for the storm event.
+
+| Station | pH  | Organic matter (%) | $\text{Cd } (\mu\text{g g}^{-1} \text{ dry weight})$ |                        |                        |                           | $\text{Pb } (\mu\text{g g}^{-1} \text{ dry weight})$ |                           |                           |                            |
+|---------|-----|--------------------|------------------------------------------------------|------------------------|------------------------|---------------------------|------------------------------------------------------|---------------------------|---------------------------|----------------------------|
+|         |     |                    | Fraction I                                           | Fraction II            | Fraction III           | Total metal concentration | Fraction I                                           | Fraction II               | Fraction III              | Total metal concentration  |
+| D1      | 7.2 | 16.3               | 1.55<br>( $\pm 1.10$ )                               | 2.89<br>( $\pm 0.34$ ) | 7.03<br>( $\pm 1.11$ ) | 8.56<br>( $\pm 2.95$ )    | 8.53<br>( $\pm 6.93$ )                               | 221.71<br>( $\pm 28.79$ ) | 147.16<br>( $\pm 26.33$ ) | 361.66<br>( $\pm 56.51$ )  |
+| D2      | 7.1 | 17.9               | 1.77<br>( $\pm 1.59$ )                               | 2.94<br>( $\pm 0.27$ ) | 6.13<br>( $\pm 0.81$ ) | 8.57<br>( $\pm 2.46$ )    | 8.88<br>( $\pm 6.17$ )                               | 184.40<br>( $\pm 19.17$ ) | 119.62<br>( $\pm 17.49$ ) | 314.91<br>( $\pm 32.70$ )  |
+| D3      | 7.1 | 11.4               | 1.54<br>( $\pm 1.40$ )                               | 2.11<br>( $\pm 0.59$ ) | 3.72<br>( $\pm 1.68$ ) | 6.22<br>( $\pm 3.29$ )    | 9.44<br>( $\pm 6.43$ )                               | 127.68<br>( $\pm 85.72$ ) | 50.55<br>( $\pm 42.46$ )  | 172.72<br>( $\pm 125.11$ ) |
+| D4      | 7.0 | 18.9               | 1.46<br>( $\pm 1.27$ )                               | 2.98<br>( $\pm 0.35$ ) | 6.04<br>( $\pm 2.18$ ) | 7.77<br>( $\pm 1.56$ )    | 9.32<br>( $\pm 7.00$ )                               | 159.05<br>( $\pm 11.13$ ) | 81.11<br>( $\pm 26.18$ )  | 237.55<br>( $\pm 23.98$ )  |
+| D5      | 7.1 | 11.7               | 1.48<br>( $\pm 1.33$ )                               | 2.15<br>( $\pm 1.00$ ) | 4.55<br>( $\pm 2.07$ ) | 6.18<br>( $\pm 3.89$ )    | 10.0<br>( $\pm 6.62$ )                               | 131.39<br>( $\pm 74.64$ ) | 67.60<br>( $\pm 54.43$ )  | 197.67<br>( $\pm 131.68$ ) |
+| D5 *    | 5.8 | 16.8               | 3.05<br>( $\pm 0.16$ )                               | 1.42<br>( $\pm 0.21$ ) | 5.83<br>( $\pm 0.51$ ) | 10.28<br>( $\pm 0.72$ )   | 7.29<br>( $\pm 0.12$ )                               | 105.92<br>( $\pm 13.22$ ) | 51.18<br>( $\pm 3.32$ )   | 122.00<br>( $\pm 1.49$ )   |
+
+Fraction I = Exchangeable Fraction  
+Fraction II = Organically Bound Fraction  
+Fraction III = Residual Fraction  
+\* = Storm event
