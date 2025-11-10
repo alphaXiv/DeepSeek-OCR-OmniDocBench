@@ -1,0 +1,43 @@
+# 目录
+
+## 第一单元 乐鸣江河
+
+![Illustration of a man in traditional Chinese clothing (red and white) singing or gesturing, set against a yellow/orange background.]()![](_page_0_Picture_2.jpeg)
+
+| 表现与实践 | 演唱             | 长江之歌     | (2) |
+|-------|----------------|----------|-----|
+|       |                | 黄河船夫曲    | (4) |
+|       | 演奏             | 五月栽秧     | (5) |
+| 感受与欣赏 | 欣赏             | 川江船夫号子   | (6) |
+|       |                | (男声合唱)   |     |
+|       |                | 山丹丹开花红艳艳 | (7) |
+|       |                | (管弦乐)    |     |
+| 活动与创造 | 音乐沙龙 我的编创 爱乐驿站 |          | (9) |
+
+## 第二单元 海滨音诗
+
+![Illustration of a young girl playing a violin, set against a blue background with waves.]()![](_page_0_Picture_5.jpeg)
+
+| 表现与实践 | 演唱             | 大海啊，故乡          | (12) |
+|-------|----------------|-----------------|------|
+|       |                | 踏浪              | (13) |
+|       | 演奏             | 海滨之歌            | (14) |
+| 感受与欣赏 | 欣赏             | 海港之夜 (男声合唱)     | (15) |
+|       |                | 海洋与辛巴德的船        | (16) |
+|       |                | (交响组曲《舍赫拉查德》选段) |      |
+| 活动与创造 | 音乐沙龙 我的编创 爱乐驿站 |                 | (19) |
+
+## 第三单元 清明雨花
+
+![Illustration of a group of stone statues (likely martyrs) with floating flowers, set against a yellow/orange background.]()![](_page_0_Picture_8.jpeg)
+
+| 表现与实践 | 演唱   | 雨花石         | (22) |
+|-------|------|-------------|------|
+|       |      | 共和国之恋       | (23) |
+|       | 演奏   | 五月的鲜花       | (24) |
+| 感受与欣赏 | 欣赏   | 做人要做这样的人    | (25) |
+|       |      | (京剧《红灯记》选段) |      |
+|       |      | 游击队歌        | (26) |
+|       |      | (木管五重奏)     |      |
+| 活动与创造 | 音乐沙龙 | 班级音乐会       | (28) |
+|       |      | 爱乐驿站        |      |

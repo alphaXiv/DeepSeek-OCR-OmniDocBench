@@ -1,0 +1,21 @@
+**Fig. 2** Test images superimposed: in *red* the first, in *green* the second frame (left). The white square indicates the Interrogation Window. On the right the same image with a rectangular artificially saturated area on the first frame
+
+![Figure 2 shows two test images. The left image displays two frames (red and green) with a white square indicating the interrogation window. The right image shows the same frames but with a rectangular area artificially saturated in the first frame.]()![](_page_0_Picture_2.jpeg)
+
+![Figure 3 shows three dissimilarity maps: Lorentzian, SSD, and Fast Correlation. These maps display contours of dissimilarity over a 2D displacement space (x and y directions, ranging from -15 to 15). The background color indicates dissimilarity level (darker = lower dissimilarity), and contours are drawn from 0 to 1 in steps of 0.05.]()![](_page_0_Figure_3.jpeg)
+
+**Fig. 3** Maps of dissimilarity with Lorentzian, sum of squared differences and fast correlation. Dissimilarity are subtracted of the minimum value and normalized by the maximum value. Contours are drawn from 0 to 1 with a step of 0.05. For reference, the levels
+
+0.7, 0.6 and 0.5 are drawn in *red*, *green*, and *blue*, respectively. The lowest the dissimilarity the darker the background. Abscissa and ordinate represent guessed displacement in the *x* and *y* direction, respectively
+
+**Fig. 4** Dissimilarity maps on the modified image. Same contour lines and axes as in Fig. 3
+
+![Figure 4 shows three dissimilarity maps (Lorentzian, SSD, and Fast Correlation) computed on the modified image (with an artificially saturated area). The maps use the same contour lines and axes as Figure 3.]()![](_page_0_Figure_7.jpeg)
+
+conservation by spurious pixels (outliers) between (e.g. the white square artificially added in the first frame).
+
+The SSD and cross-correlation are functions defined univocally. Conversely, the Lorentzian depends on a parameter,  $\sigma_e$ , which tunes how robust the estimator has to be. As a matter of fact, it should equal the amplitude of the expected differences between pixels fulfilling the BCC. The above maps have been computed with a value equal to 26, that is about one half of the standard deviation of the image gray levels ( $\sigma = 43 \pm 0.1$  for both images).
+
+In order to test the sensitivity of the solution on the parameter  $\sigma_e$ , the dissimilarity map given by the
+
+Lorentzian estimator was computed for six different values of  $\sigma_e$ , ranging from 2 to 128; results are plotted in Fig. 5. If one assumes the level of the second peak as an indication of the signal to noise ratio, one should conclude that the values of 26 is not optimal, since the values from 3 up to 13 behaves slightly better, but the results are more or less similar to those obtained with 26. Further increases of the value deteriorate the S/N ratio, but also for  $\sigma_e = 128$ , the Lorentzian estimator works noticeably better than SSD or cross-correlation. These results indicate that the Lorentzian estimator performs well for a wide range of values of the parameter, even though the optimal seems to be at about 1/3 of the

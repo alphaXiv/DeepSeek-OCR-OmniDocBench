@@ -6,6 +6,7 @@ import re
 from tqdm import tqdm
 import torch
 from concurrent.futures import ThreadPoolExecutor
+import argparse
  
 
 if torch.version.cuda == '11.8':
@@ -294,7 +295,6 @@ def process_pdf_to_ocr(input_path, output_path):
 
 
         contents += content + f'\n{page_num}\n'
-
 
         jdx += 1
 

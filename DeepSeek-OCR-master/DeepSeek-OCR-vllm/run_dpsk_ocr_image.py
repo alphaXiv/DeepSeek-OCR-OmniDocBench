@@ -191,12 +191,15 @@ async def stream_generate(image=None, prompt=''):
         if request_output.outputs:
             full_text = request_output.outputs[0].text
             new_text = full_text[printed_length:]
-            print(new_text, end='', flush=True)
+            # yield incremental text chunks instead of printing
+            if new_text:
+                yield new_text
             printed_length = len(full_text)
             final_output = full_text
-    print('\n') 
 
-    return final_output
+    # At the end of generation yield a final empty chunk to indicate completion
+    # Consumers can ignore empty chunks if desired.
+    yield ''
 
 
 
@@ -217,7 +220,16 @@ if __name__ == "__main__":
 
     prompt = PROMPT
 
-    result_out = asyncio.run(stream_generate(image_features, prompt))
+    # Collect incremental chunks from the async generator into a single string
+    final_chunks = []
+
+    async def run_and_collect():
+        async for chunk in stream_generate(image_features, prompt):
+            if chunk:
+                final_chunks.append(chunk)
+
+    asyncio.run(run_and_collect())
+    result_out = ''.join(final_chunks)
 
 
     save_results = 1

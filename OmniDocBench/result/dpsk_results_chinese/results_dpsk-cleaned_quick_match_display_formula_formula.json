@@ -1,0 +1,4629 @@
+[
+    {
+        "gt_idx": [
+            6
+        ],
+        "gt": "\\alpha< 0, \\lambda< 0",
+        "pred_idx": [
+            8
+        ],
+        "pred": "\\[\\alpha < 0, \\lambda < 0\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6
+        ],
+        "pred_position": 349,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "0",
+        "norm_gt": "\\alpha<0,\\lambda<0",
+        "norm_pred": "\\alpha<0,\\lambda<0",
+        "image_name": "yanbaopptmerge_yanbaoPPT_2460.jpg",
+        "upper_len": 18,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "yanbaopptmerge_yanbaoPPT_2460.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "\\alpha> 0, \\lambda> 0",
+        "pred_idx": [
+            9
+        ],
+        "pred": "\\[\\alpha > 0, \\lambda > 0\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            7
+        ],
+        "pred_position": 380,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "1",
+        "norm_gt": "\\alpha>0,\\lambda>0",
+        "norm_pred": "\\alpha>0,\\lambda>0",
+        "image_name": "yanbaopptmerge_yanbaoPPT_2460.jpg",
+        "upper_len": 18,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "yanbaopptmerge_yanbaoPPT_2460.jpg"
+    },
+    {
+        "gt_idx": [
+            10
+        ],
+        "gt": "\\alpha=\\mathrm{t r} ( \\mathbf{A} )=\\lambda_{1}+\\lambda_{2}",
+        "pred_idx": [
+            6
+        ],
+        "pred": "\\[ \\begin{align*} \\frac{du}{dt} &= P^{-1} A P u \\\\ \\alpha &= \\operatorname{tr}(A) = \\lambda_1 + \\lambda_2 \\\\ \\beta &= |A| = \\lambda_1 \\lambda_2 \\end{align*} \\]",
+        "edit": 0.6847826086956522,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            10
+        ],
+        "pred_position": 409,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "2",
+        "norm_gt": "\\alpha={tr}({a})=\\lambda_{1}+\\lambda_{2}",
+        "norm_pred": "\\frac{du}{dt}&=p^{-1}apu\\\\\\alpha&={tr}(a)=\\lambda_1+\\lambda_2\\\\\\beta&=|a|=\\lambda_1\\lambda_2",
+        "image_name": "yanbaopptmerge_yanbaoPPT_2460.jpg",
+        "upper_len": 92,
+        "metric": {
+            "Edit_dist": 0.6847826086956522
+        },
+        "Edit_num": 63,
+        "img_name": "yanbaopptmerge_yanbaoPPT_2460.jpg"
+    },
+    {
+        "gt_idx": [
+            9
+        ],
+        "gt": "\\frac{d {\\bf u}} {d t}={\\bf P}^{-1} {\\bf A P} {\\bf u}",
+        "pred_idx": [
+            7
+        ],
+        "pred": "\\[\\Delta = 0 \\quad A\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            9
+        ],
+        "pred_position": 23,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "3",
+        "norm_gt": "\\frac{d{\\bfu}}{dt}={\\bfp}^{-1}{\\bfap}{\\bfu}",
+        "norm_pred": "\\delta=0a",
+        "image_name": "yanbaopptmerge_yanbaoPPT_2460.jpg",
+        "upper_len": 43,
+        "metric": {
+            "Edit_dist": 0.8837209302325582
+        },
+        "Edit_num": 38,
+        "img_name": "yanbaopptmerge_yanbaoPPT_2460.jpg"
+    },
+    {
+        "gt_idx": [
+            11
+        ],
+        "gt": "\\beta=\\mid\\mathbf{A} \\mid=\\lambda_{1} \\lambda_{2}",
+        "pred_idx": [
+            3
+        ],
+        "pred": "\\[ \\begin{align*} P \\xi \\xi \\left( \\begin{array}{cc} 1 & 2 \\end{array} \\right) \\quad & P^{-1} A P = \\begin{pmatrix} \\lambda & \\\\ & \\lambda \\end{pmatrix} \\\\ \\frac{du}{dt} = \\lambda u \\quad & u = u_0 e^{\\lambda t} \\\\ \\frac{dv}{dt} = \\lambda v \\quad & v = v_0 e^{\\lambda t} \\end{align*} \\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            11
+        ],
+        "pred_position": 59,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "4",
+        "norm_gt": "\\beta=\\mid{a}\\mid=\\lambda_{1}\\lambda_{2}",
+        "norm_pred": "p\\xi\\xi({cc}1&2)&p^{-1}ap=\\lambda&\\\\&\\lambda\\\\\\frac{du}{dt}=\\lambdau&u=u_0e^{\\lambdat}\\\\\\frac{dv}{dt}=\\lambdav&v=v_0e^{\\lambdat}",
+        "image_name": "yanbaopptmerge_yanbaoPPT_2460.jpg",
+        "upper_len": 128,
+        "metric": {
+            "Edit_dist": 0.7578125
+        },
+        "Edit_num": 97,
+        "img_name": "yanbaopptmerge_yanbaoPPT_2460.jpg"
+    },
+    {
+        "gt_idx": [
+            1,
+            2,
+            3
+        ],
+        "gt": "\\begin{array}{l} {\\[\\frac{1}{3}\\times 3.14\\times 4^{2} \\times 6\\]} \\\\ {\\[= 3. 1 4 \\times1 6 \\times2\\]} \\\\ {\\[= 1 0 0. 4 8 c m^{3}\\]} \\end{array}",
+        "pred_idx": [
+            1
+        ],
+        "pred": "\\[ \\begin{align*} \\frac{1}{3} \\times 3.14 \\times 4^2 \\times 6 \\\\ &= 3.14 \\times 16 \\times 2 \\\\ &= 100.48 \\text{cm}^3 \\end{align*} \\]",
+        "edit": 0.15789473684210525,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            2.1,
+            2.2,
+            2.3
+        ],
+        "pred_position": 47,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            },
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            },
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "5",
+        "norm_gt": "\\frac{1}{3}\\times3.14\\times4^{2}\\times6=3.14\\times16\\times2=100.48cm^{3}",
+        "norm_pred": "\\frac{1}{3}\\times3.14\\times4^2\\times6\\\\&=3.14\\times16\\times2\\\\&=100.48{cm}^3",
+        "image_name": "yanbaopptmerge_yanbaoPPT_4310.jpg",
+        "upper_len": 76,
+        "metric": {
+            "Edit_dist": 0.15789473684210525
+        },
+        "Edit_num": 12,
+        "img_name": "yanbaopptmerge_yanbaoPPT_4310.jpg"
+    },
+    {
+        "gt_idx": [
+            2
+        ],
+        "gt": "（\\frac{1} {9} ）（\\frac{2}{9} ）（\\frac{5}{9} ）（\\frac{8}{9} ）",
+        "pred_idx": [
+            ""
+        ],
+        "pred": "",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            3
+        ],
+        "pred_position": "",
+        "pred_category_type": "",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "6",
+        "norm_gt": "（\\frac{1}{9}）（\\frac{2}{9}）（\\frac{5}{9}）（\\frac{8}{9}）",
+        "norm_pred": "",
+        "image_name": "yanbaopptmerge_yanbaoPPT_4710.jpg",
+        "upper_len": 52,
+        "metric": {
+            "Edit_dist": 1.0
+        },
+        "Edit_num": 52,
+        "img_name": "yanbaopptmerge_yanbaoPPT_4710.jpg"
+    },
+    {
+        "gt_idx": [
+            14
+        ],
+        "gt": "血中原卟啉含量（g/L全血）=\\frac{样品荧光强度空白荧光强度}{标准管荧光强度空白荧光强度}\\times标准管原卟啉含量(g)\\times\\frac{100}{样品取样量(ml)}\\times10",
+        "pred_idx": [
+            44
+        ],
+        "pred": "\\[= \\frac{\\mathrm{样品荧光强度空白荧光强度}}{\\mathrm{标准管荧光强度空白荧光强度}}\\times \\mathrm{标准管原叶啉含量(g)}\\times\\]",
+        "edit": 0.4752475247524752,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            14
+        ],
+        "pred_position": 1572,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_ch"
+            }
+        ],
+        "img_id": "7",
+        "norm_gt": "血中原卟啉含量（g/l全血）=\\frac{样品荧光强度空白荧光强度}{标准管荧光强度空白荧光强度}\\times标准管原卟啉含量(g)\\times\\frac{100}{样品取样量(ml)}\\times10",
+        "norm_pred": "=\\frac{{样品荧光强度空白荧光强度}}{{标准管荧光强度空白荧光强度}}\\times{标准管原叶啉含量(g)}\\times",
+        "image_name": "docstructbench_dianzishu_zhongwenzaixian-o.O-61569751.pdf_155.jpg",
+        "upper_len": 101,
+        "metric": {
+            "Edit_dist": 0.4752475247524752
+        },
+        "Edit_num": 48,
+        "img_name": "docstructbench_dianzishu_zhongwenzaixian-o.O-61569751.pdf_155.jpg"
+    },
+    {
+        "gt_idx": [
+            11
+        ],
+        "gt": "原式={\\frac{1} {2}} \\int_{0}^{\\frac{1} {2}} {\\frac{1} {2 t^{2}-2 t-4}} \\ \\mathrm{d} t={\\frac{1} {1 2}} \\int_{0}^{\\frac{1} {2}} \\left( {\\frac{1} {t-2}}-{\\frac{1} {t+1}} \\right) \\mathrm{d} t=-{\\frac{\\operatorname{l n} 2} {1 2}}",
+        "pred_idx": [
+            11
+        ],
+        "pred": "\\[原式 = \\frac{1}{2}\\int_{0}^{\\frac{1}{2}}\\frac{1}{2t^2 - 2t - 4}\\mathrm{d}t = \\frac{1}{12}\\int_{0}^{\\frac{1}{2}}\\left(\\frac{1}{t - 2} -\\frac{1}{t + 1}\\right)\\mathrm{d}t = -\\frac{\\ln 2}{12}\\]",
+        "edit": 0.10625,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            14
+        ],
+        "pred_position": 569,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_ch"
+            }
+        ],
+        "img_id": "8",
+        "norm_gt": "原式={\\frac{1}{2}}\\int_{0}^{\\frac{1}{2}}{\\frac{1}{2t^{2}-2t-4}}\\{d}t={\\frac{1}{12}}\\int_{0}^{\\frac{1}{2}}({\\frac{1}{t-2}}-{\\frac{1}{t+1}}){d}t=-{\\frac{{ln}2}{12}}",
+        "norm_pred": "原式=\\frac{1}{2}\\int_{0}^{\\frac{1}{2}}\\frac{1}{2t^2-2t-4}{d}t=\\frac{1}{12}\\int_{0}^{\\frac{1}{2}}(\\frac{1}{t-2}-\\frac{1}{t+1}){d}t=-\\frac{\\ln2}{12}",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 160,
+        "metric": {
+            "Edit_dist": 0.10625
+        },
+        "Edit_num": 17,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            15
+        ],
+        "gt": "原式=2 \\iint_{D_{1}} \\operatorname{s i n} x^{2} \\ \\mathrm{d} x \\ \\mathrm{d} y=2 \\int_{0}^{\\sqrt{\\pi}} \\operatorname{s i n} x^{2} \\ \\mathrm{d} x \\int_{0}^{x} \\ \\mathrm{d} y=2 \\int_{0}^{\\sqrt{\\pi}} x \\operatorname{s i n} x^{2} \\ \\mathrm{d} x=2",
+        "pred_idx": [
+            15
+        ],
+        "pred": "\\[原式 = 2\\iint_{D_{1}}\\sin x^{2}\\mathrm{d}x\\mathrm{d}y = 2\\int_{0}^{\\sqrt{\\pi}}\\sin x^{2}\\mathrm{d}x\\int_{0}^{x}\\mathrm{d}y = 2\\int_{0}^{\\sqrt{\\pi}}x\\sin x^{2}\\mathrm{d}x = 2\\]",
+        "edit": 0.08270676691729323,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            18
+        ],
+        "pred_position": 1001,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_ch"
+            }
+        ],
+        "img_id": "9",
+        "norm_gt": "原式=2\\iint_{d_{1}}{sin}x^{2}\\{d}x\\{d}y=2\\int_{0}^{\\sqrt{\\pi}}{sin}x^{2}\\{d}x\\int_{0}^{x}\\{d}y=2\\int_{0}^{\\sqrt{\\pi}}x{sin}x^{2}\\{d}x=2",
+        "norm_pred": "原式=2\\iint_{d_{1}}\\sinx^{2}{d}x{d}y=2\\int_{0}^{\\sqrt{\\pi}}\\sinx^{2}{d}x\\int_{0}^{x}{d}y=2\\int_{0}^{\\sqrt{\\pi}}x\\sinx^{2}{d}x=2",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 133,
+        "metric": {
+            "Edit_dist": 0.08270676691729323
+        },
+        "Edit_num": 11,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            19
+        ],
+        "gt": "\\sum_{n=1}^{\\infty} \\frac{(-1 )^{n-1}} {n ( 2 n+1 )}=\\sum_{n=1}^{\\infty} \\frac{(-1 )^{n-1}} {n}+2 \\sum_{n=1}^{\\infty} \\frac{(-1 )^{n}} {2 n+1}.",
+        "pred_idx": [
+            19
+        ],
+        "pred": "\\[\\sum_{n = 1}^{\\infty}\\frac{(-1)^{n - 1}}{n(2n + 1)} = \\sum_{n = 1}^{\\infty}\\frac{(-1)^{n - 1}}{n} +2\\sum_{n = 1}^{\\infty}\\frac{(-1)^{n}}{2n + 1}.\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            22
+        ],
+        "pred_position": 1271,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "10",
+        "norm_gt": "\\sum_{n=1}^{\\infty}\\frac{(-1)^{n-1}}{n(2n+1)}=\\sum_{n=1}^{\\infty}\\frac{(-1)^{n-1}}{n}+2\\sum_{n=1}^{\\infty}\\frac{(-1)^{n}}{2n+1}",
+        "norm_pred": "\\sum_{n=1}^{\\infty}\\frac{(-1)^{n-1}}{n(2n+1)}=\\sum_{n=1}^{\\infty}\\frac{(-1)^{n-1}}{n}+2\\sum_{n=1}^{\\infty}\\frac{(-1)^{n}}{2n+1}",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 127,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            21
+        ],
+        "gt": "\\operatorname{l n} ( 1+x )=\\sum_{n=1}^{\\infty} \\frac{(-1 )^{n-1}} {n} x^{n}, x \\in(-1, 1 ]",
+        "pred_idx": [
+            21
+        ],
+        "pred": "\\[\\ln (1 + x) = \\sum_{n = 1}^{\\infty}\\frac{(-1)^{n - 1}}{n} x^n,x\\in (-1,1].\\]",
+        "edit": 0.06153846153846154,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            24
+        ],
+        "pred_position": 1431,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "11",
+        "norm_gt": "{ln}(1+x)=\\sum_{n=1}^{\\infty}\\frac{(-1)^{n-1}}{n}x^{n},x\\in(-1,1]",
+        "norm_pred": "\\ln(1+x)=\\sum_{n=1}^{\\infty}\\frac{(-1)^{n-1}}{n}x^n,x\\in(-1,1]",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 65,
+        "metric": {
+            "Edit_dist": 0.06153846153846154
+        },
+        "Edit_num": 4,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            23
+        ],
+        "gt": "f ( x )=\\sum_{n=1}^{\\infty} \\frac{(-1 )^{n}} {2 n+1} x^{2 n+1}, x \\in[-1, 1 ].",
+        "pred_idx": [
+            23
+        ],
+        "pred": "\\[f(x) = \\sum_{n = 1}^{\\infty}\\frac{(-1)^n}{2n + 1} x^{2n + 1},x\\in [-1,1].\\]",
+        "edit": 0.03125,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            26
+        ],
+        "pred_position": 1518,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "12",
+        "norm_gt": "f(x)=\\sum_{n=1}^{\\infty}\\frac{(-1)^{n}}{2n+1}x^{2n+1},x\\in[-1,1]",
+        "norm_pred": "f(x)=\\sum_{n=1}^{\\infty}\\frac{(-1)^n}{2n+1}x^{2n+1},x\\in[-1,1]",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 64,
+        "metric": {
+            "Edit_dist": 0.03125
+        },
+        "Edit_num": 2,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            25
+        ],
+        "gt": "f^{\\prime} ( x )=\\sum_{n=1}^{\\infty} (-1 )^{n} x^{2 n}=-\\frac{x^{2}} {1+x^{2}}=\\frac{1} {1+x^{2}}-1, x \\in(-1, 1 ).",
+        "pred_idx": [
+            25
+        ],
+        "pred": "\\[f^{\\prime}(x) = \\sum_{n = 1}^{\\infty}(-1)^{n}x^{2n} = -\\frac{x^{2}}{1 + x^{2}} = \\frac{1}{1 + x^{2}} -1,x\\in (-1,1).\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            28
+        ],
+        "pred_position": 1613,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "13",
+        "norm_gt": "f^{\\prime}(x)=\\sum_{n=1}^{\\infty}(-1)^{n}x^{2n}=-\\frac{x^{2}}{1+x^{2}}=\\frac{1}{1+x^{2}}-1,x\\in(-1,1)",
+        "norm_pred": "f^{\\prime}(x)=\\sum_{n=1}^{\\infty}(-1)^{n}x^{2n}=-\\frac{x^{2}}{1+x^{2}}=\\frac{1}{1+x^{2}}-1,x\\in(-1,1)",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 101,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            27
+        ],
+        "gt": "\\sum_{n=1}^{\\infty} {\\frac{(-1 )^{n-1}} {n ( 2 n+1 )}}=\\operatorname{l n} 2+2 f ( 1 )=\\operatorname{l n} 2+2 \\left( {\\frac{\\pi} {4}}-1 \\right)=\\operatorname{l n} 2+{\\frac{\\pi} {2}}-2",
+        "pred_idx": [
+            27
+        ],
+        "pred": "\\[\\sum_{n = 1}^{\\infty}\\frac{(-1)^{n - 1}}{n(2n + 1)} = \\ln 2 + 2f(1) = \\ln 2 + 2\\left(\\frac{\\pi}{4} -1\\right) = \\ln 2 + \\frac{\\pi}{2} -2\\]",
+        "edit": 0.10909090909090909,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            30
+        ],
+        "pred_position": 1770,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "14",
+        "norm_gt": "\\sum_{n=1}^{\\infty}{\\frac{(-1)^{n-1}}{n(2n+1)}}={ln}2+2f(1)={ln}2+2({\\frac{\\pi}{4}}-1)={ln}2+{\\frac{\\pi}{2}}-2",
+        "norm_pred": "\\sum_{n=1}^{\\infty}\\frac{(-1)^{n-1}}{n(2n+1)}=\\ln2+2f(1)=\\ln2+2(\\frac{\\pi}{4}-1)=\\ln2+\\frac{\\pi}{2}-2",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 110,
+        "metric": {
+            "Edit_dist": 0.10909090909090909
+        },
+        "Edit_num": 12,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            31
+        ],
+        "gt": "3 x^{2}-6 x y-3 x^{2} y^{\\prime}-3 y^{2} y^{\\prime}+2 x-y^{\\prime}=0.",
+        "pred_idx": [
+            31
+        ],
+        "pred": "\\[3x^{2} - 6xy - 3x^{2}y^{\\prime} - 3y^{2}y^{\\prime} + 2x - y^{\\prime} = 0.\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            34
+        ],
+        "pred_position": 2314,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "15",
+        "norm_gt": "3x^{2}-6xy-3x^{2}y^{\\prime}-3y^{2}y^{\\prime}+2x-y^{\\prime}=0",
+        "norm_pred": "3x^{2}-6xy-3x^{2}y^{\\prime}-3y^{2}y^{\\prime}+2x-y^{\\prime}=0",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 60,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            33
+        ],
+        "gt": "6 x-6 y-1 2 x y^{\\prime}-3 x^{2} y^{\\prime\\prime}-6 y \\left( y^{\\prime} \\right)^{2}-3 y^{2} y^{\\prime\\prime}+2-y^{\\prime\\prime}=0.",
+        "pred_idx": [
+            33
+        ],
+        "pred": "\\[6x - 6y - 12xy^{\\prime} - 3x^{2}y^{\\prime \\prime} - 6y(y^{\\prime})^{2} - 3y^{2}y^{\\prime \\prime} + 2 - y^{\\prime \\prime} = 0.\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            36
+        ],
+        "pred_position": 2463,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "16",
+        "norm_gt": "6x-6y-12xy^{\\prime}-3x^{2}y^{\\prime\\prime}-6y(y^{\\prime})^{2}-3y^{2}y^{\\prime\\prime}+2-y^{\\prime\\prime}=0",
+        "norm_pred": "6x-6y-12xy^{\\prime}-3x^{2}y^{\\prime\\prime}-6y(y^{\\prime})^{2}-3y^{2}y^{\\prime\\prime}+2-y^{\\prime\\prime}=0",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 105,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            38
+        ],
+        "gt": "f ( y ) \\geqslant f ( x )+f^{\\prime} ( x ) ( y-x ),",
+        "pred_idx": [
+            38
+        ],
+        "pred": "\\[f(y)\\geqslant f(x) + f^{\\prime}(x)(y - x),\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            41
+        ],
+        "pred_position": 2822,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "17",
+        "norm_gt": "f(y)\\geqslantf(x)+f^{\\prime}(x)(y-x),",
+        "norm_pred": "f(y)\\geqslantf(x)+f^{\\prime}(x)(y-x),",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 37,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            43
+        ],
+        "gt": "x_{n}=\\mathrm{e}-\\sum_{k=n+1}^{\\infty} {\\frac{1} {k!}} \\stackrel{\\mathrm{d e f}} {=} \\mathrm{e}-r_{n}, \\operatorname* {l i m}_{n \\to\\infty} r_{n}=0.",
+        "pred_idx": [
+            41
+        ],
+        "pred": "\\[x_{n} = \\mathrm{e} - \\sum_{k = n + 1}^{\\infty}\\frac{1}{k!}\\stackrel {\\mathrm{def}}{=}\\mathrm{e} - r_{n},\\lim_{n\\to \\infty}r_{n} = 0.\\]",
+        "edit": 0.05,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            46
+        ],
+        "pred_position": 3160,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "18",
+        "norm_gt": "x_{n}={e}-\\sum_{k=n+1}^{\\infty}{\\frac{1}{k!}}\\stackrel{{def}}{=}{e}-r_{n},*{lim}_{n\\to\\infty}r_{n}=0",
+        "norm_pred": "x_{n}={e}-\\sum_{k=n+1}^{\\infty}\\frac{1}{k!}\\stackrel{{def}}{=}{e}-r_{n},\\lim_{n\\to\\infty}r_{n}=0",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 100,
+        "metric": {
+            "Edit_dist": 0.05
+        },
+        "Edit_num": 5,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            45
+        ],
+        "gt": "\\root n \\of{\\mathrm{e}}-1=\\frac{1} {n}+\\frac{1} {2 n^{2}}+o \\left( \\frac{1} {n^{2}} \\right),",
+        "pred_idx": [
+            43
+        ],
+        "pred": "\\[\\sqrt[n]{e} - 1 = \\frac{1}{n} +\\frac{1}{2n^{2}} +\\sigma \\left(\\frac{1}{n^{2}}\\right),\\]",
+        "edit": 0.22388059701492538,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            48
+        ],
+        "pred_position": 3305,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "19",
+        "norm_gt": "\\rootn\\of{{e}}-1=\\frac{1}{n}+\\frac{1}{2n^{2}}+o(\\frac{1}{n^{2}}),",
+        "norm_pred": "\\sqrt[n]{e}-1=\\frac{1}{n}+\\frac{1}{2n^{2}}+\\sigma(\\frac{1}{n^{2}}),",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 67,
+        "metric": {
+            "Edit_dist": 0.22388059701492538
+        },
+        "Edit_num": 15,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            47
+        ],
+        "gt": "原式=\\operatorname* {l i m}_{n \\to\\infty} n \\left( \\operatorname{l n} x_{n}-1-{\\frac{1} {2 n}} \\right)=\\operatorname* {l i m}_{n \\to\\infty} n \\left( \\operatorname{l n} {\\frac{\\mathrm{e}-r_{n}} {\\mathrm{e}}}-{\\frac{1} {2 n}} \\right)=-{\\frac{1} {2}}",
+        "pred_idx": [
+            45
+        ],
+        "pred": "\\[\\lim_{n\\to \\infty}n\\left(\\ln x_{n} - 1 - \\frac{1}{2n}\\right) = \\lim_{n\\to \\infty}n\\left(\\ln \\frac{\\mathrm{e} - r_{n}}{\\mathrm{e}} - \\frac{1}{2n}\\right) = -\\frac{1}{2}\\]",
+        "edit": 0.16030534351145037,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            50
+        ],
+        "pred_position": 3403,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_ch"
+            }
+        ],
+        "img_id": "20",
+        "norm_gt": "原式=*{lim}_{n\\to\\infty}n({ln}x_{n}-1-{\\frac{1}{2n}})=*{lim}_{n\\to\\infty}n({ln}{\\frac{{e}-r_{n}}{{e}}}-{\\frac{1}{2n}})=-{\\frac{1}{2}}",
+        "norm_pred": "\\lim_{n\\to\\infty}n(\\lnx_{n}-1-\\frac{1}{2n})=\\lim_{n\\to\\infty}n(\\ln\\frac{{e}-r_{n}}{{e}}-\\frac{1}{2n})=-\\frac{1}{2}",
+        "image_name": "jiaocai_71434495.pdf_0.jpg",
+        "upper_len": 131,
+        "metric": {
+            "Edit_dist": 0.16030534351145037
+        },
+        "Edit_num": 21,
+        "img_name": "jiaocai_71434495.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            15
+        ],
+        "gt": "\\iint_{\\Sigma}Pdydz+Qdzdx=\\iint_{\\Sigma}\\left(\\frac{x}{z}P+\\frac{y}{z}Q\\right)dxdy",
+        "pred_idx": [
+            16
+        ],
+        "pred": "\\[\\iint_{\\Sigma}P d y d z + Q d z d x = \\iint_{\\Sigma}\\left(\\frac{x}{z} P + \\frac{y}{z} Q\\right)d x d y\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            22
+        ],
+        "pred_position": 1341,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "21",
+        "norm_gt": "\\iint_{\\sigma}pdydz+qdzdx=\\iint_{\\sigma}(\\frac{x}{z}p+\\frac{y}{z}q)dxdy",
+        "norm_pred": "\\iint_{\\sigma}pdydz+qdzdx=\\iint_{\\sigma}(\\frac{x}{z}p+\\frac{y}{z}q)dxdy",
+        "image_name": "jiaocaineedrop_20608808.pdf_0.jpg",
+        "upper_len": 71,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_20608808.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            19
+        ],
+        "gt": "=\\ln2+\\sum_{n=1}^{\\infty}(-1)^{n-1}{\\frac{\\left({\\frac{1}{2}}x\\right)^{n}}{n}}",
+        "pred_idx": [
+            21
+        ],
+        "pred": "\\[= \\ln 2 + \\sum_{n = 1}^{\\infty}(-1)^{n - 1}\\frac{\\left(\\frac{1}{2} x\\right)^{n}}{n}\\]",
+        "edit": 0.05970149253731343,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            28
+        ],
+        "pred_position": 1768,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "22",
+        "norm_gt": "=\\ln2+\\sum_{n=1}^{\\infty}(-1)^{n-1}{\\frac{({\\frac{1}{2}}x)^{n}}{n}}",
+        "norm_pred": "=\\ln2+\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{(\\frac{1}{2}x)^{n}}{n}",
+        "image_name": "jiaocaineedrop_20608808.pdf_0.jpg",
+        "upper_len": 67,
+        "metric": {
+            "Edit_dist": 0.05970149253731343
+        },
+        "Edit_num": 4,
+        "img_name": "jiaocaineedrop_20608808.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            22
+        ],
+        "gt": "\\begin{aligned}[\\ln(2+x)]'=\\frac{1}{2+x}=\\frac{1}{2\\left(1+\\frac{x}{2}\\right)}=\\frac{1}{2}\\sum_{n=0}^{\\infty}(-1)^n\\left(\\frac{x}{2}\\right)^n\\end{aligned}",
+        "pred_idx": [
+            23
+        ],
+        "pred": "\\[\\ln (2 + x)]^{\\prime} = \\frac{1}{2 + x} = \\frac{1}{2(1 + \\frac{x}{2})} = \\frac{1}{2}\\sum_{n = 0}^{\\infty}(-1)^{n}\\left(\\frac{x}{2}\\right)^{n}\\]",
+        "edit": 0.12173913043478261,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            31
+        ],
+        "pred_position": 2309,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "23",
+        "norm_gt": "[\\ln(2+x)]'=\\frac{1}{2+x}=\\frac{1}{2(1+\\frac{x}{2})}=\\frac{1}{2}\\sum_{n=0}^{\\infty}(-1)^n(\\frac{x}{2})^n",
+        "norm_pred": "\\ln(2+x)]^{\\prime}=\\frac{1}{2+x}=\\frac{1}{2(1+\\frac{x}{2})}=\\frac{1}{2}\\sum_{n=0}^{\\infty}(-1)^{n}(\\frac{x}{2})^{n}",
+        "image_name": "jiaocaineedrop_20608808.pdf_0.jpg",
+        "upper_len": 115,
+        "metric": {
+            "Edit_dist": 0.12173913043478261
+        },
+        "Edit_num": 14,
+        "img_name": "jiaocaineedrop_20608808.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            23
+        ],
+        "gt": "\\ln(2+x)=\\sum_{n=0}^{\\infty}(-1)^{n}\\frac{\\left(\\frac{1}{2}x\\right)^{n+1}}{n+1}+C=\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{\\left(\\frac{1}{2}x\\right)^{n}}{n}+C",
+        "pred_idx": [
+            24
+        ],
+        "pred": "\\[\\ln (2 + x)]^{\\prime} = \\frac{1}{2 + x} = \\frac{1}{2(1 + \\frac{x}{2})} = \\frac{1}{2}\\sum_{n = 0}^{\\infty}(-1)^{n}\\left(\\frac{x}{2}\\right)^{n}\\]",
+        "edit": 0.47692307692307695,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            32
+        ],
+        "pred_position": 2458,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "24",
+        "norm_gt": "\\ln(2+x)=\\sum_{n=0}^{\\infty}(-1)^{n}\\frac{(\\frac{1}{2}x)^{n+1}}{n+1}+c=\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{(\\frac{1}{2}x)^{n}}{n}+c",
+        "norm_pred": "\\ln(2+x)]^{\\prime}=\\frac{1}{2+x}=\\frac{1}{2(1+\\frac{x}{2})}=\\frac{1}{2}\\sum_{n=0}^{\\infty}(-1)^{n}(\\frac{x}{2})^{n}",
+        "image_name": "jiaocaineedrop_20608808.pdf_0.jpg",
+        "upper_len": 130,
+        "metric": {
+            "Edit_dist": 0.47692307692307695
+        },
+        "Edit_num": 62,
+        "img_name": "jiaocaineedrop_20608808.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            24
+        ],
+        "gt": "S(0)=C=\\ln(2+0)=\\ln2",
+        "pred_idx": [
+            26
+        ],
+        "pred": "\\[S(0) = C = \\ln (2 + 0) = \\ln 2\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            33
+        ],
+        "pred_position": 2607,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "25",
+        "norm_gt": "s(0)=c=\\ln(2+0)=\\ln2",
+        "norm_pred": "s(0)=c=\\ln(2+0)=\\ln2",
+        "image_name": "jiaocaineedrop_20608808.pdf_0.jpg",
+        "upper_len": 20,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_20608808.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            2
+        ],
+        "gt": "\\therefore\\left[(2b)2+\\left(\\frac{3\\sqrt2}b\\right)^2\\right]+\\left[(2b-b)2+\\left(\\frac{6\\sqrt2}b-\\frac{3\\sqrt2}b\\right)^2\\right]=b^2+\\left(\\frac{6\\sqrt2}b\\right)^2",
+        "pred_idx": [
+            0
+        ],
+        "pred": "\\[\\therefore \\left[(2b)2 + \\left(\\frac{3\\sqrt{2}}{b}\\right)^2\\right] + \\left[(2b - b)2 + \\left(\\frac{6\\sqrt{2}}{b} - \\frac{3\\sqrt{2}}{b}\\right)^2\\right] = b^2 +\\left(\\frac{6\\sqrt{2}}{b}\\right)^2,\\]",
+        "edit": 0.13709677419354838,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            1
+        ],
+        "pred_position": 1,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "26",
+        "norm_gt": "\\therefore[(2b)2+(\\frac{3\\sqrt2}b)^2]+[(2b-b)2+(\\frac{6\\sqrt2}b-\\frac{3\\sqrt2}b)^2]=b^2+(\\frac{6\\sqrt2}b)^2",
+        "norm_pred": "\\therefore[(2b)2+(\\frac{3\\sqrt{2}}{b})^2]+[(2b-b)2+(\\frac{6\\sqrt{2}}{b}-\\frac{3\\sqrt{2}}{b})^2]=b^2+(\\frac{6\\sqrt{2}}{b})^2,",
+        "image_name": "jiaocaineedrop_33137159.pdf_3.jpg",
+        "upper_len": 124,
+        "metric": {
+            "Edit_dist": 0.13709677419354838
+        },
+        "Edit_num": 17,
+        "img_name": "jiaocaineedrop_33137159.pdf_3.jpg"
+    },
+    {
+        "gt_idx": [
+            3
+        ],
+        "gt": "\\therefore b=\\sqrt{3},",
+        "pred_idx": [
+            1
+        ],
+        "pred": "\\[\\therefore b = \\sqrt{3},\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            2
+        ],
+        "pred_position": 199,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "27",
+        "norm_gt": "\\thereforeb=\\sqrt{3},",
+        "norm_pred": "\\thereforeb=\\sqrt{3},",
+        "image_name": "jiaocaineedrop_33137159.pdf_3.jpg",
+        "upper_len": 21,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_33137159.pdf_3.jpg"
+    },
+    {
+        "gt_idx": [
+            4
+        ],
+        "gt": "\\therefore B(\\sqrt{3},2\\sqrt{6}),D(2\\sqrt{3},\\sqrt{6}),",
+        "pred_idx": [
+            2
+        ],
+        "pred": "\\[\\therefore B(\\sqrt{3},2\\sqrt{6}),D(2\\sqrt{3},\\sqrt{6}),\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            3
+        ],
+        "pred_position": 228,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "28",
+        "norm_gt": "\\thereforeb(\\sqrt{3},2\\sqrt{6}),d(2\\sqrt{3},\\sqrt{6}),",
+        "norm_pred": "\\thereforeb(\\sqrt{3},2\\sqrt{6}),d(2\\sqrt{3},\\sqrt{6}),",
+        "image_name": "jiaocaineedrop_33137159.pdf_3.jpg",
+        "upper_len": 54,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_33137159.pdf_3.jpg"
+    },
+    {
+        "gt_idx": [
+            6
+        ],
+        "gt": "\\therefore x=\\frac{3\\sqrt{3}}{2},",
+        "pred_idx": [
+            4
+        ],
+        "pred": "\\[\\therefore x = \\frac{3\\sqrt{3}}{2},\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            5
+        ],
+        "pred_position": 429,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "29",
+        "norm_gt": "\\thereforex=\\frac{3\\sqrt{3}}{2},",
+        "norm_pred": "\\thereforex=\\frac{3\\sqrt{3}}{2},",
+        "image_name": "jiaocaineedrop_33137159.pdf_3.jpg",
+        "upper_len": 32,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_33137159.pdf_3.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "\\therefore F\\left(\\frac{3\\sqrt{3}}2,0\\right),",
+        "pred_idx": [
+            5
+        ],
+        "pred": "\\[\\therefore F\\left(\\frac{3\\sqrt{3}}{2},0\\right),\\]",
+        "edit": 0.05714285714285714,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6
+        ],
+        "pred_position": 469,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "30",
+        "norm_gt": "\\thereforef(\\frac{3\\sqrt{3}}2,0),",
+        "norm_pred": "\\thereforef(\\frac{3\\sqrt{3}}{2},0),",
+        "image_name": "jiaocaineedrop_33137159.pdf_3.jpg",
+        "upper_len": 35,
+        "metric": {
+            "Edit_dist": 0.05714285714285714
+        },
+        "Edit_num": 2,
+        "img_name": "jiaocaineedrop_33137159.pdf_3.jpg"
+    },
+    {
+        "gt_idx": [
+            8
+        ],
+        "gt": "\\because OE=\\sqrt{3},OF=\\frac{3\\sqrt{3}}2,",
+        "pred_idx": [
+            6
+        ],
+        "pred": "\\[\\therefore OE = \\sqrt{3},OF = \\frac{3\\sqrt{3}}{2},\\]",
+        "edit": 0.2,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            7
+        ],
+        "pred_position": 521,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "31",
+        "norm_gt": "\\becauseoe=\\sqrt{3},of=\\frac{3\\sqrt{3}}2,",
+        "norm_pred": "\\thereforeoe=\\sqrt{3},of=\\frac{3\\sqrt{3}}{2},",
+        "image_name": "jiaocaineedrop_33137159.pdf_3.jpg",
+        "upper_len": 45,
+        "metric": {
+            "Edit_dist": 0.2
+        },
+        "Edit_num": 9,
+        "img_name": "jiaocaineedrop_33137159.pdf_3.jpg"
+    },
+    {
+        "gt_idx": [
+            9
+        ],
+        "gt": "\\therefore EF=OF-OE=\\frac{\\sqrt{3}}{2},",
+        "pred_idx": [
+            7
+        ],
+        "pred": "\\[\\therefore EF = OF - OE = \\frac{\\sqrt{3}}{2},\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            8
+        ],
+        "pred_position": 576,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "32",
+        "norm_gt": "\\thereforeef=of-oe=\\frac{\\sqrt{3}}{2},",
+        "norm_pred": "\\thereforeef=of-oe=\\frac{\\sqrt{3}}{2},",
+        "image_name": "jiaocaineedrop_33137159.pdf_3.jpg",
+        "upper_len": 38,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_33137159.pdf_3.jpg"
+    },
+    {
+        "gt_idx": [
+            10
+        ],
+        "gt": "\\therefore\\frac{EF}{OE}=\\frac12,",
+        "pred_idx": [
+            8
+        ],
+        "pred": "\\[\\therefore \\frac{EF}{OE} = \\frac{1}{2},\\]",
+        "edit": 0.1111111111111111,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            9
+        ],
+        "pred_position": 626,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "33",
+        "norm_gt": "\\therefore\\frac{ef}{oe}=\\frac12,",
+        "norm_pred": "\\therefore\\frac{ef}{oe}=\\frac{1}{2},",
+        "image_name": "jiaocaineedrop_33137159.pdf_3.jpg",
+        "upper_len": 36,
+        "metric": {
+            "Edit_dist": 0.1111111111111111
+        },
+        "Edit_num": 4,
+        "img_name": "jiaocaineedrop_33137159.pdf_3.jpg"
+    },
+    {
+        "gt_idx": [
+            22
+        ],
+        "gt": "A=\\left( \\begin{array} {c c c} {{{1}}} & {{{1}}} & {{{0}}} \\\\ {{{1}}} & {{{2}}} & {{{1}}} \\\\ {{{1}}} & {{{3}}} & {{{2}}} \\\\ {{{1}}} & {{{4}}} & {{{3}}} \\\\ \\end{array} \\right)",
+        "pred_idx": [
+            50
+        ],
+        "pred": "\\[f(x) = \\left| \\begin{array}{lll}2x & x & 1 & 0 \\\\ 1 & x & 2 & 3 \\\\ 2 & 3 & x & 2 \\\\ 1 & 1 & 2 & 2x \\end{array} \\right|\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            40
+        ],
+        "pred_position": 348,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "34",
+        "norm_gt": "a=({ccc}{{{1}}}&{{{1}}}&{{{0}}}\\\\{{{1}}}&{{{2}}}&{{{1}}}\\\\{{{1}}}&{{{3}}}&{{{2}}}\\\\{{{1}}}&{{{4}}}&{{{3}}}\\\\)",
+        "norm_pred": "f(x)=|{lll}2x&x&1&0\\\\1&x&2&3\\\\2&3&x&2\\\\1&1&2&2x|",
+        "image_name": "jiaocaineedrop_38247658.pdf_0.jpg",
+        "upper_len": 109,
+        "metric": {
+            "Edit_dist": 0.7798165137614679
+        },
+        "Edit_num": 85,
+        "img_name": "jiaocaineedrop_38247658.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            16
+        ],
+        "gt": "A B=\\left( \\begin{array} {c c c} {{{-5}}} & {{{2}}} & {{{3}}} \\\\ {{{6}}} & {{{3}}} & {{{9}}} \\\\ {{{-4}}} & {{{1}}} & {{{1}}} \\\\ \\end{array} \\right)_{3 \\times3} \\quad| A B |=\\left| \\begin{array} {c c c} {{{-5}}} & {{{2}}} & {{{3}}} \\\\ {{{6}}} & {{{3}}} & {{{9}}} \\\\ {{{-4}}} & {{{1}}} & {{{1}}} \\\\ \\end{array} \\right|",
+        "pred_idx": [
+            68
+        ],
+        "pred": "\\[A = \\left( \\begin{array}{ll}2 & 3\\\\ 3 & 0\\\\ 1 & 2 \\end{array} \\right),B = \\left( \\begin{array}{ll}2 & 1 & 3\\\\ -3 & 0 & -1 \\end{array} \\right)\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            28
+        ],
+        "pred_position": 1162,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "35",
+        "norm_gt": "ab=({ccc}{{{-5}}}&{{{2}}}&{{{3}}}\\\\{{{6}}}&{{{3}}}&{{{9}}}\\\\{{{-4}}}&{{{1}}}&{{{1}}}\\\\)_{3\\times3}|ab|=|{ccc}{{{-5}}}&{{{2}}}&{{{3}}}\\\\{{{6}}}&{{{3}}}&{{{9}}}\\\\{{{-4}}}&{{{1}}}&{{{1}}}\\\\|",
+        "norm_pred": "a=({ll}2&3\\\\3&0\\\\1&2),b=({ll}2&1&3\\\\-3&0&-1)",
+        "image_name": "jiaocaineedrop_38247658.pdf_0.jpg",
+        "upper_len": 187,
+        "metric": {
+            "Edit_dist": 0.8342245989304813
+        },
+        "Edit_num": 156,
+        "img_name": "jiaocaineedrop_38247658.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            24
+        ],
+        "gt": "A=\\left( \\begin{array} {c c c} {{{1}}} & {{{1}}} & {{{0}}} \\\\ {{{1}}} & {{{2}}} & {{{1}}} \\\\ {{{1}}} & {{{3}}} & {{{2}}} \\\\ {{{1}}} & {{{4}}} & {{{3}}} \\\\ \\end{array} \\right) \\sim \\left( \\begin{array} {c c c} {{{1}}} & {{{1}}} & {{{0}}} \\\\ {{{0}}} & {{{1}}} & {{{1}}} \\\\ {{{0}}} & {{{0}}} & {{{0}}} \\\\ {{{0}}} & {{{0}}} & {{{0}}} \\\\ \\end{array} \\right)",
+        "pred_idx": [
+            60
+        ],
+        "pred": "\\[A = \\left( \\begin{array}{lll}1 & 2 & 1\\\\ -1 & 0 & 1\\\\ 0 & 1 & 0 \\end{array} \\right),A^{*}\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            42
+        ],
+        "pred_position": 828,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "36",
+        "norm_gt": "a=({ccc}{{{1}}}&{{{1}}}&{{{0}}}\\\\{{{1}}}&{{{2}}}&{{{1}}}\\\\{{{1}}}&{{{3}}}&{{{2}}}\\\\{{{1}}}&{{{4}}}&{{{3}}}\\\\)\\sim({ccc}{{{1}}}&{{{1}}}&{{{0}}}\\\\{{{0}}}&{{{1}}}&{{{1}}}\\\\{{{0}}}&{{{0}}}&{{{0}}}\\\\{{{0}}}&{{{0}}}&{{{0}}}\\\\)",
+        "norm_pred": "a=({lll}1&2&1\\\\-1&0&1\\\\0&1&0),a^{*}",
+        "image_name": "jiaocaineedrop_38247658.pdf_0.jpg",
+        "upper_len": 220,
+        "metric": {
+            "Edit_dist": 0.8863636363636364
+        },
+        "Edit_num": 195,
+        "img_name": "jiaocaineedrop_38247658.pdf_0.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "\\therefore2022\\div4=505\\cdots\\cdots2,",
+        "pred_idx": [
+            5
+        ],
+        "pred": "\\[\\therefore 2022\\div 4 = 505\\dots 2,\\]",
+        "edit": 0.1891891891891892,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            8
+        ],
+        "pred_position": 815,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "37",
+        "norm_gt": "\\therefore2022\\div4=505\\cdots\\cdots2,",
+        "norm_pred": "\\therefore2022\\div4=505\\dots2,",
+        "image_name": "jiaocaineedrop_42351289.pdf_1.jpg",
+        "upper_len": 37,
+        "metric": {
+            "Edit_dist": 0.1891891891891892
+        },
+        "Edit_num": 7,
+        "img_name": "jiaocaineedrop_42351289.pdf_1.jpg"
+    },
+    {
+        "gt_idx": [
+            15
+        ],
+        "gt": "\\therefore M=2200\\times40\\times10^{-3}=88(m g/100m L)",
+        "pred_idx": [
+            11
+        ],
+        "pred": "\\[\\therefore M = 2200\\times 40\\times 10^{-3} = 88(mg / 100mL)\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            22
+        ],
+        "pred_position": 1672,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "38",
+        "norm_gt": "\\thereforem=2200\\times40\\times10^{-3}=88(mg/100ml)",
+        "norm_pred": "\\thereforem=2200\\times40\\times10^{-3}=88(mg/100ml)",
+        "image_name": "jiaocaineedrop_42351289.pdf_1.jpg",
+        "upper_len": 50,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_42351289.pdf_1.jpg"
+    },
+    {
+        "gt_idx": [
+            4
+        ],
+        "gt": "\\operatorname{s i n} A \\operatorname{c o s} B=\\frac{1} {2} [ \\operatorname{s i n} ( A+B )+\\operatorname{s i n} ( A-B ) ] \\, ; \\, \\operatorname{c o s} A \\operatorname{s i n} B=\\frac{1} {2} [ \\operatorname{s i n} ( A+B )-\\operatorname{s i n} ( A-B ) ]；",
+        "pred_idx": [
+            8
+        ],
+        "pred": "\\[\\sin A\\cos B = \\frac{1}{2} [\\sin (A + B) + \\sin (A - B)];\\cos A\\sin B = \\frac{1}{2} [\\sin (A + B) - \\sin (A - B)];\\]",
+        "edit": 0.2,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6
+        ],
+        "pred_position": 230,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "39",
+        "norm_gt": "{sin}a{cos}b=\\frac{1}{2}[{sin}(a+b)+{sin}(a-b)]\\,;\\,{cos}a{sin}b=\\frac{1}{2}[{sin}(a+b)-{sin}(a-b)]；",
+        "norm_pred": "\\sina\\cosb=\\frac{1}{2}[\\sin(a+b)+\\sin(a-b)];\\cosa\\sinb=\\frac{1}{2}[\\sin(a+b)-\\sin(a-b)];",
+        "image_name": "jiaocaineedrop_j70ke43p.pdf_69.jpg",
+        "upper_len": 100,
+        "metric": {
+            "Edit_dist": 0.2
+        },
+        "Edit_num": 20,
+        "img_name": "jiaocaineedrop_j70ke43p.pdf_69.jpg"
+    },
+    {
+        "gt_idx": [
+            5
+        ],
+        "gt": "\\operatorname{c o s} A \\operatorname{c o s} B=\\frac{1} {2} [ \\operatorname{c o s} ( A+B )+\\operatorname{c o s} ( A-B ) ] \\; ; \\; \\operatorname{s i n} A \\operatorname{s i n} B=\\frac{1} {2} [ \\operatorname{c o s} ( A-B )-\\operatorname{c o s} ( A+B ) ]；",
+        "pred_idx": [
+            9
+        ],
+        "pred": "\\[\\cos A\\cos B = \\frac{1}{2} [\\cos (A + B) + \\cos (A - B)];\\sin A\\sin B = \\frac{1}{2} [\\cos (A - B) - \\cos (A + B)];\\]",
+        "edit": 0.2,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            7
+        ],
+        "pred_position": 349,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "40",
+        "norm_gt": "{cos}a{cos}b=\\frac{1}{2}[{cos}(a+b)+{cos}(a-b)]\\;;\\;{sin}a{sin}b=\\frac{1}{2}[{cos}(a-b)-{cos}(a+b)]；",
+        "norm_pred": "\\cosa\\cosb=\\frac{1}{2}[\\cos(a+b)+\\cos(a-b)];\\sina\\sinb=\\frac{1}{2}[\\cos(a-b)-\\cos(a+b)];",
+        "image_name": "jiaocaineedrop_j70ke43p.pdf_69.jpg",
+        "upper_len": 100,
+        "metric": {
+            "Edit_dist": 0.2
+        },
+        "Edit_num": 20,
+        "img_name": "jiaocaineedrop_j70ke43p.pdf_69.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "\\operatorname{s i n} A+\\operatorname{s i n} B=2 \\operatorname{s i n} {\\frac{A+B} {2}} \\operatorname{c o s} {\\frac{A-B} {2}} ; ~ ~ \\operatorname{s i n} A-\\operatorname{s i n} B=2 \\operatorname{c o s} {\\frac{A+B} {2}} \\operatorname{s i n} {\\frac{A-B} {2}}；",
+        "pred_idx": [
+            5
+        ],
+        "pred": "\\[\\sin A + \\sin B = 2\\sin \\frac{A + B}{2}\\cos \\frac{A - B}{2};\\sin A - \\sin B = 2\\cos \\frac{A + B}{2}\\sin \\frac{A - B}{2};\\]",
+        "edit": 0.23684210526315788,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            9
+        ],
+        "pred_position": 484,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "41",
+        "norm_gt": "{sin}a+{sin}b=2{sin}{\\frac{a+b}{2}}{cos}{\\frac{a-b}{2}};~~{sin}a-{sin}b=2{cos}{\\frac{a+b}{2}}{sin}{\\frac{a-b}{2}}；",
+        "norm_pred": "\\sina+\\sinb=2\\sin\\frac{a+b}{2}\\cos\\frac{a-b}{2};\\sina-\\sinb=2\\cos\\frac{a+b}{2}\\sin\\frac{a-b}{2};",
+        "image_name": "jiaocaineedrop_j70ke43p.pdf_69.jpg",
+        "upper_len": 114,
+        "metric": {
+            "Edit_dist": 0.23684210526315788
+        },
+        "Edit_num": 27,
+        "img_name": "jiaocaineedrop_j70ke43p.pdf_69.jpg"
+    },
+    {
+        "gt_idx": [
+            8
+        ],
+        "gt": "\\operatorname{c o s} A+\\operatorname{c o s} B=2 \\operatorname{c o s} \\frac{A+B} {2} \\operatorname{c o s} \\frac{A-B} {2} ; ~ ~ \\operatorname{c o s} A-\\operatorname{c o s} B=-2 \\operatorname{s i n} \\frac{A+B} {2} \\operatorname{s i n} \\frac{A-B} {2}；",
+        "pred_idx": [
+            6
+        ],
+        "pred": "\\[\\cos A + \\cos B = 2\\cos \\frac{A + B}{2}\\cos \\frac{A - B}{2};\\cos A - \\cos B = -2\\sin \\frac{A + B}{2}\\sin \\frac{A - B}{2};\\]",
+        "edit": 0.17757009345794392,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            10
+        ],
+        "pred_position": 609,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "42",
+        "norm_gt": "{cos}a+{cos}b=2{cos}\\frac{a+b}{2}{cos}\\frac{a-b}{2};~~{cos}a-{cos}b=-2{sin}\\frac{a+b}{2}{sin}\\frac{a-b}{2}；",
+        "norm_pred": "\\cosa+\\cosb=2\\cos\\frac{a+b}{2}\\cos\\frac{a-b}{2};\\cosa-\\cosb=-2\\sin\\frac{a+b}{2}\\sin\\frac{a-b}{2};",
+        "image_name": "jiaocaineedrop_j70ke43p.pdf_69.jpg",
+        "upper_len": 107,
+        "metric": {
+            "Edit_dist": 0.17757009345794392
+        },
+        "Edit_num": 19,
+        "img_name": "jiaocaineedrop_j70ke43p.pdf_69.jpg"
+    },
+    {
+        "gt_idx": [
+            2
+        ],
+        "gt": "{\\displaystyle{\\big|A E_{2}\\big|\\cdot\\big|F_{2}B\\big|=(1+k^{2})\\big|x_{1}x_{2}-(x_{1}+x_{2})+1\\big|=(1+k^{2})\\bigg|\\frac{4k^{2}-12}{3+4k^{2}}-\\frac{8k^{2}}{3+4k^{2}}+1\\bigg|=(1+k^{2})\\bigg|\\frac{9}{3+4k^2}\\bigg|=(1+}}{{k^{2})\\frac{9}{3+4k^{2}}\\!=\\!\\frac{9}{4}\\big(1\\!+\\!\\frac{1}{3+4k^{2}}\\big),}}",
+        "pred_idx": [
+            33,
+            34,
+            35,
+            36
+        ],
+        "pred": "\\begin{array}{l} {\\[\\left|A F_{2}\\right|\\cdot \\left|F_{2}B\\right| = \\left(1 + k^{2}\\right)\\left|x_{1}x_{2} - (x_{1} + x_{2})\\right| + 1| = \\left(1 + k^{2}\\right)\\left|\\frac{4k^{2} - 12}{3 + 4k^{2}} -\\frac{8k^{2}}{3 + 4k^{2}} +1\\right| = \\left(1 + k^{2}\\right)\\left|\\frac{9}{3 + 4k^{2}}\\right| = \\left(1 + \\frac{9}{3 + 4k^{2}}\\right)\\]} \\\\ {\\[k^{2} = 0\\]} \\\\ {\\[\\left|A F_{2}\\right|\\cdot \\left|F_{2}B\\right|\\]} \\\\ {\\[\\left(\\frac{9}{4},3\\right]\\]} \\end{array}",
+        "edit": 0.36879432624113473,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            3
+        ],
+        "pred_position": 280,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "43",
+        "norm_gt": "{{\\big|ae_{2}\\big|\\cdot\\big|f_{2}b\\big|=(1+k^{2})\\big|x_{1}x_{2}-(x_{1}+x_{2})+1\\big|=(1+k^{2})\\bigg|\\frac{4k^{2}-12}{3+4k^{2}}-\\frac{8k^{2}}{3+4k^{2}}+1\\bigg|=(1+k^{2})\\bigg|\\frac{9}{3+4k^2}\\bigg|=(1+}}{{k^{2})\\frac{9}{3+4k^{2}}\\!=\\!\\frac{9}{4}\\big(1\\!+\\!\\frac{1}{3+4k^{2}}\\big),}}",
+        "norm_pred": "|af_{2}|\\cdot|f_{2}b|=(1+k^{2})|x_{1}x_{2}-(x_{1}+x_{2})|+1|=(1+k^{2})|\\frac{4k^{2}-12}{3+4k^{2}}-\\frac{8k^{2}}{3+4k^{2}}+1|=(1+k^{2})|\\frac{9}{3+4k^{2}}|=(1+\\frac{9}{3+4k^{2}})k^{2}=0|af_{2}|\\cdot|f_{2}b|(\\frac{9}{4},3]",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1198.jpg",
+        "upper_len": 282,
+        "metric": {
+            "Edit_dist": 0.35815602836879434
+        },
+        "Edit_num": 101,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1198.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "=-{\\left(x_{1}-1\\right)\\left(x_{2}-1\\right)-k^{2}\\left(x_{1}-1\\right)\\left(x_{2}-1\\right)=-\\left(1+k^{2}\\right)\\left[\\,x_{1}x_{2}-\\left(x_{1}+x_{2}\\right)+1\\right]=-(1+k^{2})}(\\frac{4k^2-12}{3+4k^2}-\\frac{8k^2}{3+4k^2}+1)=(1+k^2)\\frac{9}{3+4k^2}=\\frac{9}{4}(1+\\frac{1}{3+4k^2})，",
+        "pred_idx": [
+            7,
+            8
+        ],
+        "pred": "\\begin{array}{l} {\\[= - (x_{1} - 1)(x_{2} - 1) - k^{2}(x_{1} - 1)(x_{2} - 1) = - (1 + k^{2})\\left[x_{1}x_{2} - (x_{1} + x_{2}) + 1\\right] = - (1 + k^{2})\\]} \\\\ {\\[\\left(\\frac{4k^{2} - 12}{3 + 4k^{2}} -\\frac{8k^{2}}{3 + 4k^{2}} +1\\right) = (1 + k^{2})\\frac{9}{3 + 4k^{2}} = \\frac{9}{4}\\left(1 + \\frac{1}{3 + 4k^{2}}\\right),\\]} \\end{array}",
+        "edit": 0.08962264150943396,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            8
+        ],
+        "pred_position": 1111,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "44",
+        "norm_gt": "=-{(x_{1}-1)(x_{2}-1)-k^{2}(x_{1}-1)(x_{2}-1)=-(1+k^{2})[\\,x_{1}x_{2}-(x_{1}+x_{2})+1]=-(1+k^{2})}(\\frac{4k^2-12}{3+4k^2}-\\frac{8k^2}{3+4k^2}+1)=(1+k^2)\\frac{9}{3+4k^2}=\\frac{9}{4}(1+\\frac{1}{3+4k^2})，",
+        "norm_pred": "=-(x_{1}-1)(x_{2}-1)-k^{2}(x_{1}-1)(x_{2}-1)=-(1+k^{2})[x_{1}x_{2}-(x_{1}+x_{2})+1]=-(1+k^{2})(\\frac{4k^{2}-12}{3+4k^{2}}-\\frac{8k^{2}}{3+4k^{2}}+1)=(1+k^{2})\\frac{9}{3+4k^{2}}=\\frac{9}{4}(1+\\frac{1}{3+4k^{2}}),",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1198.jpg",
+        "upper_len": 211,
+        "metric": {
+            "Edit_dist": 0.09004739336492891
+        },
+        "Edit_num": 19,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1198.jpg"
+    },
+    {
+        "gt_idx": [
+            8
+        ],
+        "gt": "\\[2 5 x \\!=\\! 1 5 \\! \\times\\! 2 0 0 0\\]",
+        "pred_idx": [
+            5
+        ],
+        "pred": "\\[25x = 15\\times 2000\\]",
+        "edit": 0.3333333333333333,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6.1
+        ],
+        "pred_position": 164,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "45",
+        "norm_gt": "25x\\!=\\!15\\!\\times\\!2000",
+        "norm_pred": "25x=15\\times2000",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1253.jpg",
+        "upper_len": 24,
+        "metric": {
+            "Edit_dist": 0.3333333333333333
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1253.jpg"
+    },
+    {
+        "gt_idx": [
+            9
+        ],
+        "gt": "\\[x \\!=\\! 1 2 0 0\\]",
+        "pred_idx": [
+            6
+        ],
+        "pred": "\\[x = 1200\\]",
+        "edit": 0.4,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6.2
+        ],
+        "pred_position": 191,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "46",
+        "norm_gt": "x\\!=\\!1200",
+        "norm_pred": "x=1200",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1253.jpg",
+        "upper_len": 10,
+        "metric": {
+            "Edit_dist": 0.4
+        },
+        "Edit_num": 4,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1253.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "\\[2 5^{2} \\ x \\!=\\! 1 5^{2} \\! \\times\\! 2 0 0 0\\]",
+        "pred_idx": [
+            10
+        ],
+        "pred": "\\[25^{2}x = 15^{2}\\times 2000\\]",
+        "edit": 0.2727272727272727,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            10.1
+        ],
+        "pred_position": 302,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "47",
+        "norm_gt": "25^{2}\\x\\!=\\!15^{2}\\!\\times\\!2000",
+        "norm_pred": "25^{2}x=15^{2}\\times2000",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1253.jpg",
+        "upper_len": 33,
+        "metric": {
+            "Edit_dist": 0.2727272727272727
+        },
+        "Edit_num": 9,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1253.jpg"
+    },
+    {
+        "gt_idx": [
+            14
+        ],
+        "gt": "\\[x \\!=\\! 7 2 0\\]",
+        "pred_idx": [
+            13
+        ],
+        "pred": "\\[x = 720\\]",
+        "edit": 0.4444444444444444,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            10.2
+        ],
+        "pred_position": 337,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "48",
+        "norm_gt": "x\\!=\\!720",
+        "norm_pred": "x=720",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1253.jpg",
+        "upper_len": 9,
+        "metric": {
+            "Edit_dist": 0.4444444444444444
+        },
+        "Edit_num": 4,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1253.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "Z\\left(3,2\\right)\\overset{逆时针旋转90^{\\circ} }{\\rightarrow}{Z}'\\left(-2,3\\right)",
+        "pred_idx": [
+            34
+        ],
+        "pred": "\\[Z(3,2)\\xrightarrow{\\mathrm{逆时针旋转}90^{\\circ}}Z^{\\prime}(- 2,3)\\]",
+        "edit": 0.41509433962264153,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6
+        ],
+        "pred_position": 271,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_ch"
+            }
+        ],
+        "img_id": "49",
+        "norm_gt": "z(3,2)\\overset{逆时针旋转90^{\\circ}}{arrow}{z}'(-2,3)",
+        "norm_pred": "z(3,2)\\xrightarrow{{逆时针旋转}90^{\\circ}}z^{\\prime}(-2,3)",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1276.jpg",
+        "upper_len": 53,
+        "metric": {
+            "Edit_dist": 0.41509433962264153
+        },
+        "Edit_num": 22,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1276.jpg"
+    },
+    {
+        "gt_idx": [
+            9
+        ],
+        "gt": "Z\\left(3,2\\right)\\overset{顺时针旋转90^{\\circ} }{\\rightarrow}{Z}'\\left(-2,3\\right)",
+        "pred_idx": [
+            38
+        ],
+        "pred": "\\[Z(3,2)\\xrightarrow{\\mathrm{顺时针旋转}90^{\\circ}}Z^{\\prime}(2, - 3)\\]",
+        "edit": 0.4528301886792453,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            9
+        ],
+        "pred_position": 521,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_ch"
+            }
+        ],
+        "img_id": "50",
+        "norm_gt": "z(3,2)\\overset{顺时针旋转90^{\\circ}}{arrow}{z}'(-2,3)",
+        "norm_pred": "z(3,2)\\xrightarrow{{顺时针旋转}90^{\\circ}}z^{\\prime}(2,-3)",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1276.jpg",
+        "upper_len": 53,
+        "metric": {
+            "Edit_dist": 0.4528301886792453
+        },
+        "Edit_num": 24,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1276.jpg"
+    },
+    {
+        "gt_idx": [
+            18
+        ],
+        "gt": "\\angle1=7 5^{\\circ}\\angle2=4 0^{\\circ}\\angle3=6 5^{\\circ}\\angle4=1 1 5^{\\circ}\\angle5=9 0^{\\circ}\\angle6=9 0^{\\circ}",
+        "pred_idx": [
+            155,
+            156,
+            157,
+            158,
+            159,
+            160
+        ],
+        "pred": "\\begin{array}{l} {\\[\\angle 1 = 75^{\\circ}\\]} \\\\ {\\[\\angle 2 = 40^{\\circ}\\]} \\\\ {\\[\\angle 3 = 65^{\\circ}\\]} \\\\ {\\[\\angle 4 = 115^{\\circ}\\]} \\\\ {\\[\\angle 5 = 90^{\\circ}\\]} \\\\ {\\[\\angle 6 = 90^{\\circ}\\]} \\end{array}",
+        "edit": 0.043859649122807015,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            40
+        ],
+        "pred_position": 793,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "51",
+        "norm_gt": "\\angle1=75^{\\circ}\\angle2=40^{\\circ}\\angle3=65^{\\circ}\\angle4=115^{\\circ}\\angle5=90^{\\circ}\\angle6=90^{\\circ}",
+        "norm_pred": "\\angle1=75^{\\circ}\\angle2=40^{\\circ}\\angle3=65^{\\circ}\\angle4=115^{\\circ}\\angle5=90^{\\circ}\\angle6=90^{\\circ}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1290.jpg",
+        "upper_len": 109,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1290.jpg"
+    },
+    {
+        "gt_idx": [
+            35
+        ],
+        "gt": "8 \\times2 0 0=1 6 0 0",
+        "pred_idx": [
+            178
+        ],
+        "pred": "\\[8\\times 200 = 1600\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            81
+        ],
+        "pred_position": 2391,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "52",
+        "norm_gt": "8\\times200=1600",
+        "norm_pred": "8\\times200=1600",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1290.jpg",
+        "upper_len": 15,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1290.jpg"
+    },
+    {
+        "gt_idx": [
+            17
+        ],
+        "gt": "\\frac{3} {8} \\quad\\frac{4} {9} \\quad0. 6 2 5 \\quad0. 5 \\quad0. 3 7 \\quad\\frac{9} {1 0}",
+        "pred_idx": [
+            6
+        ],
+        "pred": "\\[3\\frac{4}{5}\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            18
+        ],
+        "pred_position": 307,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "53",
+        "norm_gt": "\\frac{3}{8}\\frac{4}{9}0.6250.50.37\\frac{9}{10}",
+        "norm_pred": "3\\frac{4}{5}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1349.jpg",
+        "upper_len": 46,
+        "metric": {
+            "Edit_dist": 0.7391304347826086
+        },
+        "Edit_num": 34,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1349.jpg"
+    },
+    {
+        "gt_idx": [
+            20
+        ],
+        "gt": "\\mathrm{B a C l}_{2}+\\mathrm{N a}_{2} \\mathrm{S O}_{4}=\\mathrm{B a S O}_{4} \\downarrow+2 \\mathrm{N a C l}",
+        "pred_idx": [
+            14
+        ],
+        "pred": "\\[\\mathrm{BaCl}_2 + \\mathrm{Na}_2\\mathrm{SO}_4 = \\mathrm{BaSO}_4\\downarrow +2\\mathrm{NaCl}\\]",
+        "edit": 0.14285714285714285,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            18
+        ],
+        "pred_position": 2111,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "54",
+        "norm_gt": "{bacl}_{2}+{na}_{2}{so}_{4}={baso}_{4}\\downarrow+2{nacl}",
+        "norm_pred": "{bacl}_2+{na}_2{so}_4={baso}_4\\downarrow+2{nacl}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg",
+        "upper_len": 56,
+        "metric": {
+            "Edit_dist": 0.14285714285714285
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg"
+    },
+    {
+        "gt_idx": [
+            23
+        ],
+        "gt": "\\frac{2 3 3} {4. 6 6 \\mathrm{~ g}} \\!=\\! \\frac{1 1 7} {x} \\quad x \\!=\\! 2. 3 4 \\mathrm{~ g}",
+        "pred_idx": [
+            89
+        ],
+        "pred": "\\[\\frac{233}{4.66\\mathrm{g}}\\frac{117}{x} x = 2.34\\mathrm{g}\\]",
+        "edit": 0.21153846153846154,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            21
+        ],
+        "pred_position": 2230,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "55",
+        "norm_gt": "\\frac{233}{4.66{~g}}\\!=\\!\\frac{117}{x}x\\!=\\!2.34{~g}",
+        "norm_pred": "\\frac{233}{4.66{g}}\\frac{117}{x}x=2.34{g}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg",
+        "upper_len": 52,
+        "metric": {
+            "Edit_dist": 0.21153846153846154
+        },
+        "Edit_num": 11,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg"
+    },
+    {
+        "gt_idx": [
+            26
+        ],
+        "gt": "\\mathrm{B a C l}_{2}+\\mathrm{N a}_{2} \\mathrm{C O}_{3}=\\mathrm{B a C O}_{3} \\downarrow+2 \\mathrm{N a C l}",
+        "pred_idx": [
+            20
+        ],
+        "pred": "\\[\\mathrm{BaCl}_2 + \\mathrm{Na}_2\\mathrm{CO}_3 = \\mathrm{BaCO}_3\\downarrow +2\\mathrm{NaCl}\\]",
+        "edit": 0.14285714285714285,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            24
+        ],
+        "pred_position": 2394,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "56",
+        "norm_gt": "{bacl}_{2}+{na}_{2}{co}_{3}={baco}_{3}\\downarrow+2{nacl}",
+        "norm_pred": "{bacl}_2+{na}_2{co}_3={baco}_3\\downarrow+2{nacl}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg",
+        "upper_len": 56,
+        "metric": {
+            "Edit_dist": 0.14285714285714285
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg"
+    },
+    {
+        "gt_idx": [
+            29
+        ],
+        "gt": "\\frac{1 9 7} {1. \\, 9 7 \\ \\mathrm{g}} \\!=\\! \\frac{1 1 7} {y} \\quad y \\!=\\! 1. \\, 1 7 \\ \\mathrm{g}",
+        "pred_idx": [
+            83
+        ],
+        "pred": "\\[\\frac{96}{7.2\\mathrm{g}} = \\frac{x}{x},x = 0.15\\mathrm{g}\\]",
+        "edit": 0.4642857142857143,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            27
+        ],
+        "pred_position": 1677,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "57",
+        "norm_gt": "\\frac{197}{1.\\,97\\{g}}\\!=\\!\\frac{117}{y}y\\!=\\!1.\\,17\\{g}",
+        "norm_pred": "\\frac{96}{7.2{g}}=\\frac{x}{x},x=0.15{g}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg",
+        "upper_len": 56,
+        "metric": {
+            "Edit_dist": 0.4642857142857143
+        },
+        "Edit_num": 26,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg"
+    },
+    {
+        "gt_idx": [
+            37
+        ],
+        "gt": "\\mathrm{Z n}+\\mathrm{H}_{2} \\, \\mathrm{S O}_{4}=\\mathrm{Z n S O}_{4}+\\mathrm{H}_{2}\\uparrow",
+        "pred_idx": [
+            32
+        ],
+        "pred": "\\[\\mathrm{Zn} + \\mathrm{H}_2\\mathrm{SO}_4 = \\mathrm{ZnSO}_4 + \\mathrm{H}_2\\uparrow\\]",
+        "edit": 0.20408163265306123,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            37
+        ],
+        "pred_position": 3214,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "58",
+        "norm_gt": "{zn}+{h}_{2}\\,{so}_{4}={znso}_{4}+{h}_{2}\\uparrow",
+        "norm_pred": "{zn}+{h}_2{so}_4={znso}_4+{h}_2\\uparrow",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg",
+        "upper_len": 49,
+        "metric": {
+            "Edit_dist": 0.20408163265306123
+        },
+        "Edit_num": 10,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg"
+    },
+    {
+        "gt_idx": [
+            40
+        ],
+        "gt": "\\frac{6 5} {x} \\!=\\! \\frac{2} {0. 2 \\mathrm{~ g}} \\quad x \\!=\\! 6. 5 \\mathrm{~ g}",
+        "pred_idx": [
+            107
+        ],
+        "pred": "\\[= \\frac{16.1\\mathrm{g}}{6.5\\mathrm{g} + 98\\mathrm{g} - 0.2\\mathrm{g}}\\times 100\\% \\approx\\]",
+        "edit": 0.6666666666666666,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            40
+        ],
+        "pred_position": 3496,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "59",
+        "norm_gt": "\\frac{65}{x}\\!=\\!\\frac{2}{0.2{~g}}x\\!=\\!6.5{~g}",
+        "norm_pred": "=\\frac{16.1{g}}{6.5{g}+98{g}-0.2{g}}\\times100\\%\\approx",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg",
+        "upper_len": 54,
+        "metric": {
+            "Edit_dist": 0.6666666666666666
+        },
+        "Edit_num": 36,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg"
+    },
+    {
+        "gt_idx": [
+            41
+        ],
+        "gt": "\\frac{1 6 1} {y} \\!=\\! \\frac{2} {0. 2 \\mathrm{~ g}} \\quad y \\!=\\! 1 6. 1 \\mathrm{~ g}",
+        "pred_idx": [
+            102
+        ],
+        "pred": "\\[\\left(\\frac{36n}{36n + 6n}\\times 100\\% \\right) = 16.8\\mathrm{g}\\]",
+        "edit": 0.6530612244897959,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            41
+        ],
+        "pred_position": 3074,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "60",
+        "norm_gt": "\\frac{161}{y}\\!=\\!\\frac{2}{0.2{~g}}y\\!=\\!16.1{~g}",
+        "norm_pred": "(\\frac{36n}{36n+6n}\\times100\\%)=16.8{g}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg",
+        "upper_len": 49,
+        "metric": {
+            "Edit_dist": 0.6530612244897959
+        },
+        "Edit_num": 32,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg"
+    },
+    {
+        "gt_idx": [
+            42
+        ],
+        "gt": "\\frac{9 8} {1 0 \\ \\% z} \\!=\\! \\frac{2} {0. 2 \\mathrm{~ g}} \\quad z \\!=\\! 9 8 \\mathrm{~ g}",
+        "pred_idx": [
+            101
+        ],
+        "pred": "\\[\\frac{72n}{(72 + 10 + 16\\times 5)n}\\times 100\\% = 14.4\\mathrm{g}\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            42
+        ],
+        "pred_position": 2979,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "61",
+        "norm_gt": "\\frac{98}{10\\\\%z}\\!=\\!\\frac{2}{0.2{~g}}z\\!=\\!98{~g}",
+        "norm_pred": "\\frac{72n}{(72+10+16\\times5)n}\\times100\\%=14.4{g}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg",
+        "upper_len": 51,
+        "metric": {
+            "Edit_dist": 0.7254901960784313
+        },
+        "Edit_num": 37,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1363.jpg"
+    },
+    {
+        "gt_idx": [
+            3
+        ],
+        "gt": "1. 5 \\times4=6",
+        "pred_idx": [
+            8
+        ],
+        "pred": "\\[1.5 \\times 4 = 6\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            2
+        ],
+        "pred_position": 35,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "62",
+        "norm_gt": "1.5\\times4=6",
+        "norm_pred": "1.5\\times4=6",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 12,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            4
+        ],
+        "gt": "3 1 5 \\div3. 5=9 0",
+        "pred_idx": [
+            9
+        ],
+        "pred": "\\[315 \\div 3.5 = 90\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            3
+        ],
+        "pred_position": 59,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "63",
+        "norm_gt": "315\\div3.5=90",
+        "norm_pred": "315\\div3.5=90",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 13,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            5
+        ],
+        "gt": "3 1. 2 \\div6=5. 2",
+        "pred_idx": [
+            10
+        ],
+        "pred": "\\[31.2 \\div 6 = 5.2\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4
+        ],
+        "pred_position": 81,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "64",
+        "norm_gt": "31.2\\div6=5.2",
+        "norm_pred": "31.2\\div6=5.2",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 13,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            6
+        ],
+        "gt": "8\\frac{9}{10}\\!-\\!\\frac{3}{4}\\!=\\!8\\frac{3}{20}",
+        "pred_idx": [
+            11
+        ],
+        "pred": "\\[8 \\frac{9}{10} - \\frac{3}{4} = 8 \\frac{3}{20}\\]",
+        "edit": 0.1702127659574468,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            5
+        ],
+        "pred_position": 106,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "65",
+        "norm_gt": "8\\frac{9}{10}\\!-\\!\\frac{3}{4}\\!=\\!8\\frac{3}{20}",
+        "norm_pred": "8\\frac{9}{10}-\\frac{3}{4}=8\\frac{3}{20}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 47,
+        "metric": {
+            "Edit_dist": 0.1702127659574468
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "7. 5 \\times8 0 0=6 0 0 0",
+        "pred_idx": [
+            12
+        ],
+        "pred": "\\[7.5 \\times 800 = 6000\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6
+        ],
+        "pred_position": 156,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "66",
+        "norm_gt": "7.5\\times800=6000",
+        "norm_pred": "7.5\\times800=6000",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 17,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            8
+        ],
+        "gt": "5\\frac{2}{3}\\!-\\!4\\frac{1}{2}\\!=\\!1\\frac{1}{6}",
+        "pred_idx": [
+            13
+        ],
+        "pred": "\\[5 \\frac{2}{3} - 4 \\frac{1}{2} = 1 \\frac{1}{6}\\]",
+        "edit": 0.17391304347826086,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            7
+        ],
+        "pred_position": 185,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "67",
+        "norm_gt": "5\\frac{2}{3}\\!-\\!4\\frac{1}{2}\\!=\\!1\\frac{1}{6}",
+        "norm_pred": "5\\frac{2}{3}-4\\frac{1}{2}=1\\frac{1}{6}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 46,
+        "metric": {
+            "Edit_dist": 0.17391304347826086
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            9
+        ],
+        "gt": "{\\frac{1}{7}}+{\\frac{2}{5}}={\\frac{19}{35}}",
+        "pred_idx": [
+            14
+        ],
+        "pred": "\\[\\frac{1}{7} + \\frac{2}{5} = \\frac{19}{35}\\]",
+        "edit": 0.13953488372093023,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            8
+        ],
+        "pred_position": 235,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "68",
+        "norm_gt": "{\\frac{1}{7}}+{\\frac{2}{5}}={\\frac{19}{35}}",
+        "norm_pred": "\\frac{1}{7}+\\frac{2}{5}=\\frac{19}{35}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 43,
+        "metric": {
+            "Edit_dist": 0.13953488372093023
+        },
+        "Edit_num": 6,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            11
+        ],
+        "gt": "0. 8 \\times5 0 0=4 0 0",
+        "pred_idx": [
+            16
+        ],
+        "pred": "\\[0.8 \\times 500 = 400\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            10
+        ],
+        "pred_position": 309,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "69",
+        "norm_gt": "0.8\\times500=400",
+        "norm_pred": "0.8\\times500=400",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            12
+        ],
+        "gt": "4\\frac34-\\frac12\\!=\\!4\\,\\frac14",
+        "pred_idx": [
+            17
+        ],
+        "pred": "\\[4 \\frac{3}{4} - \\frac{1}{2} = 4 \\frac{1}{4}\\]",
+        "edit": 0.4594594594594595,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            11
+        ],
+        "pred_position": 337,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "70",
+        "norm_gt": "4\\frac34-\\frac12\\!=\\!4\\,\\frac14",
+        "norm_pred": "4\\frac{3}{4}-\\frac{1}{2}=4\\frac{1}{4}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 37,
+        "metric": {
+            "Edit_dist": 0.4594594594594595
+        },
+        "Edit_num": 17,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "4\\frac{1}{3}\\!-\\!3\\,\\frac{2}{5}\\!=\\!\\frac{14}{15}",
+        "pred_idx": [
+            18
+        ],
+        "pred": "\\[4 \\frac{1}{3} - 3 \\frac{2}{5} = \\frac{14}{15}\\]",
+        "edit": 0.20408163265306123,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            12
+        ],
+        "pred_position": 385,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "71",
+        "norm_gt": "4\\frac{1}{3}\\!-\\!3\\,\\frac{2}{5}\\!=\\!\\frac{14}{15}",
+        "norm_pred": "4\\frac{1}{3}-3\\frac{2}{5}=\\frac{14}{15}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 49,
+        "metric": {
+            "Edit_dist": 0.20408163265306123
+        },
+        "Edit_num": 10,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            14
+        ],
+        "gt": "4 7. 6 \\div7=6. 8",
+        "pred_idx": [
+            19
+        ],
+        "pred": "\\[47.6 \\div 7 = 6.8\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            13
+        ],
+        "pred_position": 438,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "72",
+        "norm_gt": "47.6\\div7=6.8",
+        "norm_pred": "47.6\\div7=6.8",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 13,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            15
+        ],
+        "gt": "6. 8 \\times2 0=1 3 6",
+        "pred_idx": [
+            20
+        ],
+        "pred": "\\[6.8 \\times 20 = 136\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            14
+        ],
+        "pred_position": 460,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "73",
+        "norm_gt": "6.8\\times20=136",
+        "norm_pred": "6.8\\times20=136",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg",
+        "upper_len": 15,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1496.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "\\times20\\times50",
+        "pred_idx": [
+            15
+        ],
+        "pred": "\\[3.14 \\times 20^{2} + 2 \\times 3.14 \\times 20 \\times 50\\]",
+        "edit": 0.6363636363636364,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            11
+        ],
+        "pred_position": 387,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "74",
+        "norm_gt": "\\times20\\times50",
+        "norm_pred": "3.14\\times20^{2}+2\\times3.14\\times20\\times50",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1539.jpg",
+        "upper_len": 44,
+        "metric": {
+            "Edit_dist": 0.6363636363636364
+        },
+        "Edit_num": 28,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1539.jpg"
+    },
+    {
+        "gt_idx": [
+            15
+        ],
+        "gt": "\\approx7600(平方厘米）",
+        "pred_idx": [
+            17
+        ],
+        "pred": "\\[\\approx 7600\\]",
+        "edit": 0.35294117647058826,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            13
+        ],
+        "pred_position": 464,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_ch"
+            }
+        ],
+        "img_id": "75",
+        "norm_gt": "\\approx7600(平方厘米）",
+        "norm_pred": "\\approx7600",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1539.jpg",
+        "upper_len": 17,
+        "metric": {
+            "Edit_dist": 0.35294117647058826
+        },
+        "Edit_num": 6,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1539.jpg"
+    },
+    {
+        "gt_idx": [
+            5
+        ],
+        "gt": "{\\hat{b}}={\\frac{\\sum_{i=1}^{n} \\bigl( x_{i}-{\\overline{{{x}}}} \\bigr) \\bigl( y_{i}-{\\overline{{{y}}}} \\bigr)} {\\sum_{i=1}^{n} \\bigl( x_{i}-{\\overline{{{x}}}} \\bigr)^{2}}}={\\frac{\\sum_{i=1}^{n} x_{i} y_{i}-n {\\overline{{{x}}}} {\\overline{{{y}}}}} {\\sum_{i=1}^{n} x_{i}^{2}-n {\\overline{{{x}}}}^{2}}} \\;, \\; \\; a={\\overline{{{y}}}}-{\\hat{b}} {\\overline{{{x}}}} \\;.",
+        "pred_idx": [
+            35
+        ],
+        "pred": "\\[\\hat{b} = \\frac{\\sum_{i = 1}^{n}(x_{i} - \\bar{x})(y_{i} - \\bar{y})}{\\sum_{i = 1}^{n}(x_{i} - \\bar{x})^{2}} = \\frac{\\sum_{i = 1}^{n}x_{i}y_{i} - n\\bar{x}\\bar{y}}{\\sum_{i = 1}^{n}x_{i}^{2} - n\\bar{x}^{2}}\\]",
+        "edit": 0.504424778761062,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            7
+        ],
+        "pred_position": 816,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "76",
+        "norm_gt": "{\\hat{b}}={\\frac{\\sum_{i=1}^{n}\\bigl(x_{i}-{\\overline{{{x}}}}\\bigr)\\bigl(y_{i}-{\\overline{{{y}}}}\\bigr)}{\\sum_{i=1}^{n}\\bigl(x_{i}-{\\overline{{{x}}}}\\bigr)^{2}}}={\\frac{\\sum_{i=1}^{n}x_{i}y_{i}-n{\\overline{{{x}}}}{\\overline{{{y}}}}}{\\sum_{i=1}^{n}x_{i}^{2}-n{\\overline{{{x}}}}^{2}}}\\;,\\;\\;a={\\overline{{{y}}}}-{\\hat{b}}{\\overline{{{x}}}}\\;",
+        "norm_pred": "\\hat{b}=\\frac{\\sum_{i=1}^{n}(x_{i}-\\bar{x})(y_{i}-\\bar{y})}{\\sum_{i=1}^{n}(x_{i}-\\bar{x})^{2}}=\\frac{\\sum_{i=1}^{n}x_{i}y_{i}-n\\bar{x}\\bar{y}}{\\sum_{i=1}^{n}x_{i}^{2}-n\\bar{x}^{2}}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1910.jpg",
+        "upper_len": 339,
+        "metric": {
+            "Edit_dist": 0.504424778761062
+        },
+        "Edit_num": 171,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1910.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "{\\hat{b}}={\\frac{\\sum_{i=1}^{6} x_{i} y_{i}-6 {\\overline{{{x y}}}}} {\\sum_{i=1}^{6} x_{i}^{2}-6 {\\overline{{{x}}}}^{2}}}={\\frac{1 6 0 6-6 \\times3. 5 \\times8 0} {9 1-6 \\times3. 5^{2}}} \\approx-4 ~, ~ ~ a={\\overline{{{y}}}}-{\\hat{b}} {\\overline{{{x}}}}=8 0+4 \\times3. 5=9 4 。",
+        "pred_idx": [
+            11
+        ],
+        "pred": "\\[{\\hat{b}=\\frac{\\sum_{i=1}^{6}x_{i}y_{i}-6\\bar{x}\\bar{y}}{\\sum_{i=1}^{6}x_{i}^{2}-6\\bar{x}^{2}}=\\frac{1606-6\\times3.5\\times80}{91-6\\times3.5^{2}}\\approx-4~,~a=\\bar{y}-\\hat{b}\\bar{x}=80+4\\times3.5=94~.}\\]",
+        "edit": 0.26639344262295084,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            15
+        ],
+        "pred_position": 1442,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "77",
+        "norm_gt": "{\\hat{b}}={\\frac{\\sum_{i=1}^{6}x_{i}y_{i}-6{\\overline{{{xy}}}}}{\\sum_{i=1}^{6}x_{i}^{2}-6{\\overline{{{x}}}}^{2}}}={\\frac{1606-6\\times3.5\\times80}{91-6\\times3.5^{2}}}\\approx-4~,~~a={\\overline{{{y}}}}-{\\hat{b}}{\\overline{{{x}}}}=80+4\\times3.5=94。",
+        "norm_pred": "{\\hat{b}=\\frac{\\sum_{i=1}^{6}x_{i}y_{i}-6\\bar{x}\\bar{y}}{\\sum_{i=1}^{6}x_{i}^{2}-6\\bar{x}^{2}}=\\frac{1606-6\\times3.5\\times80}{91-6\\times3.5^{2}}\\approx-4~,~a=\\bar{y}-\\hat{b}\\bar{x}=80+4\\times3.5=94~.}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_1910.jpg",
+        "upper_len": 244,
+        "metric": {
+            "Edit_dist": 0.26639344262295084
+        },
+        "Edit_num": 65,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_1910.jpg"
+    },
+    {
+        "gt_idx": [
+            10
+        ],
+        "gt": "\\[5.076 \\ \\mathrm{m}^{2}=( \\qquad\\qquad) \\mathrm{d m}^{2}~~~~~~~~~~2.5L=\\left (  \\right ) mL\\]",
+        "pred_idx": [
+            42,
+            43,
+            44,
+            45
+        ],
+        "pred": "\\begin{array}{l} {\\[5.076\\mathrm{m}^2 = (\\]} \\\\ {\\[\\mathrm{dm}^2\\]} \\\\ {\\[2.5\\mathrm{L} = (\\]} \\\\ {\\[\\mathrm{mL}\\]} \\end{array}",
+        "edit": 0.4883720930232558,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            9.1
+        ],
+        "pred_position": 577,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "78",
+        "norm_gt": "5.076\\{m}^{2}=(){dm}^{2}~~~~~~~~~~2.5l=()ml",
+        "norm_pred": "5.076{m}^2=({dm}^22.5{l}=({ml}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2211.jpg",
+        "upper_len": 43,
+        "metric": {
+            "Edit_dist": 0.46511627906976744
+        },
+        "Edit_num": 20,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2211.jpg"
+    },
+    {
+        "gt_idx": [
+            11
+        ],
+        "gt": "\\[5 \\mathrm{m}^{3}24\\mathrm{dm}^{3}=(\\qquad\\qquad)\\mathrm{dm}^{3}~~~~~~~0.15m^{3}=( \\qquad\\qquad) \\mathrm{dm}^{3}=( \\qquad\\qquad)\\mathrm{cm}^{3}\\]",
+        "pred_idx": [
+            46,
+            47,
+            48,
+            49,
+            50
+        ],
+        "pred": "\\begin{array}{l} {\\[5\\mathrm{m}^3 24\\mathrm{dm}^3 = (\\]} \\\\ {\\[\\mathrm{dm}^3\\]} \\\\ {\\[0.15\\mathrm{m}^3 = (\\]} \\\\ {\\[\\mathrm{dm}^3 = (\\]} \\\\ {\\[\\mathrm{cm}^3\\]} \\end{array}",
+        "edit": 0.3582089552238806,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            9.2
+        ],
+        "pred_position": 659,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "79",
+        "norm_gt": "5{m}^{3}24{dm}^{3}=(){dm}^{3}~~~~~~~0.15m^{3}=(){dm}^{3}=(){cm}^{3}",
+        "norm_pred": "5{m}^324{dm}^3=({dm}^30.15{m}^3=({dm}^3=({cm}^3",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2211.jpg",
+        "upper_len": 67,
+        "metric": {
+            "Edit_dist": 0.3582089552238806
+        },
+        "Edit_num": 24,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2211.jpg"
+    },
+    {
+        "gt_idx": [
+            12
+        ],
+        "gt": "\\[1.05~{\\mathrm{L}}\\!=\\!(\\phantom{-}\\!\\!\\!\\!\\!\\phantom{\\frac{1}{\\mathrm{d}\\mathrm{m}^{+}}})\\mathrm{d}\\mathrm{m}^{3}=\\left(\\right)mL\\]",
+        "pred_idx": [
+            52
+        ],
+        "pred": "\\[\\mathrm{dm}^3 = (\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            9.3
+        ],
+        "pred_position": 803,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "80",
+        "norm_gt": "1.05~{{l}}\\!=\\!(\\phantom{-}\\!\\!\\!\\!\\!\\phantom{\\frac{1}{{d}{m}^{+}}}){d}{m}^{3}=()ml",
+        "norm_pred": "{dm}^3=(",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2211.jpg",
+        "upper_len": 83,
+        "metric": {
+            "Edit_dist": 0.9036144578313253
+        },
+        "Edit_num": 75,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2211.jpg"
+    },
+    {
+        "gt_idx": [
+            11
+        ],
+        "gt": "\\mathrm{Z n} \\longrightarrow\\mathrm{Z n}^{2+}+2 \\mathrm{e}^{-}",
+        "pred_idx": [
+            9
+        ],
+        "pred": "\\[Zn\\longrightarrow Zn^{2 + } + 2e^{-}\\]",
+        "edit": 0.16216216216216217,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            12
+        ],
+        "pred_position": 258,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "81",
+        "norm_gt": "{zn}\\longrightarrow{zn}^{2+}+2{e}^{-}",
+        "norm_pred": "zn\\longrightarrowzn^{2+}+2e^{-}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_250.jpg",
+        "upper_len": 37,
+        "metric": {
+            "Edit_dist": 0.16216216216216217
+        },
+        "Edit_num": 6,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_250.jpg"
+    },
+    {
+        "gt_idx": [
+            3
+        ],
+        "gt": "化学能{\\underset{氧化还原反应} {\\xrightarrow{\\text{化学电池}}}}电能",
+        "pred_idx": [
+            18
+        ],
+        "pred": "\\[\\mathrm{NH_4Cl}\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            3
+        ],
+        "pred_position": 406,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_ch"
+            }
+        ],
+        "img_id": "82",
+        "norm_gt": "化学能{\\underset{氧化还原反应}{\\xrightarrow{{化学电池}}}}电能",
+        "norm_pred": "{nh_4cl}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_250.jpg",
+        "upper_len": 46,
+        "metric": {
+            "Edit_dist": 0.9130434782608695
+        },
+        "Edit_num": 42,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_250.jpg"
+    },
+    {
+        "gt_idx": [
+            1
+        ],
+        "gt": "\\lambda=T v=8. 5 \\; \\mathrm{m}.",
+        "pred_idx": [
+            14
+        ],
+        "pred": "\\[\\lambda = Tv = 8.5 \\mathrm{~m}\\]",
+        "edit": 0.15789473684210525,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            1
+        ],
+        "pred_position": 1,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "83",
+        "norm_gt": "\\lambda=tv=8.5\\;{m}",
+        "norm_pred": "\\lambda=tv=8.5{~m}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2718.jpg",
+        "upper_len": 19,
+        "metric": {
+            "Edit_dist": 0.15789473684210525
+        },
+        "Edit_num": 3,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2718.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "T=\\frac{6 0} {3 0} \\mathrm{~ s}=2 \\mathrm{~ s}.",
+        "pred_idx": [
+            6
+        ],
+        "pred": "\\[T = \\frac{60}{30} \\mathrm{~s} = 2 \\mathrm{~s}.\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            10
+        ],
+        "pred_position": 392,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "84",
+        "norm_gt": "t=\\frac{60}{30}{~s}=2{~s}",
+        "norm_pred": "t=\\frac{60}{30}{~s}=2{~s}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2718.jpg",
+        "upper_len": 25,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2718.jpg"
+    },
+    {
+        "gt_idx": [
+            9
+        ],
+        "gt": "\\lambda=\\frac{2 0} {2. 5} \\mathrm{~ m}=8 \\mathrm{~ m}.",
+        "pred_idx": [
+            8
+        ],
+        "pred": "\\[\\lambda = \\frac{20}{2.5} \\mathrm{~m} = 8 \\mathrm{~m}.\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            12
+        ],
+        "pred_position": 477,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "85",
+        "norm_gt": "\\lambda=\\frac{20}{2.5}{~m}=8{~m}",
+        "norm_pred": "\\lambda=\\frac{20}{2.5}{~m}=8{~m}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2718.jpg",
+        "upper_len": 32,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2718.jpg"
+    },
+    {
+        "gt_idx": [
+            11
+        ],
+        "gt": "v=\\frac{\\lambda} {T}=4 \\; \\mathrm{~ m / s}.",
+        "pred_idx": [
+            10
+        ],
+        "pred": "\\[v = \\frac{\\lambda}{T} = 4 \\mathrm{~m / s}.\\]",
+        "edit": 0.06896551724137931,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            14
+        ],
+        "pred_position": 546,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "86",
+        "norm_gt": "v=\\frac{\\lambda}{t}=4\\;{~m/s}",
+        "norm_pred": "v=\\frac{\\lambda}{t}=4{~m/s}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2718.jpg",
+        "upper_len": 29,
+        "metric": {
+            "Edit_dist": 0.06896551724137931
+        },
+        "Edit_num": 2,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2718.jpg"
+    },
+    {
+        "gt_idx": [
+            18
+        ],
+        "gt": "2 5. 1 2 \\div3. 1 4 \\div2=4 ( \\mathrm{c m} )",
+        "pred_idx": [
+            32
+        ],
+        "pred": "\\[25.12\\div 3.14\\div 2 = 4(\\mathrm{cm})\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            22
+        ],
+        "pred_position": 657,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "87",
+        "norm_gt": "25.12\\div3.14\\div2=4({cm})",
+        "norm_pred": "25.12\\div3.14\\div2=4({cm})",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2893.jpg",
+        "upper_len": 26,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2893.jpg"
+    },
+    {
+        "gt_idx": [
+            22
+        ],
+        "gt": "\\[1 6. 5 6 \\div( 3. 1 4+1 )=4 ( \\mathrm{d m} )\\]",
+        "pred_idx": [
+            15
+        ],
+        "pred": "\\[16.56\\div (3.14 + 1) = 4(\\mathrm{dm})\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            27.1
+        ],
+        "pred_position": 903,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "88",
+        "norm_gt": "16.56\\div(3.14+1)=4({dm})",
+        "norm_pred": "16.56\\div(3.14+1)=4({dm})",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2893.jpg",
+        "upper_len": 25,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2893.jpg"
+    },
+    {
+        "gt_idx": [
+            23
+        ],
+        "gt": "\\[3. 1 4 \\times( 4 \\div2 )^{2} \\times( 4 \\times2 )=1 0 0. 4 8 ( \\mathrm{d m}^{3} )\\]",
+        "pred_idx": [
+            16
+        ],
+        "pred": "\\[3.14\\times (4\\div 2)^2\\times (4\\times 2) = 100.48(\\mathrm{dm}^3)\\]",
+        "edit": 0.07272727272727272,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            27.2
+        ],
+        "pred_position": 945,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "89",
+        "norm_gt": "3.14\\times(4\\div2)^{2}\\times(4\\times2)=100.48({dm}^{3})",
+        "norm_pred": "3.14\\times(4\\div2)^2\\times(4\\times2)=100.48({dm}^3)",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_2893.jpg",
+        "upper_len": 55,
+        "metric": {
+            "Edit_dist": 0.07272727272727272
+        },
+        "Edit_num": 4,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_2893.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "x^{2}+y^{2}+z^{2}=4,",
+        "pred_idx": [
+            5
+        ],
+        "pred": "\\[x^{2} + y^{2} + z^{2} = 4,\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            8
+        ],
+        "pred_position": 654,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "90",
+        "norm_gt": "x^{2}+y^{2}+z^{2}=4,",
+        "norm_pred": "x^{2}+y^{2}+z^{2}=4,",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3009.jpg",
+        "upper_len": 20,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3009.jpg"
+    },
+    {
+        "gt_idx": [
+            9
+        ],
+        "gt": "x^{2}+y^{2}-2 x=0",
+        "pred_idx": [
+            6
+        ],
+        "pred": "\\[x^{2} + y^{2} - 2x = 0\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            10
+        ],
+        "pred_position": 684,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "91",
+        "norm_gt": "x^{2}+y^{2}-2x=0",
+        "norm_pred": "x^{2}+y^{2}-2x=0",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3009.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3009.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "| x | \\leqslant2, \\ \\ | y | \\leqslant2, \\ \\ | z | \\leqslant2 ;",
+        "pred_idx": [
+            9
+        ],
+        "pred": "\\[|x|\\leqslant 2, |y|\\leqslant 2, |z|\\leqslant 2,\\]",
+        "edit": 0.10869565217391304,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            14
+        ],
+        "pred_position": 1070,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "92",
+        "norm_gt": "|x|\\leqslant2,\\\\|y|\\leqslant2,\\\\|z|\\leqslant2;",
+        "norm_pred": "|x|\\leqslant2,|y|\\leqslant2,|z|\\leqslant2,",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3009.jpg",
+        "upper_len": 46,
+        "metric": {
+            "Edit_dist": 0.10869565217391304
+        },
+        "Edit_num": 5,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3009.jpg"
+    },
+    {
+        "gt_idx": [
+            15
+        ],
+        "gt": "\\left\\{\\begin{array} {l} {{{x^{2}+y^{2}-2 x=0 \\,,}}} \\\\ {{{{}}}} \\\\ {{{{z=0 \\,,}}}} \\\\ \\end{array} \\right.",
+        "pred_idx": [
+            11
+        ],
+        "pred": "\\[x^{2} + y^{2} - 2x = 0,\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            16
+        ],
+        "pred_position": 1278,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "93",
+        "norm_gt": "\\{{l}{{{x^{2}+y^{2}-2x=0\\,,}}}\\\\{{{{}}}}\\\\{{{{z=0\\,,}}}}\\\\",
+        "norm_pred": "x^{2}+y^{2}-2x=0,",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3009.jpg",
+        "upper_len": 58,
+        "metric": {
+            "Edit_dist": 0.7068965517241379
+        },
+        "Edit_num": 41,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3009.jpg"
+    },
+    {
+        "gt_idx": [
+            5
+        ],
+        "gt": "V {=} V_{D-B C E F}+V_{D-A B F} \\quad{=} V_{D-B C E F}+V_{B-A D F}={\\frac{1} {3}} S_{\\# \\mathrm{g e g} B C E F} \\cdot D G+{\\frac{1} {3}} S_{\\Delta\\mathrm{A D F}} \\cdot C G",
+        "pred_idx": [
+            12
+        ],
+        "pred": "\\[V = V_{D - BCEF} + V_{D - ABF} = V_{D - BCEF} + V_{B - ADF} = \\frac{1}{3} S_{\\text{菱形BCEF}}\\cdot DG + \\frac{1}{3} S_{\\Delta ADF}\\cdot CG\\]",
+        "edit": 0.14285714285714285,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            17
+        ],
+        "pred_position": 691,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "94",
+        "norm_gt": "v{=}v_{d-bcef}+v_{d-abf}{=}v_{d-bcef}+v_{b-adf}={\\frac{1}{3}}s_{\\#{geg}bcef}\\cdotdg+{\\frac{1}{3}}s_{\\delta{adf}}\\cdotcg",
+        "norm_pred": "v=v_{d-bcef}+v_{d-abf}=v_{d-bcef}+v_{b-adf}=\\frac{1}{3}s_{{菱形bcef}}\\cdotdg+\\frac{1}{3}s_{\\deltaadf}\\cdotcg",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3063.jpg",
+        "upper_len": 119,
+        "metric": {
+            "Edit_dist": 0.14285714285714285
+        },
+        "Edit_num": 17,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3063.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "\\therefore \\left\\{\\begin{matrix} {{x=\\lambda x_{1}+\\mu x_{2}}} \\\\ {{y=\\lambda y_{1}+\\mu y_{2}}} \\\\ \\end{matrix} \\right.",
+        "pred_idx": [
+            119
+        ],
+        "pred": "\\[\\therefore \\left\\{ \\begin{array}{l l}{x = \\lambda x_{1} + \\mu x_{2}}\\\\ {y = \\lambda y_{1} + \\mu y_{2}} \\end{array} \\right.\\]",
+        "edit": 0.11428571428571428,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            45
+        ],
+        "pred_position": 3087,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "95",
+        "norm_gt": "\\therefore\\{{{x=\\lambdax_{1}+\\mux_{2}}}\\\\{{y=\\lambday_{1}+\\muy_{2}}}\\\\",
+        "norm_pred": "\\therefore\\{{ll}{x=\\lambdax_{1}+\\mux_{2}}\\\\{y=\\lambday_{1}+\\muy_{2}}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3063.jpg",
+        "upper_len": 70,
+        "metric": {
+            "Edit_dist": 0.11428571428571428
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3063.jpg"
+    },
+    {
+        "gt_idx": [
+            16
+        ],
+        "gt": "9\\times \\Box < 48",
+        "pred_idx": [
+            18
+        ],
+        "pred": "\\[9\\times \\square < 48\\]",
+        "edit": 0.35294117647058826,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            14
+        ],
+        "pred_position": 134,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "96",
+        "norm_gt": "9\\times\\box<48",
+        "norm_pred": "9\\times\\square<48",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg",
+        "upper_len": 17,
+        "metric": {
+            "Edit_dist": 0.35294117647058826
+        },
+        "Edit_num": 6,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg"
+    },
+    {
+        "gt_idx": [
+            8
+        ],
+        "gt": "\\Box {\\div} 9=\\Box \\cdots \\cdots()",
+        "pred_idx": [
+            17
+        ],
+        "pred": "\\[48\\div 9 =\\]",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6
+        ],
+        "pred_position": 100,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "97",
+        "norm_gt": "\\box{\\div}9=\\box\\cdots\\cdots()",
+        "norm_pred": "48\\div9=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg",
+        "upper_len": 30,
+        "metric": {
+            "Edit_dist": 0.8
+        },
+        "Edit_num": 24,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "\\Box {\\div} 3=\\Box \\cdots \\cdots()",
+        "pred_idx": [
+            ""
+        ],
+        "pred": "",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            5
+        ],
+        "pred_position": "",
+        "pred_category_type": "",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "98",
+        "norm_gt": "\\box{\\div}3=\\box\\cdots\\cdots()",
+        "norm_pred": "",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg",
+        "upper_len": 30,
+        "metric": {
+            "Edit_dist": 1.0
+        },
+        "Edit_num": 30,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg"
+    },
+    {
+        "gt_idx": [
+            9
+        ],
+        "gt": "\\Box {\\div} 5=\\Box \\cdots \\cdots()",
+        "pred_idx": [
+            ""
+        ],
+        "pred": "",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            7
+        ],
+        "pred_position": "",
+        "pred_category_type": "",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "99",
+        "norm_gt": "\\box{\\div}5=\\box\\cdots\\cdots()",
+        "norm_pred": "",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg",
+        "upper_len": 30,
+        "metric": {
+            "Edit_dist": 1.0
+        },
+        "Edit_num": 30,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg"
+    },
+    {
+        "gt_idx": [
+            10
+        ],
+        "gt": "\\Box {\\div} 6=\\Box \\cdots \\cdots()",
+        "pred_idx": [
+            ""
+        ],
+        "pred": "",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            8
+        ],
+        "pred_position": "",
+        "pred_category_type": "",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "100",
+        "norm_gt": "\\box{\\div}6=\\box\\cdots\\cdots()",
+        "norm_pred": "",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg",
+        "upper_len": 30,
+        "metric": {
+            "Edit_dist": 1.0
+        },
+        "Edit_num": 30,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg"
+    },
+    {
+        "gt_idx": [
+            11
+        ],
+        "gt": "\\Box {\\div} 7=\\Box \\cdots \\cdots()",
+        "pred_idx": [
+            ""
+        ],
+        "pred": "",
+        "edit": 1,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            9
+        ],
+        "pred_position": "",
+        "pred_category_type": "",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "101",
+        "norm_gt": "\\box{\\div}7=\\box\\cdots\\cdots()",
+        "norm_pred": "",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg",
+        "upper_len": 30,
+        "metric": {
+            "Edit_dist": 1.0
+        },
+        "Edit_num": 30,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3303.jpg"
+    },
+    {
+        "gt_idx": [
+            1
+        ],
+        "gt": "F^{\\prime} ( x ) \\!=\\! \\frac{2 \\operatorname{c o s} ( 2 x \\!+\\! \\frac{\\pi} {4} ) \\operatorname{s i n} ( 2 x \\!-\\! \\frac{\\pi} {4} )-2 \\operatorname{c o s} ( 2 x \\!-\\! \\frac{\\pi} {4} ) \\operatorname{s i n} ( 2 x \\!+\\! \\frac{\\pi} {4} )} {\\operatorname{s i n}^{2} ( 2 x \\!-\\! \\frac{\\pi} {4} )} \\!=\\! \\frac{-2} {\\operatorname{s i n}^{2} ( 2 x \\!-\\! \\frac{\\pi} {4} )} \\! < \\! 0",
+        "pred_idx": [
+            1
+        ],
+        "pred": "\\[F^{\\prime}(x) = \\frac{2\\cos(2x + \\frac{\\pi}{4})\\sin(2x - \\frac{\\pi}{4}) - 2\\cos(2x - \\frac{\\pi}{4})\\sin(2x + \\frac{\\pi}{4})}{\\sin^{2}(2x - \\frac{\\pi}{4})} = \\frac{-2}{\\sin^{2}(2x - \\frac{\\pi}{4})} < 0\\]",
+        "edit": 0.21621621621621623,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            2
+        ],
+        "pred_position": 187,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "102",
+        "norm_gt": "f^{\\prime}(x)\\!=\\!\\frac{2{cos}(2x\\!+\\!\\frac{\\pi}{4}){sin}(2x\\!-\\!\\frac{\\pi}{4})-2{cos}(2x\\!-\\!\\frac{\\pi}{4}){sin}(2x\\!+\\!\\frac{\\pi}{4})}{{sin}^{2}(2x\\!-\\!\\frac{\\pi}{4})}\\!=\\!\\frac{-2}{{sin}^{2}(2x\\!-\\!\\frac{\\pi}{4})}\\!<\\!0",
+        "norm_pred": "f^{\\prime}(x)=\\frac{2\\cos(2x+\\frac{\\pi}{4})\\sin(2x-\\frac{\\pi}{4})-2\\cos(2x-\\frac{\\pi}{4})\\sin(2x+\\frac{\\pi}{4})}{\\sin^{2}(2x-\\frac{\\pi}{4})}=\\frac{-2}{\\sin^{2}(2x-\\frac{\\pi}{4})}<0",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3458.jpg",
+        "upper_len": 222,
+        "metric": {
+            "Edit_dist": 0.21621621621621623
+        },
+        "Edit_num": 48,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3458.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "\\begin{matrix} A B C D-A_{1} B_{1} C_{1} D_{1}=\\frac{7 \\sqrt{3}} {1 6}=\\frac{1} {3} ( S_{上}+S_{下}+\\sqrt{S_{上} S_{下}} ) \\cdot h \\\\ S_{下}=( 1+2 ) \\times1 \\times\\frac{1} {2}=\\frac{3} {2} \\end{matrix}",
+        "pred_idx": [
+            72,
+            73
+        ],
+        "pred": "\\begin{array}{l} {\\[S_2 = \\frac{3}{2}\\]} \\\\ {\\[\\frac{\\sqrt{3}}{16} = \\frac{h}{3} (S_1 + \\sqrt{S_1S_2} + S_2) = \\frac{h}{3} (\\frac{3}{4} + \\frac{3}{8} + \\frac{3}{2}) = \\frac{7}{8} h\\]} \\end{array}",
+        "edit": 0.5347222222222222,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            21
+        ],
+        "pred_position": 1865,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "handwriting",
+                "equation_language": "equation_ch"
+            }
+        ],
+        "img_id": "103",
+        "norm_gt": "abcd-a_{1}b_{1}c_{1}d_{1}=\\frac{7\\sqrt{3}}{16}=\\frac{1}{3}(s_{上}+s_{下}+\\sqrt{s_{上}s_{下}})\\cdoth\\\\s_{下}=(1+2)\\times1\\times\\frac{1}{2}=\\frac{3}{2}",
+        "norm_pred": "s_2=\\frac{3}{2}\\frac{\\sqrt{3}}{16}=\\frac{h}{3}(s_1+\\sqrt{s_1s_2}+s_2)=\\frac{h}{3}(\\frac{3}{4}+\\frac{3}{8}+\\frac{3}{2})=\\frac{7}{8}h",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3458.jpg",
+        "upper_len": 144,
+        "metric": {
+            "Edit_dist": 0.5347222222222222
+        },
+        "Edit_num": 77,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3458.jpg"
+    },
+    {
+        "gt_idx": [
+            21
+        ],
+        "gt": "E H=B E \\operatorname{s i n} 6 0^{\\circ}={\\frac{3 {\\sqrt{3}}} {4}}",
+        "pred_idx": [
+            34
+        ],
+        "pred": "\\[EH = BE \\sin 60^\\circ = \\frac{3\\sqrt{3}}{4}\\]",
+        "edit": 0.18181818181818182,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            43
+        ],
+        "pred_position": 2373,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "104",
+        "norm_gt": "eh=be{sin}60^{\\circ}={\\frac{3{\\sqrt{3}}}{4}}",
+        "norm_pred": "eh=be\\sin60^\\circ=\\frac{3\\sqrt{3}}{4}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_3458.jpg",
+        "upper_len": 44,
+        "metric": {
+            "Edit_dist": 0.18181818181818182
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_3458.jpg"
+    },
+    {
+        "gt_idx": [
+            2
+        ],
+        "gt": "4\\frac{3}{5}\\!-\\!1\\frac{1}{2}\\!=\\!3\\frac{1}{10}",
+        "pred_idx": [
+            7
+        ],
+        "pred": "\\[4\\frac{3}{5} - 1\\frac{1}{2} = 3\\frac{1}{10}\\]",
+        "edit": 0.1702127659574468,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            1
+        ],
+        "pred_position": 1,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "105",
+        "norm_gt": "4\\frac{3}{5}\\!-\\!1\\frac{1}{2}\\!=\\!3\\frac{1}{10}",
+        "norm_pred": "4\\frac{3}{5}-1\\frac{1}{2}=3\\frac{1}{10}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 47,
+        "metric": {
+            "Edit_dist": 0.1702127659574468
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            3
+        ],
+        "gt": "6. 6 \\times3 0 0=1 9 8 0",
+        "pred_idx": [
+            8
+        ],
+        "pred": "\\[6.6\\times 300 = 1980\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            2
+        ],
+        "pred_position": 49,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "106",
+        "norm_gt": "6.6\\times300=1980",
+        "norm_pred": "6.6\\times300=1980",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 17,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            4
+        ],
+        "gt": "5\\frac{1}{2}\\!-\\!2\\frac{4}{9}\\!=\\!3\\,\\frac{1}{18}",
+        "pred_idx": [
+            9
+        ],
+        "pred": "\\[5\\frac{1}{2} - 2\\frac{4}{9} = 3\\frac{1}{18}\\]",
+        "edit": 0.20408163265306123,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            3
+        ],
+        "pred_position": 77,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "107",
+        "norm_gt": "5\\frac{1}{2}\\!-\\!2\\frac{4}{9}\\!=\\!3\\,\\frac{1}{18}",
+        "norm_pred": "5\\frac{1}{2}-2\\frac{4}{9}=3\\frac{1}{18}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 49,
+        "metric": {
+            "Edit_dist": 0.20408163265306123
+        },
+        "Edit_num": 10,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            5
+        ],
+        "gt": "2 4 \\div1. 2=2 0",
+        "pred_idx": [
+            10
+        ],
+        "pred": "\\[24\\div 1.2 = 20\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4
+        ],
+        "pred_position": 125,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "108",
+        "norm_gt": "24\\div1.2=20",
+        "norm_pred": "24\\div1.2=20",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 12,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "0. 3 \\times0. 8=0. 2 4",
+        "pred_idx": [
+            12
+        ],
+        "pred": "\\[0.3\\times 0.8 = 0.24\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6
+        ],
+        "pred_position": 182,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "109",
+        "norm_gt": "0.3\\times0.8=0.24",
+        "norm_pred": "0.3\\times0.8=0.24",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 17,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            8
+        ],
+        "gt": "4. 2 \\times2 0=8 4",
+        "pred_idx": [
+            13
+        ],
+        "pred": "\\[4.2\\times 20 = 84\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            7
+        ],
+        "pred_position": 210,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "110",
+        "norm_gt": "4.2\\times20=84",
+        "norm_pred": "4.2\\times20=84",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 14,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            10
+        ],
+        "gt": "8. 0 1 \\div0. 9=8. 9",
+        "pred_idx": [
+            15
+        ],
+        "pred": "\\[8.01\\div 0.9 = 8.9\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            9
+        ],
+        "pred_position": 267,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "111",
+        "norm_gt": "8.01\\div0.9=8.9",
+        "norm_pred": "8.01\\div0.9=8.9",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 15,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            11
+        ],
+        "gt": "1. 6 \\times0. 3=0. 4 8",
+        "pred_idx": [
+            16
+        ],
+        "pred": "\\[1.6\\times 0.3 = 0.48\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            10
+        ],
+        "pred_position": 290,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "112",
+        "norm_gt": "1.6\\times0.3=0.48",
+        "norm_pred": "1.6\\times0.3=0.48",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 17,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "9. 3 \\times6 0=5 5 8",
+        "pred_idx": [
+            18
+        ],
+        "pred": "\\[9.3\\times 60 = 558\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            12
+        ],
+        "pred_position": 342,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "113",
+        "norm_gt": "9.3\\times60=558",
+        "norm_pred": "9.3\\times60=558",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 15,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            14
+        ],
+        "gt": "{\\frac{1}{6}}+{\\frac{3}{5}}={\\frac{23}{30}}",
+        "pred_idx": [
+            19
+        ],
+        "pred": "\\[\\frac{1}{6} +\\frac{3}{5} = \\frac{23}{30}\\]",
+        "edit": 0.13953488372093023,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            13
+        ],
+        "pred_position": 368,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "114",
+        "norm_gt": "{\\frac{1}{6}}+{\\frac{3}{5}}={\\frac{23}{30}}",
+        "norm_pred": "\\frac{1}{6}+\\frac{3}{5}=\\frac{23}{30}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 43,
+        "metric": {
+            "Edit_dist": 0.13953488372093023
+        },
+        "Edit_num": 6,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            15
+        ],
+        "gt": "2. 3 \\times5=1 1. 5",
+        "pred_idx": [
+            20
+        ],
+        "pred": "\\[2.3\\times 5 = 11.5\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            14
+        ],
+        "pred_position": 413,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "115",
+        "norm_gt": "2.3\\times5=11.5",
+        "norm_pred": "2.3\\times5=11.5",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg",
+        "upper_len": 15,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_541.jpg"
+    },
+    {
+        "gt_idx": [
+            6
+        ],
+        "gt": "\\[38\\div7=    20\\div3=\\]",
+        "pred_idx": [
+            18
+        ],
+        "pred": "\\[38 \\div 7 =\\]",
+        "edit": 0.5,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4.1
+        ],
+        "pred_position": 33,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "116",
+        "norm_gt": "38\\div7=20\\div3=",
+        "norm_pred": "38\\div7=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.5
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "\\[50\\div8=  71\\div8=\\]",
+        "pred_idx": [
+            20,
+            21
+        ],
+        "pred": "\\begin{array}{l} {\\[50 \\div 8 =\\]} \\\\ {\\[71 \\div 8 =\\]} \\end{array}",
+        "edit": 0.058823529411764705,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4.2
+        ],
+        "pred_position": 78,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "117",
+        "norm_gt": "50\\div8=71\\div8=",
+        "norm_pred": "50\\div8=71\\div8=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            8
+        ],
+        "gt": "\\[42\\div6=  17\\div2=\\]",
+        "pred_idx": [
+            24
+        ],
+        "pred": "\\[17 \\div 2 =\\]",
+        "edit": 0.5,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4.3
+        ],
+        "pred_position": 145,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "118",
+        "norm_gt": "42\\div6=17\\div2=",
+        "norm_pred": "17\\div2=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.5
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            9
+        ],
+        "gt": "\\[78\\div9=  38\\div6=\\]",
+        "pred_idx": [
+            25
+        ],
+        "pred": "\\[78 \\div 9 =\\]",
+        "edit": 0.5,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4.4
+        ],
+        "pred_position": 164,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "119",
+        "norm_gt": "78\\div9=38\\div6=",
+        "norm_pred": "78\\div9=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.5
+        },
+        "Edit_num": 8,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            10
+        ],
+        "gt": "\\[60\\div8=  80\\div9=\\]",
+        "pred_idx": [
+            27,
+            28
+        ],
+        "pred": "\\begin{array}{l} {\\[60 \\div 8 =\\]} \\\\ {\\[80 \\div 9 =\\]} \\end{array}",
+        "edit": 0.058823529411764705,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4.5
+        ],
+        "pred_position": 199,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "120",
+        "norm_gt": "60\\div8=80\\div9=",
+        "norm_pred": "60\\div8=80\\div9=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            11
+        ],
+        "gt": "\\[30\\div4=  15\\div5=\\]",
+        "pred_idx": [
+            29,
+            30
+        ],
+        "pred": "\\begin{array}{l} {\\[30 \\div 4 =\\]} \\\\ {\\[15 \\div 5 =\\]} \\end{array}",
+        "edit": 0.058823529411764705,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4.6
+        ],
+        "pred_position": 234,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "121",
+        "norm_gt": "30\\div4=15\\div5=",
+        "norm_pred": "30\\div4=15\\div5=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            12
+        ],
+        "gt": "\\[64\\div8=  32\\div5=\\]",
+        "pred_idx": [
+            31,
+            32
+        ],
+        "pred": "\\begin{array}{l} {\\[64 \\div 8 =\\]} \\\\ {\\[32 \\div 5 =\\]} \\end{array}",
+        "edit": 0.058823529411764705,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4.7
+        ],
+        "pred_position": 269,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "122",
+        "norm_gt": "64\\div8=32\\div5=",
+        "norm_pred": "64\\div8=32\\div5=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "\\[35\\div8=  42\\div7=\\]",
+        "pred_idx": [
+            33,
+            34
+        ],
+        "pred": "\\begin{array}{l} {\\[35 \\div 8 =\\]} \\\\ {\\[42 \\div 7 =\\]} \\end{array}",
+        "edit": 0.058823529411764705,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4.8
+        ],
+        "pred_position": 304,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "123",
+        "norm_gt": "35\\div8=42\\div7=",
+        "norm_pred": "35\\div8=42\\div7=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            14
+        ],
+        "gt": "\\[54\\div8=  36\\div4=\\]",
+        "pred_idx": [
+            35,
+            36
+        ],
+        "pred": "\\begin{array}{l} {\\[54 \\div 8 =\\]} \\\\ {\\[36 \\div 4 =\\]} \\end{array}",
+        "edit": 0.058823529411764705,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            4.9
+        ],
+        "pred_position": 339,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "124",
+        "norm_gt": "54\\div8=36\\div4=",
+        "norm_pred": "54\\div8=36\\div4=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            15
+        ],
+        "gt": "\\[36\\div9=  30\\div8=\\]",
+        "pred_idx": [
+            38,
+            39
+        ],
+        "pred": "\\begin{array}{l} {\\[36 \\div 9 =\\]} \\\\ {\\[30 \\div 8 =\\]} \\end{array}",
+        "edit": 0.058823529411764705,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            5.0
+        ],
+        "pred_position": 390,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "125",
+        "norm_gt": "36\\div9=30\\div8=",
+        "norm_pred": "36\\div9=30\\div8=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            16
+        ],
+        "gt": "\\[60\\div7=  48\\div9=\\]",
+        "pred_idx": [
+            40,
+            41
+        ],
+        "pred": "\\begin{array}{l} {\\[60 \\div 7 =\\]} \\\\ {\\[48 \\div 9 =\\]} \\end{array}",
+        "edit": 0.058823529411764705,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            5.1
+        ],
+        "pred_position": 425,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "126",
+        "norm_gt": "60\\div7=48\\div9=",
+        "norm_pred": "60\\div7=48\\div9=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            17
+        ],
+        "gt": "\\[23\\div4=  45\\div7=\\]",
+        "pred_idx": [
+            42,
+            43
+        ],
+        "pred": "\\begin{array}{l} {\\[23 \\div 4 =\\]} \\\\ {\\[45 \\div 7 =\\]} \\end{array}",
+        "edit": 0.058823529411764705,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            5.2
+        ],
+        "pred_position": 460,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "127",
+        "norm_gt": "23\\div4=45\\div7=",
+        "norm_pred": "23\\div4=45\\div7=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 16,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            19
+        ],
+        "gt": "26\\div3=",
+        "pred_idx": [
+            22
+        ],
+        "pred": "\\[26 \\div 3 =\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            6
+        ],
+        "pred_position": 110,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "128",
+        "norm_gt": "26\\div3=",
+        "norm_pred": "26\\div3=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 8,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            20
+        ],
+        "gt": "41\\div6=",
+        "pred_idx": [
+            23
+        ],
+        "pred": "\\[42 \\div 6 =\\]",
+        "edit": 0.125,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            7
+        ],
+        "pred_position": 129,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "129",
+        "norm_gt": "41\\div6=",
+        "norm_pred": "42\\div6=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 8,
+        "metric": {
+            "Edit_dist": 0.125
+        },
+        "Edit_num": 1,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            21
+        ],
+        "gt": "79\\div9=",
+        "pred_idx": [
+            37
+        ],
+        "pred": "\\[79 \\div 9 =\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            8
+        ],
+        "pred_position": 371,
+        "pred_category_type": "equation_inline",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "130",
+        "norm_gt": "79\\div9=",
+        "norm_pred": "79\\div9=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg",
+        "upper_len": 8,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_546.jpg"
+    },
+    {
+        "gt_idx": [
+            5
+        ],
+        "gt": "S_{n}=\\frac{a_{1}-a_{n} q} {1-q} \\ \\ ( q \\neq1 ).",
+        "pred_idx": [
+            1
+        ],
+        "pred": "\\[S_{n} = \\frac{a_{1} - a_{n}q}{1 - q} (q \\neq 1).\\]",
+        "edit": 0.05,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            3
+        ],
+        "pred_position": 48,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "131",
+        "norm_gt": "s_{n}=\\frac{a_{1}-a_{n}q}{1-q}\\\\(q\\neq1)",
+        "norm_pred": "s_{n}=\\frac{a_{1}-a_{n}q}{1-q}(q\\neq1)",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg",
+        "upper_len": 40,
+        "metric": {
+            "Edit_dist": 0.05
+        },
+        "Edit_num": 2,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg"
+    },
+    {
+        "gt_idx": [
+            7
+        ],
+        "gt": "\\begin{aligned} {{S_{s}=}} & {{} {{} {\\frac{a_{1} ( 1-q^{n} )} {1-q}}}} \\\\ {{=}} & {{} {{} {\\frac{1 \\times( 1-2^{64} )} {1-2}}}} \\\\ {{=}} & {{} {{} {2^{64}-1}.}} \\\\ \\end{aligned}",
+        "pred_idx": [
+            3,
+            4,
+            5
+        ],
+        "pred": "\\begin{array}{l} {\\[S_{n} = \\frac{a_{1}(1 - q^{n})}{1 - q\\]} \\\\ {\\[\\qquad = \\frac{1\\times(1 - 2^{64})}{1 - 2\\]} \\\\ {\\[\\qquad = 2^{64} - 1.\\]} \\end{array}",
+        "edit": 0.44715447154471544,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            5
+        ],
+        "pred_position": 174,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "132",
+        "norm_gt": "{{s_{s}=}}&{{}{{}{\\frac{a_{1}(1-q^{n})}{1-q}}}}\\\\{{=}}&{{}{{}{\\frac{1\\times(1-2^{64})}{1-2}}}}\\\\{{=}}&{{}{{}{2^{64}-1}.}}\\\\",
+        "norm_pred": "s_{n}=\\frac{a_{1}(1-q^{n})}{1-q=\\frac{1\\times(1-2^{64})}{1-2=2^{64}-1",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg",
+        "upper_len": 123,
+        "metric": {
+            "Edit_dist": 0.44715447154471544
+        },
+        "Edit_num": 55,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg"
+    },
+    {
+        "gt_idx": [
+            13
+        ],
+        "gt": "\\mathbf{S}_{n}\\!=\\!\\frac{\\frac{1}{2}\\Big[1\\!-\\!\\left(\\frac{1}{2}\\right)^{8}\\Big]}{1\\!-\\!\\frac{1}{2}}\\!=\\!\\frac{255}{256}.",
+        "pred_idx": [
+            11
+        ],
+        "pred": "\\[S_{n} = \\frac{\\frac{1}{2}\\left[1 - \\left(\\frac{1}{2}\\right)^{8}\\right]}{1 - \\frac{1}{2}} = \\frac{255}{256},\\]",
+        "edit": 0.2647058823529412,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            11
+        ],
+        "pred_position": 617,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "133",
+        "norm_gt": "{s}_{n}\\!=\\!\\frac{\\frac{1}{2}\\big[1\\!-\\!(\\frac{1}{2})^{8}\\big]}{1\\!-\\!\\frac{1}{2}}\\!=\\!\\frac{255}{256}",
+        "norm_pred": "s_{n}=\\frac{\\frac{1}{2}[1-(\\frac{1}{2})^{8}]}{1-\\frac{1}{2}}=\\frac{255}{256},",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg",
+        "upper_len": 102,
+        "metric": {
+            "Edit_dist": 0.2647058823529412
+        },
+        "Edit_num": 27,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg"
+    },
+    {
+        "gt_idx": [
+            15
+        ],
+        "gt": "{\\frac{1}{243}}{=}27\\cdot q^{8}.",
+        "pred_idx": [
+            13
+        ],
+        "pred": "\\[\\frac{1}{243} = 27 \\cdot q^{8}.\\]",
+        "edit": 0.13333333333333333,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            13
+        ],
+        "pred_position": 787,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "134",
+        "norm_gt": "{\\frac{1}{243}}{=}27\\cdotq^{8}",
+        "norm_pred": "\\frac{1}{243}=27\\cdotq^{8}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg",
+        "upper_len": 30,
+        "metric": {
+            "Edit_dist": 0.13333333333333333
+        },
+        "Edit_num": 4,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg"
+    },
+    {
+        "gt_idx": [
+            17
+        ],
+        "gt": "q=-\\frac{1} {3}.",
+        "pred_idx": [
+            16
+        ],
+        "pred": "\\[q = -\\frac{1}{3}.\\]",
+        "edit": 0.0,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            15
+        ],
+        "pred_position": 846,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "135",
+        "norm_gt": "q=-\\frac{1}{3}",
+        "norm_pred": "q=-\\frac{1}{3}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg",
+        "upper_len": 14,
+        "metric": {
+            "Edit_dist": 0.0
+        },
+        "Edit_num": 0,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg"
+    },
+    {
+        "gt_idx": [
+            19
+        ],
+        "gt": "S_{8} \\!=\\! \\frac{2 7 \\Big[ 1 \\!-\\! \\Big( \\!-\\! \\frac{1} {3} \\Big)^{8} \\Big]} {1 \\!-\\! \\Big( \\!-\\! \\frac{1} {3} \\Big)} \\!=\\! \\frac{1 \\!-\\! 6 4 0} {8 1} \\!.",
+        "pred_idx": [
+            17
+        ],
+        "pred": "\\[S_{8} = \\frac{27\\left[1 - \\left(-\\frac{1}{3}\\right)^{8}\\right]}{1 - \\left(-\\frac{1}{3}\\right)} = \\frac{1640}{81}.\\]",
+        "edit": 0.4365079365079365,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            17
+        ],
+        "pred_position": 891,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "136",
+        "norm_gt": "s_{8}\\!=\\!\\frac{27\\big[1\\!-\\!\\big(\\!-\\!\\frac{1}{3}\\big)^{8}\\big]}{1\\!-\\!\\big(\\!-\\!\\frac{1}{3}\\big)}\\!=\\!\\frac{1\\!-\\!640}{81}\\!",
+        "norm_pred": "s_{8}=\\frac{27[1-(-\\frac{1}{3})^{8}]}{1-(-\\frac{1}{3})}=\\frac{1640}{81}",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg",
+        "upper_len": 126,
+        "metric": {
+            "Edit_dist": 0.4365079365079365
+        },
+        "Edit_num": 55,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_913.jpg"
+    },
+    {
+        "gt_idx": [
+            36
+        ],
+        "gt": "1-\\frac9{10}=  \\frac{4}{3}\\!+\\!\\frac{2}{3}\\!= \\frac{1}{5}\\!-\\!\\frac{1}{6}\\!= \\frac{6}{7}-\\frac{1}{2}+\\frac{1}{7}=",
+        "pred_idx": [
+            38
+        ],
+        "pred": "\\[\\frac {1-\\frac {9}{3}}{10}=\\quad \\frac {4}{3}+\\frac {2}{3}=\\quad \\frac {1}{5}-\\frac {1}{6}=\\quad \\frac {6}{7}-\\frac {1}{2}+\\frac {1}{7}=\\]",
+        "edit": 0.22018348623853212,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            46
+        ],
+        "pred_position": 1636,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "137",
+        "norm_gt": "1-\\frac9{10}=\\frac{4}{3}\\!+\\!\\frac{2}{3}\\!=\\frac{1}{5}\\!-\\!\\frac{1}{6}\\!=\\frac{6}{7}-\\frac{1}{2}+\\frac{1}{7}=",
+        "norm_pred": "\\frac{1-\\frac{9}{3}}{10}=\\frac{4}{3}+\\frac{2}{3}=\\frac{1}{5}-\\frac{1}{6}=\\frac{6}{7}-\\frac{1}{2}+\\frac{1}{7}=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_999.jpg",
+        "upper_len": 109,
+        "metric": {
+            "Edit_dist": 0.22018348623853212
+        },
+        "Edit_num": 24,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_999.jpg"
+    },
+    {
+        "gt_idx": [
+            37
+        ],
+        "gt": "\\frac{1}{5}\\!+\\!\\frac{3}{5}\\!=\\frac{11}{12}\\!-\\!\\frac{1}{3}\\!=\\frac{7}{9}\\!-\\!\\frac{2}{9}\\!=1-\\frac{2}{19}-\\frac{17}{19}=",
+        "pred_idx": [
+            39
+        ],
+        "pred": "\\[\\frac {1}{5}+\\frac {3}{5}=\\quad \\frac {11}{12}-\\frac {1}{3}=\\quad \\frac {7}{9}-\\frac {2}{9}=\\quad 1-\\frac {2}{19}-\\frac {17}{19}=\\]",
+        "edit": 0.1487603305785124,
+        "gt_category_type": "equation_isolated",
+        "gt_position": [
+            47
+        ],
+        "pred_position": 1778,
+        "pred_category_type": "equation_isolated",
+        "gt_attribute": [
+            {
+                "formula_type": "print",
+                "equation_language": "equation_en"
+            }
+        ],
+        "img_id": "138",
+        "norm_gt": "\\frac{1}{5}\\!+\\!\\frac{3}{5}\\!=\\frac{11}{12}\\!-\\!\\frac{1}{3}\\!=\\frac{7}{9}\\!-\\!\\frac{2}{9}\\!=1-\\frac{2}{19}-\\frac{17}{19}=",
+        "norm_pred": "\\frac{1}{5}+\\frac{3}{5}=\\frac{11}{12}-\\frac{1}{3}=\\frac{7}{9}-\\frac{2}{9}=1-\\frac{2}{19}-\\frac{17}{19}=",
+        "image_name": "jiaocaineedrop_jiaocai_needrop_en_999.jpg",
+        "upper_len": 121,
+        "metric": {
+            "Edit_dist": 0.1487603305785124
+        },
+        "Edit_num": 18,
+        "img_name": "jiaocaineedrop_jiaocai_needrop_en_999.jpg"
+    }
+]

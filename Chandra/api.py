@@ -7,8 +7,8 @@ from tqdm import tqdm
 pdf_dir = os.listdir('images_to_pdf')
                      
 url = "https://www.datalab.to/api/v1/ocr"
-headers = {"X-Api-Key": "VmMHNRZfY6k1MF-bAWPWaUGceeiVBGTtd2_zkoWgd0o"}
-# headers = {"X-Api-Key" :  "6uNuk13qKqQt6TrZXz10Ixo_PM6f66fvesk4BmmQ6PY"}
+# headers = {"X-Api-Key": "VmMHNRZfY6k1MF-bAWPWaUGceeiVBGTtd2_zkoWgd0o"}
+headers = {"X-Api-Key" :  "6uNuk13qKqQt6TrZXz10Ixo_PM6f66fvesk4BmmQ6PY"}
 max_polls = 300
 max_retries = 3
 
@@ -37,19 +37,19 @@ os.makedirs('output_results', exist_ok=True)
 processed_files = set(os.listdir('output_results'))
 processed_pdfs = set(os.path.splitext(f)[0] + '.pdf' for f in processed_files if f.endswith('.md'))
 
-for i in tqdm(range(1)):
-    # pdf_filename = pdf_dir[i]
+for i in tqdm(range(len(pdf_dir))):
+    pdf_filename = pdf_dir[i]
     
     # Skip if already processed
-    # if pdf_filename in processed_pdfs:
-        # print(f"\nSkipping (already processed): {pdf_filename}")
-        # continue
+    if pdf_filename in processed_pdfs:
+        print(f"\nSkipping (already processed): {pdf_filename}")
+        continue
     
     # Skip non-PDF files
-    # if not pdf_filename.lower().endswith('.pdf'):
-        # continue
+    if not pdf_filename.lower().endswith('.pdf'):
+        continue
     
-    pdf_path = f'images_to_pdf/docstructbench_dianzishu_zhongwenzaixian-o.O-63688043.pdf_110.pdf'
+    pdf_path = f'images_to_pdf/{pdf_filename}'
     
     # Retry logic
     for retry in range(max_retries):

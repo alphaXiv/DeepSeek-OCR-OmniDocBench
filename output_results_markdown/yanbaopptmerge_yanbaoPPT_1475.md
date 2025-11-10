@@ -1,0 +1,7 @@
+# 活动：测量纸片下落的速度
+
+1. 若要测定纸片的下落速度，你认为应测量哪些量？
+
+纸片下落的高度  $s$  和落地时间  $t$ ，然后计算  $v$ 
+
+![Decorative image of two stylized leaves, one brown and one green, in the bottom left corner.]()![](_page_0_Picture_3.jpeg)
