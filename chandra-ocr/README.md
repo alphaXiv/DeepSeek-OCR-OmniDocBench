@@ -5,6 +5,8 @@ This folder contains the `chandra.py` script and supporting files for running a 
 What it is
 - `chandra.py`: a utility/script for local OCR-related tasks (detection/recognition or dataset preprocessing). The script is lightweight and intended for quick experiments using chandra-ocr .
 
+We used the marker/ api with mode as balanced/accurate according to the docs of datalab where chandra model is hosted for public use.
+
 Quick usage
 1. install chandra-ocr package
 
