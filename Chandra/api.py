@@ -7,8 +7,7 @@ from tqdm import tqdm
 pdf_dir = os.listdir('images_to_pdf')
                      
 url = "https://www.datalab.to/api/v1/ocr"
-# headers = {"X-Api-Key": "VmMHNRZfY6k1MF-bAWPWaUGceeiVBGTtd2_zkoWgd0o"}
-headers = {"X-Api-Key" :  "6uNuk13qKqQt6TrZXz10Ixo_PM6f66fvesk4BmmQ6PY"}
+headers = {"X-Api-Key" :  "..."}
 max_polls = 300
 max_retries = 3
 
