@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
 API_URL = "https://www.datalab.to/api/v1/marker"
-API_KEY = os.getenv("DATALAB_API_KEY", "6uNuk13qKqQt6TrZXz10Ixo_PM6f66fvesk4BmmQ6PY")
+API_KEY = os.getenv("DATALAB_API_KEY", "...")
 
 #
 # Configure a session with retries, customize retry behavior
